@@ -1,0 +1,27 @@
+{
+  "name": "f2015-upe-ai",
+  "version": "1.0.0",
+  "description": "RPI UPE-run AI competition where students create programs to play \"deterministic Bomberman with portals\"",
+  "main": "index.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dubwub/F2016-UPE-AI.git"
+  },
+  "author": "Darwin Ding",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dubwub/F2016-UPE-AI/issues"
+  },
+  "homepage": "https://github.com/dubwub/F2016-UPE-AI#readme",
+  "dependencies": {
+    "express": "^4.13.4",
+    "express-handlebars": "^3.0.0",
+    "famous": "^0.7.1",
+    "react": "^15.1.0",
+    "react-famous": "^0.1.7",
+    "redis": "^2.6.1"
+  }
+}
