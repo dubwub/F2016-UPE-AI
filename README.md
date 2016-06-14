@@ -1,17 +1,17 @@
 #F2016 UPE AI Competition
 
 ##Installing the Server
-*Make sure Node.JS is installed on your computer
-*Navigate to the root directory of this (clone, fork, whatever), and then run npm install
+* Make sure Node.JS is installed on your computer
+* Navigate to the root directory of this (clone, fork, whatever), and then run npm install
 
 ##Server Details/Libraries
-Node.JS backend (full Javascript stack all the way down)
-Famous handles animations
-React handles refreshing page on update
-Redis handles storing people/ELOs/match data
-Express handles routing
-Handlebars is the viewing engine (Might be replaced in the future)
-(The NERRF stack, so to speak)
+Introducing the NERRF Stack:
+* Node.JS backend (full Javascript stack all the way down)
+* Famous handles animations
+* React handles refreshing page on update
+* Redis handles storing people/ELOs/match data
+* Express handles routing
+* Handlebars is the viewing engine (Might be replaced in the future)
 
 ##Full Rules/Documentation
 See the below document for full documentation of rules:
