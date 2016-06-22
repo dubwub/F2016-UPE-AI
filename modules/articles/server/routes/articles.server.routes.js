@@ -18,6 +18,10 @@ module.exports = function (app) {
     .put(articles.update)
     .delete(articles.delete);
 
+  // Test update article with POST
+  app.route('/api/articles/update/:articleId')
+    .post(articles.update);
+
   // Finish by binding the article middleware
   app.param('articleId', articles.articleByID);
 };

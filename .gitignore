@@ -42,11 +42,6 @@ _site/
 logs/
 build/
 
-# MongoDB
-# =======
-journal/
-*.wt
-
 # Sublime editor
 # ==============
 .sublime-project
