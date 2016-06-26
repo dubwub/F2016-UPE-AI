@@ -5,15 +5,11 @@
   <div class="list-group">
     <a ng-repeat="game in vm.games" ui-sref="games.view({ gameId: game._id })" class="list-group-item">
       <small class="list-group-item-text">
-        Game date: <span ng-bind="game.created | date:'mediumDate'"></span>
-        <br>
-        <span ng-if="game.people[0]" ng-bind="game.people[0]"></span>
-        <span ng-if="!game.people[0]">Deleted User</span> vs. 
-        <span ng-if="game.people[1]" ng-bind="game.people[1]"></span>
-        <span ng-if="!game.people[1]">Deleted User</span> vs. 
+        <span ng-bind="game.date | date:'mediumDate'"></span>
+        <span ng-bind="game.people[0]"></span> vs. <span ng-bind="game.people[1]"></span>
       </small>
-      <!-- <h4 class="list-group-item-heading" ng-bind="game.title"></h4>
-      <p class="list-group-item-text" ng-bind="game.content"></p> -->
+      <h4 class="list-group-item-heading" ng-bind="game.title"></h4>
+      <p class="list-group-item-text" ng-bind="game.content"></p>
     </a>
   </div>
   <div class="alert alert-warning text-center" ng-if="vm.games.$resolved && !vm.games.length">

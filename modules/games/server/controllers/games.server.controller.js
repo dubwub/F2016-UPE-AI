@@ -1,5 +1,9 @@
 'use strict';
 
+// seek
+var saved_person_id = -1; // MUTEX MAY BE NEEDED HERE
+var saved_res;
+var game_id = -1;
 /**
  * Module dependencies
  */
@@ -10,7 +14,52 @@ var path = require('path'),
   errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller'));
 
 /**
- * Create new game
+ * search for a game
+ */
+exports.search = function (req, res) {
+  if (saved_person_id === -1) { // first searcher
+    console.log('searching');
+    saved_person_id = req.body.personID;
+    saved_res = res;
+  } else {
+    console.log('found one');
+    var game = new Game();
+    game.people = [saved_person_id, req.body.personID]; // temporary
+    game.players = [];
+    game.people.forEach(function(person) {
+      var player = new Player();
+      player.game = game._id;
+      player.person = person;
+      player.save(function (err) {
+        if (err) {
+          return res.status(400).send({
+            message: errorHandler.getErrorMessage(err)
+          });
+        } // else {
+          // res.json(game);
+        // }
+      });
+      game.players.push(player._id);
+    });
+
+    game.save(function (err) {
+      if (err) {
+        return res.status(400).send({
+          message: errorHandler.getErrorMessage(err)
+        });
+      } else {
+        game_id = game._id;
+        saved_person_id = -1;
+        saved_res.json('starting game ' + game._id);
+        res.json('starting game ' + game._id);
+      }
+    });
+  }
+};
+
+
+/**
+ * Create new game (soon to be depreciated)
  */
 exports.create = function (req, res) {
   var game = new Game();
@@ -107,7 +156,10 @@ exports.delete = function (req, res) {
  * Delete an article
  */
 exports.submit = function (req, res) {
-  var game = req.game;
+  // count++;
+  // console.log(count);
+  // return res.json("count = " + count);
+  /* var game = req.game;
   var player = req.player;
   var move = req.move;
   player.save(function (err) {
@@ -118,15 +170,17 @@ exports.submit = function (req, res) {
     } else {
       res.json(player);
     }
-  });
+  });*/
 };
 
 /**
  * List of Articles
  */
 exports.list = function (req, res) {
-  Game.find().sort('-created').populate('people').exec(function (err, games) {
+  // Game.find().sort('-created').populate('people').exec(function (err, games) { // need to populate eventually
+  Game.find().sort('-created').exec(function (err, games) {
     if (err) {
+      // console.log(err);
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
       });
@@ -147,7 +201,8 @@ exports.gameByID = function (req, res, next, id) {
     });
   }
 
-  Game.findById(id).populate('players', 'people').exec(function (err, game) {
+  // Game.findById(id).populate('players', 'people').exec(function (err, game) { // MERGE EVENTUALLY
+  Game.findById(id).populate('players').exec(function (err, game) {
     if (err) {
       return next(err);
     } else if (!game) {
@@ -156,6 +211,7 @@ exports.gameByID = function (req, res, next, id) {
       });
     }
     req.game = game;
+    // console.log(game.players[0]); <-- TEST TO SEE IF POPULATE WORKED
     next();
   });
 };

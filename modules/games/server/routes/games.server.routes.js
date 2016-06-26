@@ -12,18 +12,18 @@ module.exports = function (app) {
     .get(games.list)
     .post(games.create);
 
+  // Test update article with POST
+  app.route('/api/games/search')
+    .post(games.search);
+
   // Single article routes
   app.route('/api/games/:gameId').all(gamesPolicy.isAllowed)
     .get(games.read)
     .put(games.update)
     .delete(games.delete);
 
-  // Test update article with POST
-  app.route('/api/games/update/:gameId')
-    .post(games.update);
-
   // Submit move
-  app.route('/api/games/submit/:playerId/:gameId')
+  app.route('/api/games/submit/:gameId')
     .post(games.submit);
 
   // Finish by binding the article middleware
