@@ -1,9 +1,9 @@
 'use strict';
 
-// seek
-var saved_person_id = -1; // MUTEX MAY BE NEEDED HERE
-var saved_res;
-var game_id = -1;
+// USED FOR EXPORTS.SEARCH, PROBABLY NEED A MUTEX
+var saved_res = -1;
+var saved_person_id = -1;
+
 /**
  * Module dependencies
  */
@@ -11,49 +11,42 @@ var path = require('path'),
   mongoose = require('mongoose'),
   Game = mongoose.model('Game'),
   Player = mongoose.model('Player'),
+  Handler = require('./Handler'),
   errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller'));
 
+/*
+    Handler "hash map", maybe in the future convert it to an actual hashmap
+    Each handler is hashed to the gameID of the game it handles
+*/
+var handlers = {};
+
 /**
- * search for a game
+ * search for a game [only kinda works for 2 people rn]
  */
 exports.search = function (req, res) {
-  if (saved_person_id === -1) { // first searcher
-    console.log('searching');
-    saved_person_id = req.body.personID;
+  if (saved_res === -1) { // first searcher
+    // console.log('searching');
     saved_res = res;
+    saved_person_id = req.body.personID;
   } else {
-    console.log('found one');
-    var game = new Game();
-    game.people = [saved_person_id, req.body.personID]; // temporary
-    game.players = [];
-    game.people.forEach(function(person) {
-      var player = new Player();
-      player.game = game._id;
-      player.person = person;
-      player.save(function (err) {
-        if (err) {
-          return res.status(400).send({
-            message: errorHandler.getErrorMessage(err)
-          });
-        } // else {
-          // res.json(game);
-        // }
+    // console.log('found one');
+    var people = [saved_person_id, req.body.personID];
+    var new_handler = new Handler(people, function(err) {
+      res.status(400).send({
+        message: errorHandler.getErrorMessage(err)
       });
-      game.players.push(player._id);
     });
-
-    game.save(function (err) {
-      if (err) {
-        return res.status(400).send({
-          message: errorHandler.getErrorMessage(err)
-        });
-      } else {
-        game_id = game._id;
-        saved_person_id = -1;
-        saved_res.json('starting game ' + game._id);
-        res.json('starting game ' + game._id);
-      }
-    });
+    // console.log("new handler");
+    // console.log(new_handler);
+    handlers[new_handler.id] = new_handler;
+    var output = {};
+    output.gameID = new_handler.id;
+    output.playerID = new_handler.players[0];
+    saved_res.json(output);
+    saved_res = -1;
+    saved_person_id = -1;
+    output.playerID = new_handler.players[1];
+    res.json(output);
   }
 };
 
@@ -153,7 +146,7 @@ exports.delete = function (req, res) {
 };
 
 /**
- * Delete an article
+ * Submit a move
  */
 exports.submit = function (req, res) {
   // count++;
@@ -171,6 +164,10 @@ exports.submit = function (req, res) {
       res.json(player);
     }
   });*/
+  var game = req.game;
+  handlers[game._id].submitMove(req.body.move, req.body.playerID, function(err) {
+    res.json(err);
+  });
 };
 
 /**
@@ -178,7 +175,7 @@ exports.submit = function (req, res) {
  */
 exports.list = function (req, res) {
   // Game.find().sort('-created').populate('people').exec(function (err, games) { // need to populate eventually
-  Game.find().sort('-created').exec(function (err, games) {
+  Game.find().sort('-created').populate('players').exec(function (err, games) {
     if (err) {
       // console.log(err);
       return res.status(400).send({

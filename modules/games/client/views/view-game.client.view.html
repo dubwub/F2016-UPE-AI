@@ -17,6 +17,8 @@
       <span ng-bind="vm.game.date | date:'mediumDate'"></span><br>
       
       <span ng-bind="vm.game.people[0]"></span> vs. <span ng-bind="vm.game.people[1]"></span>
+
+      <br>Move: <span ng-bind="vm.game.players[0].move"></span> vs. <span ng-bind="vm.game.players[1].move"></span>
       <!--<span ng-if="vm.game.people[0]" ng-bind="vm.game.people[0]"></span>
       <span ng-if="!vm.game.people[0]">Deleted User</span>
       vs

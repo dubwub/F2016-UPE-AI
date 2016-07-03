@@ -12,8 +12,15 @@
 * Run the command "grunt" in the root directory of the server
 * Then open a browser and go to localhost:3000
 
+###Folder Structure
+* /modules/games/ <-- all relevant classes, views and routing for the game module (includes matchmaking)
+
+###Routes
+* localhost:3000 <-- default landing page
+* /api/games/search <-- python27.py will POST here, and this symbolizes looking for a game (run another instance in another terminal and it should find and start the game)
+
 ##Helpful Reading
-* http://www.bossable.com/564/mean-stack-app-structure/ <-- introducing to the mean stack
+* http://www.bossable.com/564/mean-stack-app-structure/ <-- introduction to the mean stack
 
 ##Server Details/Libraries
 

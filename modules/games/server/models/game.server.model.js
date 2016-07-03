@@ -77,7 +77,7 @@ var Game = new Schema({
     type: String, // "in progress", "complete"
     default: "in progress"
   }
-  // replay: String //file name
+  // replay: String // file name
 });
 
 // END GAME RELATED SCHEMAS
