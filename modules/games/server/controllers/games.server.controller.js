@@ -1,6 +1,6 @@
 'use strict';
 
-// USED FOR EXPORTS.SEARCH, PROBABLY NEED A MUTEX
+// USED FOR EXPORTS.SEARCH, PROBABLY NEED A MUTEX OR CLEANUP OF SOME SORT
 var saved_res = -1;
 var saved_person_id = -1;
 
@@ -22,28 +22,27 @@ var handlers = {};
 
 /**
  * search for a game [only kinda works for 2 people rn]
+
+ really primitive search right now: stores first search request and then responds to both search requests
+ at the same time
  */
 exports.search = function (req, res) {
-  if (saved_res === -1) { // first searcher
-    // console.log('searching');
-    saved_res = res;
+  if (saved_res === -1) { // first person who searches reaches here
+    saved_res = res; // save their request object and ID
     saved_person_id = req.body.personID;
-  } else {
-    // console.log('found one');
+  } else { // second person reaches here
     var people = [saved_person_id, req.body.personID];
-    var new_handler = new Handler(people, function(err) {
+    var new_handler = new Handler(people, function(err) { // create new Handler object for new Game, the new Game will be init in Handler constructor
       res.status(400).send({
         message: errorHandler.getErrorMessage(err)
       });
     });
-    // console.log("new handler");
-    // console.log(new_handler);
-    handlers[new_handler.id] = new_handler;
-    var output = {};
+    handlers[new_handler.id] = new_handler; // add to assoc. array (hashmap)
+    var output = {}; // create output to be sent back to requestors
     output.gameID = new_handler.id;
     output.playerID = new_handler.players[0];
     saved_res.json(output);
-    saved_res = -1;
+    saved_res = -1; // reset search request (PROBABLY STILL NEEDS MUTEX)
     saved_person_id = -1;
     output.playerID = new_handler.players[1];
     res.json(output);
@@ -52,15 +51,10 @@ exports.search = function (req, res) {
 
 
 /**
- * Create new game (soon to be depreciated)
+ * Create new game (DEPRECIATED, REMOVE)
  */
 exports.create = function (req, res) {
   var game = new Game();
-  // console.log(game);
-  //  game.players = [];
-  //  req.body.players.forEach(player) {
-  //  game.players.push(new Player(player));
-  // }
   game.people = [0, 1]; // temporary
   game.players = [];
   game.people.forEach(function(person) {
@@ -149,24 +143,9 @@ exports.delete = function (req, res) {
  * Submit a move
  */
 exports.submit = function (req, res) {
-  // count++;
-  // console.log(count);
-  // return res.json("count = " + count);
-  /* var game = req.game;
-  var player = req.player;
-  var move = req.move;
-  player.save(function (err) {
-    if (err) {
-      return res.status(400).send({
-        message: errorHandler.getErrorMessage(err)
-      });
-    } else {
-      res.json(player);
-    }
-  });*/
   var game = req.game;
   handlers[game._id].submitMove(req.body.move, req.body.playerID, function(err) {
-    res.json(err);
+    if (err === "success") res.json(err);
   });
 };
 
