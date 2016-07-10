@@ -41,16 +41,13 @@ var Explosion = new Schema({
 })*/
 
 var Player = new Schema({
-  // x: Number,
-  // y: Number,
+  x: Number, // probably shouldn't have default
+  y: Number,
   alive: {
     type: Boolean,
     default: true
   },
-  move: {
-    type: Number,
-    default: -1
-  }, // -1 = no move, 0 = rock, 1 = paper, 2 = scissors
+  // -1 = no move, 0 = rock, 1 = paper, 2 = scissors
   // orientation: Number,
   // bombcount: Number,
   // bombpierce: Number,
@@ -70,6 +67,10 @@ var Game = new Schema({
   date: {
     type: Date,
     default: Date.now
+  },
+  size: { // size of game board
+    type: Number,
+    default: 10
   },
   people: [Number], // temporary
   players: [{ type: Schema.ObjectId, ref: 'Player' }],

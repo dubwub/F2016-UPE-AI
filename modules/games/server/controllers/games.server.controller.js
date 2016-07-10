@@ -38,14 +38,27 @@ exports.search = function (req, res) {
       });
     });
     handlers[new_handler.id] = new_handler; // add to assoc. array (hashmap)
+
     var output = {}; // create output to be sent back to requestors
     output.gameID = new_handler.id;
-    output.playerID = new_handler.players[0];
-    saved_res.json(output);
+
+    var playerIndex = 0;
+    for (var pid in new_handler.players) { // iterate through players
+      if (new_handler.players.hasOwnProperty(pid)) {
+        output.playerID = new_handler.players[pid]._id;
+        output.x = new_handler.players[pid].x;
+        output.y = new_handler.players[pid].y;
+        if (playerIndex === 0) {
+          saved_res.json(output);
+        } else if (playerIndex === 1) {
+          res.json(output);
+        }
+        playerIndex++;
+      }
+    }
+
     saved_res = -1; // reset search request (PROBABLY STILL NEEDS MUTEX)
     saved_person_id = -1;
-    output.playerID = new_handler.players[1];
-    res.json(output);
   }
 };
 
@@ -53,7 +66,7 @@ exports.search = function (req, res) {
 /**
  * Create new game (DEPRECIATED, REMOVE)
  */
-exports.create = function (req, res) {
+/* exports.create = function (req, res) {
   var game = new Game();
   game.people = [0, 1]; // temporary
   game.players = [];
@@ -61,6 +74,13 @@ exports.create = function (req, res) {
     var player = new Player();
     player.game = game._id;
     player.person = person;
+    if (person === game.people[0]) { // initialize player position
+      player.x = 0;
+      player.y = 0;
+    } else {
+      player.x = 9;
+      player.y = 9;
+    }
     player.save(function (err) {
       if (err) {
         return res.status(400).send({
@@ -85,7 +105,7 @@ exports.create = function (req, res) {
       res.json(game);
     }
   });
-};
+}; */
 
 /**
  * Show the current game
@@ -102,9 +122,9 @@ exports.read = function (req, res) {
 };
 
 /**
- * Update game status
+ * Update game status, SHOULD BE DEPRECATED (updating should be entirely backend)
  */
-exports.update = function (req, res) {
+/* exports.update = function (req, res) {
   var game = req.game;
   game.status = req.body.status;
 
@@ -120,12 +140,12 @@ exports.update = function (req, res) {
       res.json(game);
     }
   });
-};
+}; */
 
 /**
- * Delete an article
+ * Delete an article (SHOULD BE DEPRECATED)
  */
-exports.delete = function (req, res) {
+/* exports.delete = function (req, res) {
   var game = req.game;
 
   game.remove(function (err) {
@@ -137,7 +157,7 @@ exports.delete = function (req, res) {
       res.json(game);
     }
   });
-};
+}; */
 
 /**
  * Submit a move
@@ -150,7 +170,7 @@ exports.submit = function (req, res) {
 };
 
 /**
- * List of Articles
+ * List of Games
  */
 exports.list = function (req, res) {
   // Game.find().sort('-created').populate('people').exec(function (err, games) { // need to populate eventually
@@ -201,7 +221,7 @@ exports.playerByID = function (req, res, next, id) {
   }*/
 
 
-  req.player = id;
+  req.player = id; // TEMOPRARY UNTIL CREDENTIALS ARE ADDED
   next();
 
   /* Game.findById(id).populate('players', 'people').exec(function (err, game) {

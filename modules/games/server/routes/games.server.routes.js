@@ -9,8 +9,8 @@ var gamesPolicy = require('../policies/games.server.policy'),
 module.exports = function (app) {
   // Articles collection routes
   app.route('/api/games').all(gamesPolicy.isAllowed)
-    .get(games.list)
-    .post(games.create);
+    .get(games.list);
+    // .post(games.create);
 
   // Test update article with POST
   app.route('/api/games/search')
@@ -18,9 +18,9 @@ module.exports = function (app) {
 
   // Single article routes
   app.route('/api/games/:gameId').all(gamesPolicy.isAllowed)
-    .get(games.read)
-    .put(games.update)
-    .delete(games.delete);
+    .get(games.read);
+    // .put(games.update)
+    // .delete(games.delete);
 
   // Submit move
   app.route('/api/games/submit/:gameId')
