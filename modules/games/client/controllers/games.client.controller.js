@@ -14,11 +14,11 @@
     vm.authentication = Authentication;
     vm.error = null;
     vm.form = {};
-    vm.remove = remove;
-    vm.save = save;
+    // vm.remove = remove;
+    // vm.save = save;
 
     // Remove existing Game
-    function remove() {
+    /* function remove() {
       if ($window.confirm('Are you sure you want to delete?')) {
         vm.game.$remove($state.go('games.list'));
       }
@@ -47,6 +47,6 @@
       function errorCallback(res) {
         vm.error = res.data.message;
       }
-    }
+    } */
   }
 }());

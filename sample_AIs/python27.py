@@ -10,3 +10,5 @@ playerID = json['playerID']
 print(gameID)
 print(playerID)
 r = requests.post('http://localhost:3000/api/games/submit/' + gameID, data={'playerID': playerID, 'move': 'r'}); # submit sample move
+json = r.json()
+print(json)

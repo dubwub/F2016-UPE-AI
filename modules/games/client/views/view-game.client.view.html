@@ -19,6 +19,16 @@
       <span ng-bind="vm.game.people[0]"></span> vs. <span ng-bind="vm.game.people[1]"></span>
 
       <br>Positions: <span ng-bind="vm.game.players[0].x"></span>, <span ng-bind="vm.game.players[0].y"></span> vs. <span ng-bind="vm.game.players[1].x"></span>,<span ng-bind="vm.game.players[1].y"></span>
+
+      <div id="testTV" style="background-color: lightblue; width:400px; height:400px; position: relative;">
+        <div id="player1" style="position: absolute; left: {{40*vm.game.players[0].x}}px; top: {{40*vm.game.players[0].y}}px; background-color:red; width:40px; height:40px;">
+        </div>
+        <div id="player2" style="position: absolute; left: {{40*vm.game.players[1].x}}px; top: {{40*vm.game.players[1].y}}px; background-color:green; width:40px; height:40px;">
+        </div>
+      </div>
+
+      <canvas id="GameTV" width="400" height="400" style="align:center;">
+      </canvas>
       <!--<span ng-if="vm.game.people[0]" ng-bind="vm.game.people[0]"></span>
       <span ng-if="!vm.game.people[0]">Deleted User</span>
       vs

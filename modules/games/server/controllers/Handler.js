@@ -106,8 +106,6 @@ function interpretMove(move, player, boardSize) { // small helper function, outp
     default: // otherwise, no move
       break;
   }
-  // console.log(move);
-  // console.log(output);
   return output;
 }
 
