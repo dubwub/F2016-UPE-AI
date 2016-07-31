@@ -14,9 +14,9 @@
     // console.log(Game);
     var vm = this;
     vm.game = {
-      boardSize: 10
+      boardSize: 5
     };
-    vm.game.players = [{ x: 0, y: 0 }, { x: 9, y: 9 }];
+    vm.game.players = [{ x: 0, y: 0 }, { x: vm.game.boardSize - 1, y: vm.game.boardSize - 1 }];
     vm.game.submittedMoves = {};
 
     function createArray(length) { // literally creates a new array with params e.g. createArray(5,3)
@@ -60,6 +60,10 @@
             targetSquare.y++;
             if (targetSquare.y >= vm.game.boardSize) targetSquare.y = vm.game.boardSize - 1;
             break;
+          case '':
+            targetSquare.x = vm.game.players[index].x;
+            targetSquare.y = vm.game.players[index].y;
+            break;
         }
         // console.log(targetSquare);
         targetSquares[index] = targetSquare; // hash everything by index, not player (object keys???)
@@ -80,8 +84,8 @@
         var targetSquares = getTargetSquares();
         var resolveBoard = createArray(vm.game.boardSize, vm.game.boardSize); // there may be a better way of doing this
         vm.game.players.forEach(function (player, index) { // first pass, fill in all target squares
-          var playerObj = { player: player, state: 'origin' };
-          var targetObj = { player: player, state: 'target' };
+          var playerObj = { player: index, state: 'origin' };
+          var targetObj = { player: index, state: 'target' };
           if (typeof resolveBoard[player.x][player.y] === 'undefined') resolveBoard[player.x][player.y] = [playerObj];
           else resolveBoard[player.x][player.y].push(playerObj);
           if (typeof resolveBoard[targetSquares[index].x][targetSquares[index].y] === 'undefined')
@@ -103,13 +107,24 @@
         console.log(resolveBoard);
         vm.game.players.forEach(function (player, index) { // second pass, find joint cross throughs and target square sharing and resolve
           if (resolveBoard[targetSquares[index].x][targetSquares[index].y].length > 1) {
-            var otherIndex = resolveBoard[targetSquares[index].x][targetSquares[index].y].indexOf({ player: index, state: 'target' });
-            if (otherIndex === 0) otherIndex = 1; // with two players this is either 0 or 1
-            else otherIndex = 0;
+            // there are 4 cases here in a 1v1
+            // 1: this player's target square overlaps with another target square
+            // 2: this player's target square overlaps with an origin square
+            // 3: this player's target square overlaps with a target and origin square
+            // 4: this player's target square overlaps with its own origin square
+            var otherIndex = -1; // first, find first object that isn't owned by this object
+            for (var i = 0; i < resolveBoard[targetSquares[index].x][targetSquares[index].y].length; i++) {
+              if (resolveBoard[targetSquares[index].x][targetSquares[index].y][i].player !== index) { // probably change this term to not be confusing
+                otherIndex = i;
+              }
+            }
+            // console.log(otherIndex);
+            if (otherIndex === -1) return; // case 4, don't move
             var otherObj = resolveBoard[targetSquares[index].x][targetSquares[index].y][otherIndex];
-            if (otherObj.state === 'target') { // target square collision, resolve by staying still
+            // covers cases 1 and 3, stays still
+            if (otherObj.state === 'target' || resolveBoard[targetSquares[index].x][targetSquares[index].y].length === 3) {
               return;
-            } else if (resolveBoard[player.x][player.y].length > 1) { // the other square is an origin, check for crossover
+            } else if (resolveBoard[player.x][player.y].length > 1) { // case 2
               return;
             } else { // legal, move (find a way to remove boilerplate from below?)
               player.x = targetSquares[index].x;
