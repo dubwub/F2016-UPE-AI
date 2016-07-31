@@ -23,32 +23,41 @@
           pageTitle: 'Games List'
         }
       })
-      .state('games.create', {
-        url: '/create',
-        templateUrl: 'modules/games/client/views/form-game.client.view.html',
-        controller: 'GamesController',
+      .state('games.training', {
+        url: '/training',
+        templateUrl: 'modules/games/client/views/training-game.client.view.html',
+        controller: 'TrainingController',
         controllerAs: 'vm',
-        resolve: {
-          gameResolve: newGame
-        },
         data: {
-          roles: ['user', 'admin'],
-          pageTitle: 'Games Create'
+          pageTitle: 'Training Mode'
         }
       })
-      .state('games.edit', {
-        url: '/:gameId/edit',
-        templateUrl: 'modules/games/client/views/form-game.client.view.html',
-        controller: 'GamesController',
-        controllerAs: 'vm',
-        resolve: {
-          gameResolve: getGame
-        },
-        data: {
-          roles: ['user', 'admin'],
-          pageTitle: 'Edit Game {{ gameResolve.title }}'
-        }
-      })
+      // .state('games.create', {
+      //   url: '/create',
+      //   templateUrl: 'modules/games/client/views/form-game.client.view.html',
+      //   controller: 'GamesController',
+      //   controllerAs: 'vm',
+      //   resolve: {
+      //     gameResolve: newGame
+      //   },
+      //   data: {
+      //     roles: ['user', 'admin'],
+      //     pageTitle: 'Games Create'
+      //   }
+      // })
+      // .state('games.edit', {
+      //   url: '/:gameId/edit',
+      //   templateUrl: 'modules/games/client/views/form-game.client.view.html',
+      //   controller: 'GamesController',
+      //   controllerAs: 'vm',
+      //   resolve: {
+      //     gameResolve: getGame
+      //   },
+      //   data: {
+      //     roles: ['user', 'admin'],
+      //     pageTitle: 'Edit Game {{ gameResolve.title }}'
+      //   }
+      // })
       .state('games.view', {
         url: '/:gameId',
         templateUrl: 'modules/games/client/views/view-game.client.view.html',

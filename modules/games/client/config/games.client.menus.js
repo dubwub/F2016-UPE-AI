@@ -21,11 +21,9 @@
       state: 'games.list'
     });
 
-    // Add the dropdown create item
     menuService.addSubMenuItem('topbar', 'games', {
-      title: 'Create Games',
-      state: 'games.create',
-      roles: ['user']
+      title: 'Training Mode',
+      state: 'games.training'
     });
   }
 }());

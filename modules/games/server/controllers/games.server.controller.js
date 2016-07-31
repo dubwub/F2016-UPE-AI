@@ -14,6 +14,11 @@ var path = require('path'),
   Handler = require('./Handler'),
   errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller'));
 
+var Class = {
+  Game: require('../../Class/Game'),
+  Player: require('../../Class/Player')
+};
+
 /*
     Handler "hash map", maybe in the future convert it to an actual hashmap
     Each handler is hashed to the gameID of the game it handles
@@ -26,7 +31,27 @@ var handlers = {};
  really primitive search right now: stores first search request and then responds to both search requests
  at the same time
  */
+
+// willThisEvenWork.$inject = ['Socket'];
+// function willThisEvenWork(Socket) {
+//   console.log('Socket');
+//   console.log(Socket);
+// }
+// console.log(socketio);
+// var io = io();
+
 exports.search = function (req, res) {
+  // var io = require('socket.io-client')('http://localhost:3000/');
+  // io.on('connect', function() {
+  //   io.send('testEmit', { message: 'holy shit tihtithi' });
+  //   io.emit('testEmit', { message: 'holy shit it worked' });
+  // });
+  // io.emit('testEmit', { message: 'newGame' });
+  // console.log("req");
+  // console.log(req.socket);
+  // req.socket.emit('testEmit', { message: 'no fucking way' });
+  // console.log("res");
+  // console.log(res);
   if (saved_res === -1) { // first person who searches reaches here
     saved_res = res; // save their request object and ID
     saved_person_id = req.body.personID;
@@ -184,6 +209,14 @@ exports.list = function (req, res) {
       res.json(games);
     }
   });
+};
+
+// training mode, doesn't really need anything here tbh
+exports.training = function (req, res) {
+  // console.log(Class);
+  // console.log(res);
+  res.json(Class);
+  // return Class;
 };
 
 /**

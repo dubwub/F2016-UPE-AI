@@ -24,9 +24,9 @@
     // Connect to Socket.io server
     function connect() {
       // Connect only when authenticated
-      if (Authentication.user) {
-        service.socket = io();
-      }
+      // if (Authentication.user) {
+      service.socket = io();
+      // }
     }
 
     // Wrap the Socket.io 'emit' method

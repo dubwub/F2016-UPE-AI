@@ -11,5 +11,6 @@
     var vm = this;
 
     vm.games = GamesService.query();
+    // console.log(vm.games);
   }
 }());

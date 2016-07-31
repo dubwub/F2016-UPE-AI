@@ -1,16 +1,7 @@
 <section>
   <div class="page-header">
     <h1>Game TV</h1>
-    <!--<h1 ng-bind="vm.game.title"></h1>-->
   </div>
-  <!--<div class="pull-right" ng-show="vm.game.isCurrentUserOwner">
-    <a class="btn btn-primary" ui-sref="games.edit({ gameId: vm.game._id })">
-      <i class="glyphicon glyphicon-edit"></i>
-    </a>
-    <a class="btn btn-primary" ng-click="vm.remove()">
-      <i class="glyphicon glyphicon-trash"></i>
-    </a>
-  </div>-->
   <small>
     <em class="text-muted">
       Game started: 
@@ -20,19 +11,27 @@
 
       <br>Positions: <span ng-bind="vm.game.players[0].x"></span>, <span ng-bind="vm.game.players[0].y"></span> vs. <span ng-bind="vm.game.players[1].x"></span>,<span ng-bind="vm.game.players[1].y"></span>
 
-      <div id="testTV" style="background-color: lightblue; width:400px; height:400px; position: relative;">
+      <div id="testTV" style="background-color: lightblue; width:{{40*vm.game.boardSize}}px; height:{{40*vm.game.boardSize}}px; position: relative;">
         <div id="player1" style="position: absolute; left: {{40*vm.game.players[0].x}}px; top: {{40*vm.game.players[0].y}}px; background-color:red; width:40px; height:40px;">
         </div>
         <div id="player2" style="position: absolute; left: {{40*vm.game.players[1].x}}px; top: {{40*vm.game.players[1].y}}px; background-color:green; width:40px; height:40px;">
         </div>
       </div>
 
-      <!--<span ng-if="vm.game.people[0]" ng-bind="vm.game.people[0]"></span>
-      <span ng-if="!vm.game.people[0]">Deleted User</span>
-      vs
-      <span ng-if="vm.game.people[1]" ng-bind="vm.game.people[1]"></span>
-      <span ng-if="!vm.game.people[1]">Deleted User</span>--> 
+      <div id="buttons1">
+        Player 1 move: 
+        <button type="button" ng-click="submit(0,'l')">left</button>
+        <button type="button" ng-click="submit(0,'u')">up</button>
+        <button type="button" ng-click="submit(0,'r')">right</button>
+        <button type="button" ng-click="submit(0,'d')">down</button>
+      </div>
+      <div id="buttons2">
+        Player 2 move: 
+        <button type="button" ng-click="submit(1,'l')">left</button>
+        <button type="button" ng-click="submit(1,'u')">up</button>
+        <button type="button" ng-click="submit(1,'r')">right</button>
+        <button type="button" ng-click="submit(1,'d')">down</button>
+      </div>
     </em>
   </small>
-  <!--<p class="lead" ng-bind="vm.game.content"></p>-->
 </section>

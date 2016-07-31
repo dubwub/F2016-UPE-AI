@@ -8,16 +8,22 @@ var gamesPolicy = require('../policies/games.server.policy'),
 
 module.exports = function (app) {
   // Articles collection routes
-  app.route('/api/games').all(gamesPolicy.isAllowed)
+  app.route('/api/games') // .all(gamesPolicy.isAllowed)
     .get(games.list);
     // .post(games.create);
+
+  // Training mode
+  app.route('/api/games/training1')
+    .get(games.training);
 
   // Test update article with POST
   app.route('/api/games/search')
     .post(games.search);
 
-  // Single article routes
-  app.route('/api/games/:gameId').all(gamesPolicy.isAllowed)
+  // Single game route
+  // fun fact if this is before any other route that has /games/ it will register this
+  // route before registering that one
+  app.route('/api/games/:gameId') // .all(gamesPolicy.isAllowed)
     .get(games.read);
     // .put(games.update)
     // .delete(games.delete);

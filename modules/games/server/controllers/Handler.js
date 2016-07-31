@@ -88,20 +88,20 @@ function interpretMove(move, player, boardSize) { // small helper function, outp
   };
   switch (move) {
     case "l":
-      output.y--;
-      if (output.y < 0) output.y = 0;
+      output.x--;
+      if (output.x < 0) output.x = 0;
       break;
     case "r":
-      output.y++;
-      if (output.y >= boardSize) output.y = boardSize - 1;
-      break;
-    case "d":
       output.x++;
       if (output.x >= boardSize) output.x = boardSize - 1;
       break;
+    case "d":
+      output.y++;
+      if (output.y >= boardSize) output.y = boardSize - 1;
+      break;
     case "u":
-      output.x--;
-      if (output.x < 0) output.x = 0;
+      output.y--;
+      if (output.y < 0) output.y = 0;
       break;
     default: // otherwise, no move
       break;
@@ -125,13 +125,17 @@ Handler.prototype =
       this.submittedMoveCount++;
       if (this.submittedMoveCount === this.people.length) { // submit all moves at once
         console.log("all moves submitted for game, resolving now");
-        // resolving is done in three steps
+        // resolving is done in four steps
         // 1. figure out where everyone wants to go
         // 2. resolve everyone with the least amount of conflict
         // 3. submit everyone's new positions
+        // 4. return all res responses <--- not currently DONE
         var targetSquares = {}; // step 1
         for (var pid in this.moves) {
           if (this.moves.hasOwnProperty(pid)) {
+            console.log(this.players);
+            console.log(pid);
+            console.log(this.players[pid]);
             targetSquares[pid] = interpretMove(this.moves[pid], this.players[pid], this.boardSize);
           }
         }
@@ -154,11 +158,13 @@ Handler.prototype =
             });
           }
         }
+        // io.on('gameUpdate', function(socket) {console.log("seen");});
+        // io.emit('gameUpdate', this.game);
         this.moves = {}; // reset
         this.submittedMoveCount = 0;
       }
-      callback("success");
-    } else callback("failure");
+      callback('success');
+    } else callback('failure');
   }
 };
 
