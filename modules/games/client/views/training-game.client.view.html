@@ -1,20 +1,26 @@
-<section>
+  <section>
   <div class="page-header">
-    <h1>Game TV</h1>
+    <h1>TRAINING MODE</h1>
   </div>
   <small>
     <em class="text-muted">
-      Game started: 
-      <span ng-bind="vm.game.date | date:'mediumDate'"></span><br>
-      
-      <span ng-bind="vm.game.people[0]"></span> vs. <span ng-bind="vm.game.people[1]"></span>
+      <!--Game started: 
+      <span ng-bind="vm.game.date | date:'mediumDate'"></span><br>-->
+      <!--<span ng-bind="vm.game.people[0]"></span> vs. <span ng-bind="vm.game.people[1]"></span>-->
 
       <br>Positions: <span ng-bind="vm.game.players[0].x"></span>, <span ng-bind="vm.game.players[0].y"></span> vs. <span ng-bind="vm.game.players[1].x"></span>,<span ng-bind="vm.game.players[1].y"></span>
+      <br>Moves: <span ng-bind="vm.game.submittedMoves[0]"></span> vs. <span ng-bind="vm.game.submittedMoves[1]"></span>
 
       <div id="testTV" style="background-color: lightblue; width:{{40*vm.game.boardSize}}px; height:{{40*vm.game.boardSize}}px; position: relative;">
         <div id="player1" style="position: absolute; left: {{40*vm.game.players[0].x}}px; top: {{40*vm.game.players[0].y}}px; background-color:red; width:40px; height:40px;">
         </div>
         <div id="player2" style="position: absolute; left: {{40*vm.game.players[1].x}}px; top: {{40*vm.game.players[1].y}}px; background-color:green; width:40px; height:40px;">
+        </div>
+        <div ng-repeat="blockRow in vm.game.blockBoard track by $index" ng-init="y = $index * 40">
+          <div ng-repeat="blockCol in blockRow track by $index" ng-init="x = $index * 40" ng-switch on="blockCol">
+            <div ng-switch-when="1" style="position: absolute; left: {{x}}px; top: {{y}}px; background-color: black; width: 40px; height: 40px;">
+            </div>
+          </div>
         </div>
       </div>
 

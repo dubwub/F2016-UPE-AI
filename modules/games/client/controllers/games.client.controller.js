@@ -31,6 +31,17 @@
       return arr;
     }
 
+    // if performance becomes an issue, convert this to an actual bitboard
+    vm.game.blockBoard = createArray(vm.game.boardSize, vm.game.boardSize);
+    for (var i = 0; i < vm.game.boardSize; i++) { // init everything to 0 (easier way?)
+      for (var j = 0; j < vm.game.boardSize; j++) {
+        vm.game.blockBoard[i][j] = 0;
+      }
+    }
+    vm.game.blockBoard[1][1] = 1;
+    vm.game.blockBoard[vm.game.boardSize - 2][vm.game.boardSize - 2] = 1;
+    // console.log(vm.game.blockBoard);
+
     function getTargetSquares() {
       var targetSquares = {};
       vm.game.players.forEach(function(player, index) {
@@ -39,31 +50,34 @@
           case 'l': // move left
             targetSquare.y = vm.game.players[index].y;
             targetSquare.x = vm.game.players[index].x;
+            if (vm.game.blockBoard[targetSquare.x - 1][targetSquare.y] === 1) break;
             targetSquare.x--;
             if (targetSquare.x < 0) targetSquare.x = 0;
             break;
           case 'r': // move right
             targetSquare.y = vm.game.players[index].y;
             targetSquare.x = vm.game.players[index].x;
+            if (vm.game.blockBoard[targetSquare.x + 1][targetSquare.y] === 1) break;
             targetSquare.x++;
             if (targetSquare.x >= vm.game.boardSize) targetSquare.x = vm.game.boardSize - 1;
             break;
           case 'u': // move up
             targetSquare.x = vm.game.players[index].x;
             targetSquare.y = vm.game.players[index].y;
+            if (vm.game.blockBoard[targetSquare.x][targetSquare.y - 1] === 1) break;
             targetSquare.y--;
             if (targetSquare.y < 0) targetSquare.y = 0;
             break;
           case 'd': // move down
             targetSquare.x = vm.game.players[index].x;
             targetSquare.y = vm.game.players[index].y;
+            if (vm.game.blockBoard[targetSquare.x][targetSquare.y + 1] === 1) break;
             targetSquare.y++;
             if (targetSquare.y >= vm.game.boardSize) targetSquare.y = vm.game.boardSize - 1;
             break;
           case '':
             targetSquare.x = vm.game.players[index].x;
             targetSquare.y = vm.game.players[index].y;
-            break;
         }
         // console.log(targetSquare);
         targetSquares[index] = targetSquare; // hash everything by index, not player (object keys???)
@@ -104,7 +118,6 @@
           last turn with no repercussions as long as we keep the targetsquare in the resolveboard, this will allow the other
           player to come to the same conclusion.
         */
-        console.log(resolveBoard);
         vm.game.players.forEach(function (player, index) { // second pass, find joint cross throughs and target square sharing and resolve
           if (resolveBoard[targetSquares[index].x][targetSquares[index].y].length > 1) {
             // there are 4 cases here in a 1v1
