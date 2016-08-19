@@ -15,7 +15,8 @@
     vm.game = {
       boardSize: 5
     };
-    vm.game.players = [{ x: 0, y: 0 }, { x: vm.game.boardSize - 1, y: vm.game.boardSize - 1 }];
+    vm.game.players = [{ x: 0, y: 0, orientation: 0, bombRange: 3, alive: true },
+      { x: vm.game.boardSize - 1, y: vm.game.boardSize - 1, orientation: 0, bombRange: 3, alive: true }];
     vm.game.moveOrder = [0, 1];
     vm.game.moveIterator = 0;
 
@@ -43,48 +44,88 @@
     // soft blocks can be destroyed
     // TODO: implement RNG algorithm for init this board
     vm.game.softBlockBoard = createArray(vm.game.boardSize, vm.game.boardSize);
-    for (i = 0; i < vm.game.boardSize; i++) { // make sure everything is defined
-      for (j = 0; j < vm.game.boardSize; j++) {
-        vm.game.softBlockBoard[i][j] = 0;
+    for (i = 1; i < vm.game.boardSize - 1; i++) { // make sure everything is defined
+      for (j = 1; j < vm.game.boardSize - 1; j++) {
+        if (vm.game.hardBlockBoard[i][j] === 1 || Math.random() > 0.5) vm.game.softBlockBoard[i][j] = 0;
+        else vm.game.softBlockBoard[i][j] = 1;
       }
     }
+    console.log(vm.game.softBlockBoard);
 
     $scope.checkSpaceBlocked = function(x, y) {
       for (var i = 0; i < vm.game.players.length; i++) { // linear time check, negligible because #players is probably ~2
         if (vm.game.players[i].x === x && vm.game.players[i].y === y) { // check if any of the players exist in square
-          return true;
+          return 'p:' + i; // use js split to get p_index
         }
       }
-      if (x < 0 || x >= vm.game.boardSize || y < 0 || y >= vm.game.boardSize) return false;
-      return vm.game.hardBlockBoard[x][y] === 1 || vm.game.softBlockBoard[x][y] === 1
-        || typeof vm.game.bombMap[[x, y]] !== 'undefined';
+      if (x < 0 || x >= vm.game.boardSize || y < 0 || y >= vm.game.boardSize) return '';
+      if (vm.game.hardBlockBoard[x][y] === 1) return 'hb';
+      if (vm.game.softBlockBoard[x][y] === 1) return 'sb';
+      if (typeof vm.game.bombMap[[x, y]] !== 'undefined') return 'b';
+      return '';
     };
 
     // bombs are represented server-side in a hashmap, client-side in a list
     vm.game.bombMap = {};
     vm.game.clientBombList = [];
 
+    function trailGetNextSquare(direction, x, y) {
+      switch (direction) {
+        case 0:
+          return [x - 1, y];
+        case 1:
+          return [x + 1, y];
+        case 2:
+          return [x, y - 1];
+        case 3:
+          return [x, y + 1];
+      }
+    }
+
+    function trailIterate(x, y) { // better name for this?
+      if (x < 0 || x >= vm.game.boardSize || y < 0 || y >= vm.game.boardSize) return false;
+      var space = $scope.checkSpaceBlocked(x, y);
+      if (space === '') return true;
+      if (space === 'sb') { // soft block here
+        vm.game.softBlockBoard[x][y] = 0;
+      }
+      if (space === 'b') {
+        // detonate bomb
+      }
+      if (space[0] === 'p') {
+        var index = Number.parseInt(space.split(':')[1]);
+        console.log('player: ' + index + ' was killed by bomb');
+        vm.game.players[index].alive = false;
+        vm.game.players[index].x = vm.game.players[index].y = -1;
+      }
+      return false;
+    }
+
     $scope.submit = function(playerIndex, move) {
       if (playerIndex !== vm.game.moveIterator) return; // ignore moves out of order
       var player = vm.game.players[playerIndex];
       switch (move) {
         case 'l': // move left
-          if ($scope.checkSpaceBlocked(player.x - 1, player.y) === true) break;
+          player.orientation = 0;
+          if ($scope.checkSpaceBlocked(player.x - 1, player.y) !== '') break;
           player.x--;
           if (player.x < 0) player.x = 0;
           break;
         case 'r': // move right
-          if ($scope.checkSpaceBlocked(player.x + 1, player.y) === true) break;
+          player.orientation = 2;
+          if ($scope.checkSpaceBlocked(player.x + 1, player.y) !== '') break;
           player.x++;
           if (player.x >= vm.game.boardSize) player.x = vm.game.boardSize - 1;
           break;
         case 'u': // move up
-          if ($scope.checkSpaceBlocked(player.x, player.y - 1) === true) break;
+          player.orientation = 1;
+          if ($scope.checkSpaceBlocked(player.x, player.y - 1) !== '') break;
           player.y--;
           if (player.y < 0) player.y = 0;
           break;
         case 'd': // move down
-          if ($scope.checkSpaceBlocked(player.x, player.y + 1) === true) break;
+          player.orientation = 3;
+          if ($scope.checkSpaceBlocked(player.x, player.y + 1) !== '') break;
           player.y++;
           if (player.y >= vm.game.boardSize) player.y = vm.game.boardSize - 1;
           break;
@@ -92,7 +133,7 @@
           break;
         case 'b': // drop bomb
           if (typeof vm.game.bombMap[[player.x, player.y]] !== 'undefined') break; // already standing on bomb
-          vm.game.bombMap[[player.x, player.y]] = { owner: playerIndex, tick: 2 }; // TODO: change this to 4
+          vm.game.bombMap[[player.x, player.y]] = { owner: playerIndex, tick: 4 }; // TODO: change this to 4
           console.log(vm.game.bombMap);
           break;
       }
@@ -102,7 +143,23 @@
         for (var key in vm.game.bombMap) {
           if (vm.game.bombMap.hasOwnProperty(key)) {
             vm.game.bombMap[key].tick -= 1;
-            if (vm.game.bombMap[key].tick === 0) delete vm.game.bombMap[key];
+            if (vm.game.bombMap[key].tick === 0) { // explode bomb, iterate in all four direction
+              var keyArray = key.split(',');
+              var keyX = Number.parseInt(keyArray[0]);
+              var keyY = Number.parseInt(keyArray[1]);
+              trailIterate(keyX, keyY);
+              for (var direction = 0; direction < 4; direction++) {
+                var x = keyX; // "missing radix operator???"
+                var y = keyY;
+                // console.log('x: ' + x + ', y: ' + y);
+                for (var step = 0; step < vm.game.players[vm.game.bombMap[key].owner].bombRange; step++) {
+                  var output = trailGetNextSquare(direction, x, y);
+                  x = output[0]; y = output[1];
+                  if (!trailIterate(x, y)) break;
+                }
+              }
+              delete vm.game.bombMap[key];
+            }
           }
         }
       }

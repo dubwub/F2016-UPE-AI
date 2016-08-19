@@ -13,13 +13,23 @@
       <br>Player to move: <span ng-bind="vm.game.moveOrder[vm.game.moveIterator]"></span>
 
       <div id="testTV" style="background-color: lightblue; width:{{40*vm.game.boardSize}}px; height:{{40*vm.game.boardSize}}px; position: relative;">
-        <div id="player1" style="position: absolute; left: {{40*vm.game.players[0].x}}px; top: {{40*vm.game.players[0].y}}px; background-color:red; width:40px; height:40px;">
+        <div id="player1" ng-switch on="vm.game.players[0].alive">
+          <div ng-switch-when="true" style="position: absolute; left: {{40*vm.game.players[0].x}}px; top: {{40*vm.game.players[0].y}}px; background-color:red; width:40px; height:40px;">
+          </div>
         </div>
-        <div id="player2" style="position: absolute; left: {{40*vm.game.players[1].x}}px; top: {{40*vm.game.players[1].y}}px; background-color:green; width:40px; height:40px;">
+        <div id="player2" ng-switch on="vm.game.players[1].alive">
+          <div ng-switch-when="true" style="position: absolute; left: {{40*vm.game.players[1].x}}px; top: {{40*vm.game.players[1].y}}px; background-color:green; width:40px; height:40px;">
+          </div>
         </div>
-        <div ng-repeat="blockRow in vm.game.hardBlockBoard track by $index" ng-init="y = $index * 40">
-          <div ng-repeat="blockCol in blockRow track by $index" ng-init="x = $index * 40" ng-switch on="blockCol">
+        <div ng-repeat="blockRow in vm.game.hardBlockBoard track by $index" ng-init="x = $index * 40">
+          <div ng-repeat="blockCol in blockRow track by $index" ng-init="y = $index * 40" ng-switch on="blockCol">
             <div ng-switch-when="1" style="position: absolute; left: {{x}}px; top: {{y}}px; background-color: black; width: 40px; height: 40px;">
+            </div>
+          </div>
+        </div>
+        <div ng-repeat="blockRow in vm.game.softBlockBoard track by $index" ng-init="x = $index * 40">
+          <div ng-repeat="blockCol in blockRow track by $index" ng-init="y = $index * 40" ng-switch on="blockCol">
+            <div ng-switch-when="1" style="position: absolute; left: {{x}}px; top: {{y}}px; background-color: gray; width: 40px; height: 40px;">
             </div>
           </div>
         </div>
