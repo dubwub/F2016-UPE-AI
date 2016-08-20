@@ -2,23 +2,23 @@
   <div class="page-header">
     <h1>TRAINING MODE</h1>
   </div>
-  <small>
+  <small> 
     <em class="text-muted">
-      <!--Game started: 
-      <span ng-bind="vm.game.date | date:'mediumDate'"></span><br>-->
-      <!--<span ng-bind="vm.game.people[0]"></span> vs. <span ng-bind="vm.game.people[1]"></span>-->
 
       <br>Positions: <span ng-bind="vm.game.players[0].x"></span>, <span ng-bind="vm.game.players[0].y"></span> vs. <span ng-bind="vm.game.players[1].x"></span>,<span ng-bind="vm.game.players[1].y"></span>
-      <br>Moves: <span ng-bind="vm.game.submittedMoves[0]"></span> vs. <span ng-bind="vm.game.submittedMoves[1]"></span>
       <br>Player to move: <span ng-bind="vm.game.moveOrder[vm.game.moveIterator]"></span>
 
       <div id="testTV" style="background-color: lightblue; width:{{40*vm.game.boardSize}}px; height:{{40*vm.game.boardSize}}px; position: relative;">
         <div id="player1" ng-switch on="vm.game.players[0].alive">
-          <div ng-switch-when="true" style="position: absolute; left: {{40*vm.game.players[0].x}}px; top: {{40*vm.game.players[0].y}}px; background-color:red; width:40px; height:40px;">
+          <div ng-switch-when="true" ng-switch on="vm.game.moveOrder[vm.game.moveIterator]" style="position: absolute; left: {{40*vm.game.players[0].x}}px; top: {{40*vm.game.players[0].y}}px; background-color:red; width:40px; height:40px;">
+            <div ng-switch-when="0" style="border:5px solid black; width:40px; height:40px;">
+            </div>
           </div>
         </div>
         <div id="player2" ng-switch on="vm.game.players[1].alive">
-          <div ng-switch-when="true" style="position: absolute; left: {{40*vm.game.players[1].x}}px; top: {{40*vm.game.players[1].y}}px; background-color:green; width:40px; height:40px;">
+          <div ng-switch-when="true" ng-switch on="vm.game.moveOrder[vm.game.moveIterator]" style="position: absolute; left: {{40*vm.game.players[1].x}}px; top: {{40*vm.game.players[1].y}}px; background-color:green; width:40px; height:40px;">
+            <div ng-switch-when="1" style="border:5px solid black; width:40px; height:40px;">
+            </div>
           </div>
         </div>
         <div ng-repeat="blockRow in vm.game.hardBlockBoard track by $index" ng-init="x = $index * 40">
@@ -37,25 +37,22 @@
           <div style="position: absolute; left: {{posArray[0] * 40}}px; top: {{posArray[1] * 40}}px; background-color: pink; width: 40px; height: 40px;">
           </div>
         </div>
+        <div ng-repeat="(pos, trailSquare) in vm.game.trailMap" ng-init="posArray = pos.split(',')">
+          <div ng-repeat="(player, trail) in trailSquare">
+            <div style="position: absolute; left: {{posArray[0] * 40}}px; top: {{posArray[1] * 40}}px; background-color: orange; width: 40px; height: 40px;">
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div id="buttons1">
-        Player 1 move: 
-        <button type="button" ng-click="submit(0,'l')">left</button>
-        <button type="button" ng-click="submit(0,'u')">up</button>
-        <button type="button" ng-click="submit(0,'r')">right</button>
-        <button type="button" ng-click="submit(0,'d')">down</button>
-        <button type="button" ng-click="submit(0,'')">do nothing</button>
-        <button type="button" ng-click="submit(0,'b')">drop bomb</button>
-      </div>
-      <div id="buttons2">
-        Player 2 move: 
-        <button type="button" ng-click="submit(1,'l')">left</button>
-        <button type="button" ng-click="submit(1,'u')">up</button>
-        <button type="button" ng-click="submit(1,'r')">right</button>
-        <button type="button" ng-click="submit(1,'d')">down</button>
-        <button type="button" ng-click="submit(1,'')">do nothing</button>
-        <button type="button" ng-click="submit(1,'b')">drop bomb</button>
+      <div id="buttons">
+        Player <span ng-bind="vm.game.moveOrder[vm.game.moveIterator]"></span> move: 
+        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'l')">left</button>
+        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'u')">up</button>
+        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'r')">right</button>
+        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'d')">down</button>
+        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'')">do nothing</button>
+        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'b')">drop bomb</button>
       </div>
     </em>
   </small>
