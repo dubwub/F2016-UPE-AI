@@ -9,17 +9,20 @@
     .module('games')
     .controller('TrainingController', TrainingController);
 
+  /*
+    This controller holds all of the game logic needed to run the training mode for Bomberman.
+    vm is the object that is exposed to the front end (see: training-game.client.view.html)
+    vm.game is where all of the game related information resides.
+  */
+
   TrainingController.$inject = ['$scope', '$window', 'TrainingService'];
   function TrainingController($scope, $window, TrainingService) {
-    var vm = this;
+    var vm = this; // again, this is the main object the front-end will interface with
     vm.game = {
-      boardSize: 9
+      boardSize: 9 // can be customized, LEAVE TO ODD NUMBERS FOR OPTIMAL BLOCK PLACEMENT
     };
-    vm.game.players = [{ x: 0, y: 0, orientation: 0, bombRange: 3, alive: true },
-      { x: vm.game.boardSize - 1, y: vm.game.boardSize - 1, orientation: 0, bombRange: 3, alive: true }];
-    vm.game.moveOrder = [0, 1];
-    vm.game.moveIterator = 0;
 
+    // createArray() is a small helper function that helps with initialization of the boards
     function createArray(length) { // literally creates a new array with params e.g. createArray(5,3)
       var arr = new Array(length || 0);
       var i = length;
@@ -30,45 +33,63 @@
       return arr;
     }
 
-    // hard blocks cannot be destroyed
-    vm.game.hardBlockBoard = createArray(vm.game.boardSize, vm.game.boardSize);
-    var i = 0; // "global" iterators because grunt hates everything that is fun
-    var j = 0;
-    for (i = 0; i < vm.game.boardSize; i++) { // make sure everything is defined
-      for (j = 0; j < vm.game.boardSize; j++) {
-        if ((i + 1) % 2 === 0 && (j + 1) % 2 === 0) vm.game.hardBlockBoard[i][j] = 1; // even indices = add block
-        else vm.game.hardBlockBoard[i][j] = 0;
+    // this function initializes the game state, should be quite fine for most game boards.
+    // the hard block generator works best in odd numbered boardSizes, and the softblockBoard doesn't really care.
+    // right now this only initializes two players, and only spaces for two players.
+    function init() {
+      vm.game.players = [{ x: 0, y: 0, orientation: 0, bombRange: 3, alive: true, coins: 0 },
+      { x: vm.game.boardSize - 1, y: vm.game.boardSize - 1, orientation: 0, bombRange: 3, alive: true, coins: 0 }];
+      vm.game.moveOrder = [0, 1];
+      vm.game.moveIterator = 0;
+
+      // hard blocks appear in a gridlike pattern with no other hard blocks in any of the adjacent squres.
+      // for odd numbered boardSizes, this initializer can simply put hard blocks in the odd indices
+      vm.game.hardBlockBoard = createArray(vm.game.boardSize, vm.game.boardSize);
+      var i = 0; // "global" iterators because grunt hates everything that is fun
+      var j = 0;
+      for (i = 0; i < vm.game.boardSize; i++) {
+        for (j = 0; j < vm.game.boardSize; j++) {
+          if (i % 2 === 1 && j % 2 === 1) vm.game.hardBlockBoard[i][j] = 1; // odd indices = add block
+          else vm.game.hardBlockBoard[i][j] = 0;
+        }
+      }
+
+      vm.game.softBlockBoard = createArray(vm.game.boardSize, vm.game.boardSize);
+      // guaranteed spots for soft blocks:
+      // players have one horizontal and vertical move they can make at the beginning
+      // this will allow for players to actually place a bomb at the beginning and not be doomed from the start
+      vm.game.softBlockBoard[2][0] = 1;
+      vm.game.softBlockBoard[0][2] = 1;
+      vm.game.softBlockBoard[vm.game.boardSize - 1][vm.game.boardSize - 3] = 1;
+      vm.game.softBlockBoard[vm.game.boardSize - 3][vm.game.boardSize - 1] = 1;
+
+      for (i = 0; i < vm.game.boardSize; i++) {
+        for (j = 0; j < vm.game.boardSize; j++) {
+          if ((i === 0 || j === 0) && (i <= 2 && j <= 2)) continue;
+          if ((i === vm.game.boardSize - 1 || j === vm.game.boardSize - 1) && (i >= vm.game.boardSize - 3 && j >= vm.game.boardSize - 3)) continue;
+          if (vm.game.hardBlockBoard[i][j] === 1 || Math.random() > 0.7) vm.game.softBlockBoard[i][j] = 0; // might fiddle with %
+          else vm.game.softBlockBoard[i][j] = 1;
+        }
       }
     }
+    init(); // initialize at the beginning, implemented for easy creation of reset button
 
-    // soft blocks can be destroyed
-    // TODO: implement RNG algorithm for init this board
-    vm.game.softBlockBoard = createArray(vm.game.boardSize, vm.game.boardSize);
-    // guaranteed spots for soft blocks
-    vm.game.softBlockBoard[2][0] = 1;
-    vm.game.softBlockBoard[0][2] = 1;
-    vm.game.softBlockBoard[vm.game.boardSize - 1][vm.game.boardSize - 3] = 1;
-    vm.game.softBlockBoard[vm.game.boardSize - 3][vm.game.boardSize - 1] = 1;
-
-    for (i = 0; i < vm.game.boardSize; i++) { // make sure everything is defined
-      for (j = 0; j < vm.game.boardSize; j++) {
-        if ((i === 0 || j === 0) && (i <= 2 && j <= 2)) continue;
-        if ((i === vm.game.boardSize - 1 || j === vm.game.boardSize - 1) && (i >= vm.game.boardSize - 3 && j >= vm.game.boardSize - 3)) continue;
-        if (vm.game.hardBlockBoard[i][j] === 1 || Math.random() > 0.7) vm.game.softBlockBoard[i][j] = 0; // might fiddle with %
-        else vm.game.softBlockBoard[i][j] = 1;
-      }
-    }
+    /*
+      note there is some funky stuff happening below, if a player and bomb are on the same square
+      the function will return bomb. this is ok for chain detonations of bombs, but may cause
+      errors in the future
+    */
 
     $scope.checkSpaceBlocked = function(x, y) {
+      if (x < 0 || x >= vm.game.boardSize || y < 0 || y >= vm.game.boardSize) return 'out'; // out of bounds
+      if (vm.game.hardBlockBoard[x][y] === 1) return 'hb'; // hard block
+      if (vm.game.softBlockBoard[x][y] === 1) return 'sb'; // soft block
+      if (typeof vm.game.bombMap[[x, y]] !== 'undefined') return 'b'; // bomb
       for (var i = 0; i < vm.game.players.length; i++) { // linear time check, negligible because #players is probably ~2
         if (vm.game.players[i].x === x && vm.game.players[i].y === y) { // check if any of the players exist in square
           return 'p:' + i; // use js split to get p_index
         }
       }
-      if (x < 0 || x >= vm.game.boardSize || y < 0 || y >= vm.game.boardSize) return 'out';
-      if (vm.game.hardBlockBoard[x][y] === 1) return 'hb';
-      if (vm.game.softBlockBoard[x][y] === 1) return 'sb';
-      if (typeof vm.game.bombMap[[x, y]] !== 'undefined') return 'b';
       return '';
     };
 
@@ -80,65 +101,79 @@
     vm.game.trailMap = {};
     vm.game.clientTrailList = []; // currently unimplemented
 
+    // used for trail creation, helper function that helps determine where the trail goes next
     function trailGetNextSquare(direction, x, y) {
       switch (direction) {
-        case 0:
+        case 0: // left
           return [x - 1, y];
-        case 1:
-          return [x + 1, y];
-        case 2:
+        case 1: // up
           return [x, y - 1];
-        case 3:
+        case 2: // right
+          return [x + 1, y];
+        case 3: // down
           return [x, y + 1];
       }
     }
 
-    /* function trailIterate(x, y) { // better name for this?
-      if (x < 0 || x >= vm.game.boardSize || y < 0 || y >= vm.game.boardSize) return false;
+    // handles trails resolving on players and soft blocks
+    function trailResolveSquare(x, y) { // better name for this?
+      if (typeof vm.game.trailMap[[x, y]] === 'undefined') return;
       var space = $scope.checkSpaceBlocked(x, y);
-      if (space === '') return true;
       if (space === 'sb') { // soft block here
         vm.game.softBlockBoard[x][y] = 0;
-      }
-      if (space === 'b') {
-        // detonate bomb
-      }
-      if (space[0] === 'p') {
+        for (var trail in vm.game.trailMap[[x, y]]) {
+          if (vm.game.trailMap[[x, y]].hasOwnProperty(trail)) {
+            vm.game.players[trail].coins += 1;
+          }
+        }
+      } else if (space[0] === 'p') { // kill player
         var index = Number.parseInt(space.split(':')[1], 10);
         console.log('player: ' + index + ' was killed by bomb');
-        vm.game.players[index].alive = false;
-        vm.game.players[index].x = vm.game.players[index].y = -1;
+        // vm.game.players[index].alive = false; // should be killing player, turned off for now
+        // vm.game.players[index].x = vm.game.players[index].y = -1;
       }
-      return false;
-    } */
-
-    // todo: trail orientations
-    function placeTrail(pIndex, x, y) {
-      if (typeof vm.game.trailMap[[x, y]] === 'undefined') {
-        vm.game.trailMap[[x, y]] = {};
-        vm.game.trailMap[[x, y]][pIndex] = { tick: 2 };
-      } else vm.game.trailMap[[x, y]][pIndex] = { tick: 2 };
     }
 
+    // creates a new trail object in the trailMap in the specified position. called by detonate
+    /*
+      sample trail types:
+      h = generic horizontal trail
+      v = generic vertical trail
+      origin: generic cross trail
+      0_end = ending trail in direction 0 (applies to 1, 2 and 3 too)
+    */
+    function placeTrail(pIndex, x, y, type) {
+      if (typeof vm.game.trailMap[[x, y]] === 'undefined') {
+        vm.game.trailMap[[x, y]] = {};
+        vm.game.trailMap[[x, y]][pIndex] = { tick: 2, type: type };
+      } else vm.game.trailMap[[x, y]][pIndex] = { tick: 2, type: type };
+    }
+
+    // general bomb destroying function, handles chain reactions pretty well
     function detonate(bombX, bombY) { // detonates bomb at x,y
       if (typeof vm.game.bombMap[[bombX, bombY]] === 'undefined') return; // no bomb here?
-      placeTrail(vm.game.bombMap[[bombX, bombY]], bombX, bombY);
+      var bomb = vm.game.bombMap[[bombX, bombY]];
+      delete vm.game.bombMap[[bombX, bombY]];
+      placeTrail(bomb.owner, bombX, bombY, 'origin');
       for (var direction = 0; direction < 4; direction++) {
         var x = bombX;
         var y = bombY;
-        for (var step = 0; step < vm.game.players[vm.game.bombMap[[bombX, bombY]].owner].bombRange; step++) {
+        for (var step = 0; step < vm.game.players[bomb.owner].bombRange; step++) {
           var output = trailGetNextSquare(direction, x, y);
           x = output[0]; y = output[1];
+          var type;
+          if (direction === 0 || direction === 2) type = 'h';
+          else type = 'v';
           var space = $scope.checkSpaceBlocked(x, y);
-          if (space !== 'out') placeTrail(vm.game.bombMap[[bombX, bombY]].owner, x, y);
+          if (space !== '') type = direction + '_end';
+          if (space !== 'out') placeTrail(bomb.owner, x, y, type);
+          if (space === 'b') detonate(x, y); // chain reactions
           if (space !== '') break;
-          // put something for triggering other bombs here
-          // if (!trailIterate(x, y)) break;
         }
       }
-      delete vm.game.bombMap[[bombX, bombY]];
     }
 
+    // submits a move
     $scope.submit = function(playerIndex, move) {
       if (playerIndex !== vm.game.moveOrder[vm.game.moveIterator]) return; // ignore moves out of order
       var player = vm.game.players[playerIndex];
@@ -190,18 +225,23 @@
           if (vm.game.bombMap.hasOwnProperty(bomb)) {
             vm.game.bombMap[bomb].tick -= 1;
             if (vm.game.bombMap[bomb].tick === 0) { // when tick hits 0, detonate!
-              var array = bomb.split(',');
-              var bombX = Number.parseInt(array[0], 10);
-              var bombY = Number.parseInt(array[1], 10);
+              var bombArray = bomb.split(',');
+              var bombX = Number.parseInt(bombArray[0], 10);
+              var bombY = Number.parseInt(bombArray[1], 10);
               detonate(bombX, bombY);
             }
           }
         }
+        console.log(vm.game.trailMap);
         for (var trailSquare in vm.game.trailMap) { // trail step
           if (vm.game.trailMap.hasOwnProperty(trailSquare)) {
             for (var trail in vm.game.trailMap[trailSquare]) {
               if (vm.game.trailMap[trailSquare].hasOwnProperty(trail)) {
+                var trailArray = trailSquare.split(',');
+                var trailX = Number.parseInt(trailArray[0], 10);
+                var trailY = Number.parseInt(trailArray[1], 10);
                 vm.game.trailMap[trailSquare][trail].tick -= 1;
+                trailResolveSquare(trailX, trailY);
                 if (vm.game.trailMap[trailSquare][trail].tick === 0) delete vm.game.trailMap[trailSquare][trail];
               }
             }
