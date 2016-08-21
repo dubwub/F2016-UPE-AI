@@ -6,8 +6,11 @@
     <em class="text-muted">
 
       <br>Positions: <span ng-bind="vm.game.players[0].x"></span>, <span ng-bind="vm.game.players[0].y"></span> vs. <span ng-bind="vm.game.players[1].x"></span>,<span ng-bind="vm.game.players[1].y"></span>
+      <br>Orientations: <span ng-bind="vm.game.players[0].orientation"></span> vs. <span ng-bind="vm.game.players[1].orientation"></span>
       <br>Coins: <span ng-bind="vm.game.players[0].coins"></span>, <span ng-bind="vm.game.players[1].coins"></span>
       <br>Player to move: <span ng-bind="vm.game.moveOrder[vm.game.moveIterator]"></span>
+
+      <br><button type="button" ng-click="init()">reset board</button>
 
       <div id="testTV" style="background-color: lightblue; width:{{40*vm.game.boardSize}}px; height:{{40*vm.game.boardSize}}px; position: relative;">
         <div id="player1" ng-switch on="vm.game.players[0].alive">
@@ -48,12 +51,19 @@
 
       <div id="buttons">
         Player <span ng-bind="vm.game.moveOrder[vm.game.moveIterator]"></span> move: 
-        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'l')">left</button>
-        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'u')">up</button>
-        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'r')">right</button>
-        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'d')">down</button>
-        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'')">do nothing</button>
+        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'ml')">move left</button>
+        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'mu')">move up</button>
+        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'mr')">move right</button>
+        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'md')">move down</button>
+        <br><button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'tl')">turn left</button>
+        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'tu')">turn up</button>
+        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'tr')">turn right</button>
+        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'td')">turn down</button>
+        <br><button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'')">do nothing</button>
         <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'b')">drop bomb</button>
+        <br><button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'buy_count')">buy extra bomb</button>
+        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'buy_pierce')">buy bomb pierce</button>
+        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'buy_range')">buy bomb range</button>
       </div>
     </em>
   </small>

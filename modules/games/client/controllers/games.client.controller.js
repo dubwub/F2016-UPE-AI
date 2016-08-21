@@ -33,12 +33,24 @@
       return arr;
     }
 
+    function createPlayer(x, y) {
+      return {
+        x: x,
+        y: y,
+        orientation: 0,
+        bombRange: 3,
+        bombPierce: 0,
+        bombCount: 1,
+        alive: true,
+        coins: 0
+      };
+    }
+
     // this function initializes the game state, should be quite fine for most game boards.
     // the hard block generator works best in odd numbered boardSizes, and the softblockBoard doesn't really care.
     // right now this only initializes two players, and only spaces for two players.
-    function init() {
-      vm.game.players = [{ x: 0, y: 0, orientation: 0, bombRange: 3, alive: true, coins: 0 },
-      { x: vm.game.boardSize - 1, y: vm.game.boardSize - 1, orientation: 0, bombRange: 3, alive: true, coins: 0 }];
+    $scope.init = function() {
+      vm.game.players = [createPlayer(0, 0), createPlayer(vm.game.boardSize - 1, vm.game.boardSize - 1)];
       vm.game.moveOrder = [0, 1];
       vm.game.moveIterator = 0;
 
@@ -71,8 +83,16 @@
           else vm.game.softBlockBoard[i][j] = 1;
         }
       }
-    }
-    init(); // initialize at the beginning, implemented for easy creation of reset button
+
+      // bombs are represented server-side in a hashmap, client-side in a list
+      vm.game.bombMap = {};
+      vm.game.clientBombList = []; // currently unimplemented
+
+      // explosion trails are too
+      vm.game.trailMap = {};
+      vm.game.clientTrailList = []; // currently unimplemented
+    };
+    $scope.init(); // initialize at the beginning, implemented for easy creation of reset button
 
     /*
       note there is some funky stuff happening below, if a player and bomb are on the same square
@@ -93,13 +113,13 @@
       return '';
     };
 
-    // bombs are represented server-side in a hashmap, client-side in a list
-    vm.game.bombMap = {};
-    vm.game.clientBombList = []; // currently unimplemented
-
-    // explosion trails are too
-    vm.game.trailMap = {};
-    vm.game.clientTrailList = []; // currently unimplemented
+    // helper function to calculate value of a block at a specific position
+    function getBlockValue(x, y) {
+      var rawScore = Math.abs((vm.game.boardSize - 1 - x) * x * (vm.game.boardSize - 1 - y) * y);
+      var scaledScore = Math.floor(10 * rawScore / ((vm.game.boardSize - 1) * (vm.game.boardSize - 1) * (vm.game.boardSize - 1) * (vm.game.boardSize - 1) / 16));
+      if (scaledScore === 0) return 1;
+      else return scaledScore; // guaranteed to be a number from 1 to 10 distributed more heavily towards center blocks
+    }
 
     // used for trail creation, helper function that helps determine where the trail goes next
     function trailGetNextSquare(direction, x, y) {
@@ -123,7 +143,7 @@
         vm.game.softBlockBoard[x][y] = 0;
         for (var trail in vm.game.trailMap[[x, y]]) {
           if (vm.game.trailMap[[x, y]].hasOwnProperty(trail)) {
-            vm.game.players[trail].coins += 1;
+            vm.game.players[trail].coins += getBlockValue(x, y);
           }
         }
       } else if (space[0] === 'p') { // kill player
@@ -153,6 +173,7 @@
     function detonate(bombX, bombY) { // detonates bomb at x,y
       if (typeof vm.game.bombMap[[bombX, bombY]] === 'undefined') return; // no bomb here?
       var bomb = vm.game.bombMap[[bombX, bombY]];
+      vm.game.players[bomb.owner].bombCount++;
       delete vm.game.bombMap[[bombX, bombY]];
       placeTrail(bomb.owner, bombX, bombY, 'origin');
       for (var direction = 0; direction < 4; direction++) {
@@ -178,35 +199,63 @@
       if (playerIndex !== vm.game.moveOrder[vm.game.moveIterator]) return; // ignore moves out of order
       var player = vm.game.players[playerIndex];
       switch (move) {
-        case 'l': // move left
+        case 'ml': // move left
           player.orientation = 0;
           if ($scope.checkSpaceBlocked(player.x - 1, player.y) !== '') break;
           player.x--;
           if (player.x < 0) player.x = 0;
           break;
-        case 'r': // move right
-          player.orientation = 2;
-          if ($scope.checkSpaceBlocked(player.x + 1, player.y) !== '') break;
-          player.x++;
-          if (player.x >= vm.game.boardSize) player.x = vm.game.boardSize - 1;
-          break;
-        case 'u': // move up
+        case 'mu': // move up
           player.orientation = 1;
           if ($scope.checkSpaceBlocked(player.x, player.y - 1) !== '') break;
           player.y--;
           if (player.y < 0) player.y = 0;
           break;
-        case 'd': // move down
+        case 'mr': // move right
+          player.orientation = 2;
+          if ($scope.checkSpaceBlocked(player.x + 1, player.y) !== '') break;
+          player.x++;
+          if (player.x >= vm.game.boardSize) player.x = vm.game.boardSize - 1;
+          break;
+        case 'md': // move down
           player.orientation = 3;
           if ($scope.checkSpaceBlocked(player.x, player.y + 1) !== '') break;
           player.y++;
           if (player.y >= vm.game.boardSize) player.y = vm.game.boardSize - 1;
           break;
+        case 'tl': // turn left
+          player.orientation = 0;
+          break;
+        case 'tu': // turn up
+          player.orientation = 1;
+          break;
+        case 'tr': // turn right
+          player.orientation = 2;
+          break;
+        case 'td': // turn down
+          player.orientation = 3;
+          break;
         case '': // do nothing
           break;
         case 'b': // drop bomb
-          if (typeof vm.game.bombMap[[player.x, player.y]] !== 'undefined') break; // already standing on bomb
+          if (typeof vm.game.bombMap[[player.x, player.y]] !== 'undefined' || player.bombCount === 0) break; // already standing on bomb or bombCount = 0
+          player.bombCount--;
           vm.game.bombMap[[player.x, player.y]] = { owner: playerIndex, tick: 4 }; // TODO: change this to 4
+          break;
+        case 'buy_count': // buys an extra bomb
+          if (player.coins < 1) break;
+          player.bombCount++;
+          player.coins -= 1;
+          break;
+        case 'buy_pierce': // buys pierce
+          if (player.coins < 1) break;
+          player.bombPierce++;
+          player.coins -= 1;
+          break;
+        case 'buy_range': // buys pierce
+          if (player.coins < 1) break;
+          player.bombRange++;
+          player.coins -= 1;
           break;
       }
       vm.game.moveIterator++;
@@ -232,7 +281,7 @@
             }
           }
         }
-        console.log(vm.game.trailMap);
+        // console.log(vm.game.trailMap);
         for (var trailSquare in vm.game.trailMap) { // trail step
           if (vm.game.trailMap.hasOwnProperty(trailSquare)) {
             for (var trail in vm.game.trailMap[trailSquare]) {
