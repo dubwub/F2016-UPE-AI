@@ -19,7 +19,7 @@
   function TrainingController($scope, $window, TrainingService) {
     var vm = this; // again, this is the main object the front-end will interface with
     vm.game = {
-      boardSize: 9 // can be customized, LEAVE TO ODD NUMBERS FOR OPTIMAL BLOCK PLACEMENT
+      boardSize: 11 // can be customized, LEAVE TO ODD NUMBERS FOR OPTIMAL BLOCK PLACEMENT
     };
 
     // createArray() is a small helper function that helps with initialization of the boards
@@ -39,7 +39,7 @@
         y: y,
         orientation: 0,
         bombRange: 3,
-        bombPierce: 0,
+        bombPierce: 1,
         bombCount: 1,
         alive: true,
         coins: 0
@@ -50,7 +50,7 @@
     // the hard block generator works best in odd numbered boardSizes, and the softblockBoard doesn't really care.
     // right now this only initializes two players, and only spaces for two players.
     $scope.init = function() {
-      vm.game.players = [createPlayer(0, 0), createPlayer(vm.game.boardSize - 1, vm.game.boardSize - 1)];
+      vm.game.players = [createPlayer(1, 1), createPlayer(vm.game.boardSize - 2, vm.game.boardSize - 2)];
       vm.game.moveOrder = [0, 1];
       vm.game.moveIterator = 0;
 
@@ -61,7 +61,8 @@
       var j = 0;
       for (i = 0; i < vm.game.boardSize; i++) {
         for (j = 0; j < vm.game.boardSize; j++) {
-          if (i % 2 === 1 && j % 2 === 1) vm.game.hardBlockBoard[i][j] = 1; // odd indices = add block
+          if (i === 0 || j === 0 || i === vm.game.boardSize - 1 || j === vm.game.boardSize - 1 ||
+            (i % 2 === 0 && j % 2 === 0)) vm.game.hardBlockBoard[i][j] = 1; // odd indices = add block
           else vm.game.hardBlockBoard[i][j] = 0;
         }
       }
@@ -70,15 +71,15 @@
       // guaranteed spots for soft blocks:
       // players have one horizontal and vertical move they can make at the beginning
       // this will allow for players to actually place a bomb at the beginning and not be doomed from the start
-      vm.game.softBlockBoard[2][0] = 1;
-      vm.game.softBlockBoard[0][2] = 1;
-      vm.game.softBlockBoard[vm.game.boardSize - 1][vm.game.boardSize - 3] = 1;
-      vm.game.softBlockBoard[vm.game.boardSize - 3][vm.game.boardSize - 1] = 1;
+      vm.game.softBlockBoard[3][1] = 1;
+      vm.game.softBlockBoard[1][3] = 1;
+      vm.game.softBlockBoard[vm.game.boardSize - 2][vm.game.boardSize - 4] = 1;
+      vm.game.softBlockBoard[vm.game.boardSize - 4][vm.game.boardSize - 2] = 1;
 
       for (i = 0; i < vm.game.boardSize; i++) {
         for (j = 0; j < vm.game.boardSize; j++) {
-          if ((i === 0 || j === 0) && (i <= 2 && j <= 2)) continue;
-          if ((i === vm.game.boardSize - 1 || j === vm.game.boardSize - 1) && (i >= vm.game.boardSize - 3 && j >= vm.game.boardSize - 3)) continue;
+          if ((i === 1 || j === 1) && (i <= 3 && j <= 3)) continue;
+          if ((i === vm.game.boardSize - 2 || j === vm.game.boardSize - 2) && (i >= vm.game.boardSize - 4 && j >= vm.game.boardSize - 4)) continue;
           if (vm.game.hardBlockBoard[i][j] === 1 || Math.random() > 0.7) vm.game.softBlockBoard[i][j] = 0; // might fiddle with %
           else vm.game.softBlockBoard[i][j] = 1;
         }
@@ -94,6 +95,11 @@
     };
     $scope.init(); // initialize at the beginning, implemented for easy creation of reset button
 
+    // pretty straightforward helper function to check whether a given block is in the board
+    $scope.checkInBounds = function(x, y) {
+      return x >= 0 && x < vm.game.boardSize && y >= 0 && y < vm.game.boardSize;
+    };
+
     /*
       note there is some funky stuff happening below, if a player and bomb are on the same square
       the function will return bomb. this is ok for chain detonations of bombs, but may cause
@@ -101,7 +107,7 @@
     */
 
     $scope.checkSpaceBlocked = function(x, y) {
-      if (x < 0 || x >= vm.game.boardSize || y < 0 || y >= vm.game.boardSize) return 'out'; // out of bounds
+      if (!$scope.checkInBounds(x, y)) return 'out'; // out of bounds
       if (vm.game.hardBlockBoard[x][y] === 1) return 'hb'; // hard block
       if (vm.game.softBlockBoard[x][y] === 1) return 'sb'; // soft block
       if (typeof vm.game.bombMap[[x, y]] !== 'undefined') return 'b'; // bomb
@@ -122,7 +128,7 @@
     }
 
     // used for trail creation, helper function that helps determine where the trail goes next
-    function trailGetNextSquare(direction, x, y) {
+    function getNextSquare(direction, x, y) {
       switch (direction) {
         case 0: // left
           return [x - 1, y];
@@ -180,16 +186,26 @@
         var x = bombX;
         var y = bombY;
         for (var step = 0; step < vm.game.players[bomb.owner].bombRange; step++) {
-          var output = trailGetNextSquare(direction, x, y);
+          var output = getNextSquare(direction, x, y);
           x = output[0]; y = output[1];
           var type;
           if (direction === 0 || direction === 2) type = 'h';
           else type = 'v';
           var space = $scope.checkSpaceBlocked(x, y);
-          if (space !== '') type = direction + '_end';
+          if (space !== '') type = direction + '_end'; // TODO: this orientation stuff
           if (space !== 'out') placeTrail(bomb.owner, x, y, type);
           if (space === 'b') detonate(x, y); // chain reactions
-          if (space !== '') break;
+          if (space !== '') {
+            // once the detonation hits a solid object, pierce comes into effect
+            // however note that pierce cannot go further than regular bomb range
+            for (var pierce = 0; pierce < vm.game.players[bomb.owner].bombRange - step && pierce < vm.game.players[bomb.owner].bombPierce; pierce++) {
+              var pierceOutput = getNextSquare(direction, x, y);
+              x = pierceOutput[0]; y = pierceOutput[1];
+              if ($scope.checkInBounds(x, y)) placeTrail(bomb.owner, x, y, type);
+              else break;
+            }
+            break;
+          }
         }
       }
     }
@@ -256,6 +272,20 @@
           if (player.coins < 1) break;
           player.bombRange++;
           player.coins -= 1;
+          break;
+        // TODO: balance buying block? right now it costs just as much to create something then destroy it
+        case 'buy_block': // buys new block
+          // first figure out how much block would cost
+          var newBlockPos = getNextSquare(player.orientation, player.x, player.y);
+          if ($scope.checkSpaceBlocked(newBlockPos[0], newBlockPos[1]) !== '') break; // can't put a block on something else
+          var blockCost = getBlockValue(newBlockPos[0], newBlockPos[1]);
+          if (player.coins < blockCost) {
+            console.log('insufficient coinage to buy block, block cost at ' + newBlockPos[0] + ',' + newBlockPos[1] + '=' + blockCost);
+            break;
+          }
+          vm.game.softBlockBoard[newBlockPos[0]][newBlockPos[1]] = 1;
+          player.coins -= blockCost;
+          // console.log('bought block that costs ' + blockCost);
           break;
       }
       vm.game.moveIterator++;

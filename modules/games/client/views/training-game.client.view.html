@@ -4,10 +4,68 @@
   </div>
   <small> 
     <em class="text-muted">
-
-      <br>Positions: <span ng-bind="vm.game.players[0].x"></span>, <span ng-bind="vm.game.players[0].y"></span> vs. <span ng-bind="vm.game.players[1].x"></span>,<span ng-bind="vm.game.players[1].y"></span>
-      <br>Orientations: <span ng-bind="vm.game.players[0].orientation"></span> vs. <span ng-bind="vm.game.players[1].orientation"></span>
-      <br>Coins: <span ng-bind="vm.game.players[0].coins"></span>, <span ng-bind="vm.game.players[1].coins"></span>
+      Player 1:
+      <table border="1">
+        <tr>
+          <td>Position</td>
+          <td><span ng-bind="vm.game.players[0].x"></span>, <span ng-bind="vm.game.players[0].y"></span></td>
+        </tr>
+        <tr>
+          <td>Orientation</td>
+          <td><span ng-bind="vm.game.players[0].orientation"></span></td>
+        </tr>
+        <tr>
+          <td>Coins</td>
+          <td><span ng-bind="vm.game.players[0].coins"></span></td>
+        </tr>
+        <tr>
+          <td>bombRange</td>
+          <td><span ng-bind="vm.game.players[0].bombRange"></span></td>
+        </tr>
+        <tr>
+          <td>bombCount</td>
+          <td><span ng-bind="vm.game.players[0].bombCount"></span></td>
+        </tr>
+        <tr>
+          <td>bombPierce</td>
+          <td><span ng-bind="vm.game.players[0].bombPierce"></span></td>
+        </tr>
+        <tr>
+          <td>alive</td>
+          <td><span ng-bind="vm.game.players[0].alive"></span></td>
+        </tr>
+      </table>
+      Player 2:
+      <table border="1">
+        <tr>
+          <td>Position</td>
+          <td><span ng-bind="vm.game.players[1].x"></span>, <span ng-bind="vm.game.players[1].y"></span></td>
+        </tr>
+        <tr>
+          <td>Orientation</td>
+          <td><span ng-bind="vm.game.players[1].orientation"></span></td>
+        </tr>
+        <tr>
+          <td>Coins</td>
+          <td><span ng-bind="vm.game.players[1].coins"></span></td>
+        </tr>
+        <tr>
+          <td>bombRange</td>
+          <td><span ng-bind="vm.game.players[1].bombRange"></span></td>
+        </tr>
+        <tr>
+          <td>bombCount</td>
+          <td><span ng-bind="vm.game.players[1].bombCount"></span></td>
+        </tr>
+        <tr>
+          <td>bombPierce</td>
+          <td><span ng-bind="vm.game.players[1].bombPierce"></span></td>
+        </tr>
+        <tr>
+          <td>alive</td>
+          <td><span ng-bind="vm.game.players[1].alive"></span></td>
+        </tr>
+      </table>
       <br>Player to move: <span ng-bind="vm.game.moveOrder[vm.game.moveIterator]"></span>
 
       <br><button type="button" ng-click="init()">reset board</button>
@@ -61,9 +119,10 @@
         <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'td')">turn down</button>
         <br><button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'')">do nothing</button>
         <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'b')">drop bomb</button>
-        <br><button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'buy_count')">buy extra bomb</button>
-        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'buy_pierce')">buy bomb pierce</button>
-        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'buy_range')">buy bomb range</button>
+        <br><button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'buy_count')">buy extra bomb (cost: 1)</button>
+        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'buy_pierce')">buy bomb pierce (cost: 1)</button>
+        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'buy_range')">buy bomb range (cost: 1)</button>
+        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'buy_block')">buy bomb block</button>
       </div>
     </em>
   </small>
