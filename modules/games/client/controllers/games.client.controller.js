@@ -9,6 +9,17 @@
     .module('games')
     .controller('TrainingController', TrainingController);
 
+  // createArray() is a small helper function that helps with initialization of the boards
+  function createArray(length) { // literally creates a new array with params e.g. createArray(5,3)
+    var arr = new Array(length || 0);
+    var i = length;
+    if (arguments.length > 1) {
+      var args = Array.prototype.slice.call(arguments, 1);
+      while (i--) arr[length - 1 - i] = createArray.apply(this, args);
+    }
+    return arr;
+  }
+
   /*
     This controller holds all of the game logic needed to run the training mode for Bomberman.
     vm is the object that is exposed to the front end (see: training-game.client.view.html)
@@ -22,18 +33,7 @@
       boardSize: 11 // can be customized, LEAVE TO ODD NUMBERS FOR OPTIMAL BLOCK PLACEMENT
     };
 
-    // createArray() is a small helper function that helps with initialization of the boards
-    function createArray(length) { // literally creates a new array with params e.g. createArray(5,3)
-      var arr = new Array(length || 0);
-      var i = length;
-      if (arguments.length > 1) {
-        var args = Array.prototype.slice.call(arguments, 1);
-        while (i--) arr[length - 1 - i] = createArray.apply(this, args);
-      }
-      return arr;
-    }
-
-    function createPlayer(x, y) {
+    function createPlayer(x, y) { // player factory
       return {
         x: x,
         y: y,
@@ -42,7 +42,9 @@
         bombPierce: 1,
         bombCount: 1,
         alive: true,
-        coins: 0
+        coins: 0,
+        orangePortal: null,
+        bluePortal: null
       };
     }
 
@@ -92,6 +94,10 @@
       // explosion trails are too
       vm.game.trailMap = {};
       vm.game.clientTrailList = []; // currently unimplemented
+
+      // portals are too hashmap
+      // key: [x, y], value is a hashmap (object) whose key is direction, output is { owner: (playerIndex), portalColor: (orange/blue)}
+      vm.game.portalMap = {};
     };
     $scope.init(); // initialize at the beginning, implemented for easy creation of reset button
 
@@ -128,7 +134,7 @@
     }
 
     // used for trail creation, helper function that helps determine where the trail goes next
-    function getNextSquare(direction, x, y) {
+    function getNextSquare(x, y, direction) {
       switch (direction) {
         case 0: // left
           return [x - 1, y];
@@ -141,12 +147,19 @@
       }
     }
 
+    function simulateMovement(x, y, direction) {
+      var nextSquare = getNextSquare(x, y, direction);
+      var nextSquareContents = $scope.checkSpaceBlocked(nextSquare[0], nextSquare[1]);
+    }
+
     // handles trails resolving on players and soft blocks
     function trailResolveSquare(x, y) { // better name for this?
       if (typeof vm.game.trailMap[[x, y]] === 'undefined') return;
       var space = $scope.checkSpaceBlocked(x, y);
       if (space === 'sb') { // soft block here
         vm.game.softBlockBoard[x][y] = 0;
+        deletePortal(x, y, -1);
+        console.log(vm.game.portalMap);
         for (var trail in vm.game.trailMap[[x, y]]) {
           if (vm.game.trailMap[[x, y]].hasOwnProperty(trail)) {
             vm.game.players[trail].coins += getBlockValue(x, y);
@@ -186,7 +199,7 @@
         var x = bombX;
         var y = bombY;
         for (var step = 0; step < vm.game.players[bomb.owner].bombRange; step++) {
-          var output = getNextSquare(direction, x, y);
+          var output = getNextSquare(x, y, direction);
           x = output[0]; y = output[1];
           var type;
           if (direction === 0 || direction === 2) type = 'h';
@@ -199,7 +212,7 @@
             // once the detonation hits a solid object, pierce comes into effect
             // however note that pierce cannot go further than regular bomb range
             for (var pierce = 0; pierce < vm.game.players[bomb.owner].bombRange - step && pierce < vm.game.players[bomb.owner].bombPierce; pierce++) {
-              var pierceOutput = getNextSquare(direction, x, y);
+              var pierceOutput = getNextSquare(x, y, direction);
               x = pierceOutput[0]; y = pierceOutput[1];
               if ($scope.checkInBounds(x, y)) placeTrail(bomb.owner, x, y, type);
               else break;
@@ -207,6 +220,52 @@
             break;
           }
         }
+      }
+    }
+
+    // deletes portal(s) from location, usage: direction is either 0-4 for one portal, -1 for all
+    function deletePortal(x, y, direction) {
+      if (typeof vm.game.portalMap[[x, y]] !== 'undefined') {
+        for (var portalDirection in vm.game.portalMap[[x, y]]) { // js iterate through hashmap
+          if (vm.game.portalMap[[x, y]].hasOwnProperty(portalDirection)) {
+            if (direction === Number.parseInt(portalDirection, 10) || direction === -1) { // if this is true, finally delete the portal(s)
+              if (vm.game.portalMap[[x, y]][portalDirection].portalColor === 'orange') {
+                vm.game.players[vm.game.portalMap[[x, y]][portalDirection].owner].orangePortal = null;
+              } else {
+                vm.game.players[vm.game.portalMap[[x, y]][portalDirection].owner].bluePortal = null;
+              }
+              delete vm.game.portalMap[[x, y]][portalDirection];
+            }
+          }
+        }
+      }
+    }
+
+    function shootPortal(playerIndex, direction, portalColor) {
+      var playerX = vm.game.players[playerIndex].x;
+      var playerY = vm.game.players[playerIndex].y;
+      var nextSquare = getNextSquare(playerX, playerY, direction);
+      var nextSquareContents = $scope.checkSpaceBlocked(nextSquare[0], nextSquare[1]);
+      while (nextSquareContents !== 'hb' && nextSquareContents !== 'sb') {
+        nextSquare = getNextSquare(nextSquare[0], nextSquare[1], direction);
+        nextSquareContents = $scope.checkSpaceBlocked(nextSquare[0], nextSquare[1]);
+      }
+      // nextSquare guaranteed to be a block at this point
+      // 0 = left, 1 = up, 2 = right, 3 = down, so (direction - 2) % 4 guaranteed to be opposite dir
+      var newPortalDirection = (direction + 2) % 4;
+      var newPortal = { x: nextSquare[0], y: nextSquare[1], direction: newPortalDirection };
+      if (portalColor === 'orange') {
+        vm.game.players[playerIndex].orangePortal = newPortal;
+        if (typeof vm.game.portalMap[[nextSquare[0], nextSquare[1]]] === 'undefined')
+          vm.game.portalMap[[nextSquare[0], nextSquare[1]]] = {};
+        else deletePortal(nextSquare[0], nextSquare[1], newPortalDirection);
+        vm.game.portalMap[[nextSquare[0], nextSquare[1]]][newPortalDirection] = { owner: playerIndex, portalColor: 'orange' };
+      } else {
+        vm.game.players[playerIndex].bluePortal = newPortal;
+        if (typeof vm.game.portalMap[[nextSquare[0], nextSquare[1]]] === 'undefined')
+          vm.game.portalMap[[nextSquare[0], nextSquare[1]]] = {};
+        else deletePortal(nextSquare[0], nextSquare[1], newPortalDirection);
+        vm.game.portalMap[[nextSquare[0], nextSquare[1]]][newPortalDirection] = { owner: playerIndex, portalColor: 'blue' };
       }
     }
 
@@ -276,7 +335,7 @@
         // TODO: balance buying block? right now it costs just as much to create something then destroy it
         case 'buy_block': // buys new block
           // first figure out how much block would cost
-          var newBlockPos = getNextSquare(player.orientation, player.x, player.y);
+          var newBlockPos = getNextSquare(player.x, player.y, player.orientation);
           if ($scope.checkSpaceBlocked(newBlockPos[0], newBlockPos[1]) !== '') break; // can't put a block on something else
           var blockCost = getBlockValue(newBlockPos[0], newBlockPos[1]);
           if (player.coins < blockCost) {
@@ -286,6 +345,14 @@
           vm.game.softBlockBoard[newBlockPos[0]][newBlockPos[1]] = 1;
           player.coins -= blockCost;
           // console.log('bought block that costs ' + blockCost);
+          break;
+        case 'op': // orange portal
+          shootPortal(playerIndex, player.orientation, 'orange');
+          console.log(vm.game.players[playerIndex].orangePortal);
+          break;
+        case 'bp': // blue portal
+          shootPortal(playerIndex, player.orientation, 'blue');
+          console.log(vm.game.players[playerIndex].bluePortal);
           break;
       }
       vm.game.moveIterator++;

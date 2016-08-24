@@ -34,6 +34,14 @@
           <td>alive</td>
           <td><span ng-bind="vm.game.players[0].alive"></span></td>
         </tr>
+        <tr>
+          <td>orangePortal</td>
+          <td><span ng-bind="vm.game.players[0].orangePortal"></span></td>
+        </tr>
+        <tr>
+          <td>bluePortal</td>
+          <td><span ng-bind="vm.game.players[0].bluePortal"></span></td>
+        </tr>
       </table>
       Player 2:
       <table border="1">
@@ -64,6 +72,14 @@
         <tr>
           <td>alive</td>
           <td><span ng-bind="vm.game.players[1].alive"></span></td>
+        </tr>
+        <tr>
+          <td>orangePortal</td>
+          <td><span ng-bind="vm.game.players[1].orangePortal"></span></td>
+        </tr>
+        <tr>
+          <td>bluePortal</td>
+          <td><span ng-bind="vm.game.players[1].bluePortal"></span></td>
         </tr>
       </table>
       <br>Player to move: <span ng-bind="vm.game.moveOrder[vm.game.moveIterator]"></span>
@@ -119,6 +135,8 @@
         <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'td')">turn down</button>
         <br><button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'')">do nothing</button>
         <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'b')">drop bomb</button>
+        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'op')">shoot orange portal</button>
+        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'bp')">shoot blue portal</button>
         <br><button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'buy_count')">buy extra bomb (cost: 1)</button>
         <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'buy_pierce')">buy bomb pierce (cost: 1)</button>
         <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'buy_range')">buy bomb range (cost: 1)</button>
