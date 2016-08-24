@@ -53,6 +53,7 @@
     // right now this only initializes two players, and only spaces for two players.
     $scope.init = function() {
       vm.game.players = [createPlayer(1, 1), createPlayer(vm.game.boardSize - 2, vm.game.boardSize - 2)];
+      // vm.game.moveOrder = [0, 1];
       vm.game.moveOrder = [0, 1];
       vm.game.moveIterator = 0;
 
@@ -147,9 +148,32 @@
       }
     }
 
+    // returns x, y and direction of next move
     function simulateMovement(x, y, direction) {
       var nextSquare = getNextSquare(x, y, direction);
+      nextSquare.push(direction);
       var nextSquareContents = $scope.checkSpaceBlocked(nextSquare[0], nextSquare[1]);
+      if (nextSquareContents === '') {
+        return nextSquare;
+      } else {
+        if (typeof vm.game.portalMap[[nextSquare[0], nextSquare[1]]] !== 'undefined') {
+          if (vm.game.portalMap[[nextSquare[0], nextSquare[1]]][(direction + 2) % 4] !== 'undefined') {
+            var player = vm.game.players[vm.game.portalMap[[nextSquare[0], nextSquare[1]]][(direction + 2) % 4].owner];
+            var otherPortalBlock;
+            var throughPortalSquare;
+            if (vm.game.portalMap[[nextSquare[0], nextSquare[1]]][(direction + 2) % 4].portalColor === 'orange') {
+              otherPortalBlock = [player.bluePortal.x, player.bluePortal.y];
+              throughPortalSquare = simulateMovement(player.bluePortal.x, player.bluePortal.y, player.bluePortal.direction);
+            } else {
+              otherPortalBlock = [player.orangePortal.x, player.orangePortal.y];
+              throughPortalSquare = simulateMovement(player.orangePortal.x, player.orangePortal.y, player.orangePortal.direction);
+            }
+            if (throughPortalSquare[0] !== otherPortalBlock[0] || throughPortalSquare[1] !== otherPortalBlock[1])
+              return throughPortalSquare;
+          }
+        }
+        return [x, y, direction];
+      }
     }
 
     // handles trails resolving on players and soft blocks
@@ -273,30 +297,23 @@
     $scope.submit = function(playerIndex, move) {
       if (playerIndex !== vm.game.moveOrder[vm.game.moveIterator]) return; // ignore moves out of order
       var player = vm.game.players[playerIndex];
+      var output; // used in the switch case
       switch (move) {
         case 'ml': // move left
-          player.orientation = 0;
-          if ($scope.checkSpaceBlocked(player.x - 1, player.y) !== '') break;
-          player.x--;
-          if (player.x < 0) player.x = 0;
+          output = simulateMovement(player.x, player.y, 0);
+          player.x = output[0]; player.y = output[1]; player.orientation = output[2];
           break;
         case 'mu': // move up
-          player.orientation = 1;
-          if ($scope.checkSpaceBlocked(player.x, player.y - 1) !== '') break;
-          player.y--;
-          if (player.y < 0) player.y = 0;
+          output = simulateMovement(player.x, player.y, 1);
+          player.x = output[0]; player.y = output[1]; player.orientation = output[2];
           break;
         case 'mr': // move right
-          player.orientation = 2;
-          if ($scope.checkSpaceBlocked(player.x + 1, player.y) !== '') break;
-          player.x++;
-          if (player.x >= vm.game.boardSize) player.x = vm.game.boardSize - 1;
+          output = simulateMovement(player.x, player.y, 2);
+          player.x = output[0]; player.y = output[1]; player.orientation = output[2];
           break;
         case 'md': // move down
-          player.orientation = 3;
-          if ($scope.checkSpaceBlocked(player.x, player.y + 1) !== '') break;
-          player.y++;
-          if (player.y >= vm.game.boardSize) player.y = vm.game.boardSize - 1;
+          output = simulateMovement(player.x, player.y, 3);
+          player.x = output[0]; player.y = output[1]; player.orientation = output[2];
           break;
         case 'tl': // turn left
           player.orientation = 0;

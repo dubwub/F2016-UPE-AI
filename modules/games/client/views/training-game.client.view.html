@@ -36,11 +36,11 @@
         </tr>
         <tr>
           <td>orangePortal</td>
-          <td><span ng-bind="vm.game.players[0].orangePortal"></span></td>
+          <td><span ng-bind="vm.game.players[0].orangePortal.x"></span>,<span ng-bind="vm.game.players[0].orangePortal.y"></span>,<span ng-bind="vm.game.players[0].orangePortal.direction"></span></td>
         </tr>
         <tr>
           <td>bluePortal</td>
-          <td><span ng-bind="vm.game.players[0].bluePortal"></span></td>
+          <td><span ng-bind="vm.game.players[0].bluePortal.x"></span>,<span ng-bind="vm.game.players[0].bluePortal.y"></span>,<span ng-bind="vm.game.players[0].bluePortal.direction"></span></td>
         </tr>
       </table>
       Player 2:
@@ -75,11 +75,11 @@
         </tr>
         <tr>
           <td>orangePortal</td>
-          <td><span ng-bind="vm.game.players[1].orangePortal"></span></td>
+          <td><span ng-bind="vm.game.players[1].orangePortal.x"></span>,<span ng-bind="vm.game.players[1].orangePortal.y"></span>,<span ng-bind="vm.game.players[1].orangePortal.direction"></span></td>
         </tr>
         <tr>
           <td>bluePortal</td>
-          <td><span ng-bind="vm.game.players[1].bluePortal"></span></td>
+          <td><span ng-bind="vm.game.players[1].bluePortal.x"></span>,<span ng-bind="vm.game.players[1].bluePortal.y"></span>,<span ng-bind="vm.game.players[1].bluePortal.direction"></span></td>
         </tr>
       </table>
       <br>Player to move: <span ng-bind="vm.game.moveOrder[vm.game.moveIterator]"></span>
