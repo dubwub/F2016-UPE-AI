@@ -54,7 +54,7 @@
     $scope.init = function() {
       vm.game.players = [createPlayer(1, 1), createPlayer(vm.game.boardSize - 2, vm.game.boardSize - 2)];
       // vm.game.moveOrder = [0, 1];
-      vm.game.moveOrder = [0, 1];
+      vm.game.moveOrder = [0, 0];
       vm.game.moveIterator = 0;
 
       // hard blocks appear in a gridlike pattern with no other hard blocks in any of the adjacent squres.
@@ -148,7 +148,7 @@
       }
     }
 
-    // returns x, y and direction of next move
+    // returns x, y and direction of a solid object move in a specific direction
     function simulateMovement(x, y, direction) {
       var nextSquare = getNextSquare(x, y, direction);
       nextSquare.push(direction);
@@ -159,17 +159,19 @@
         if (typeof vm.game.portalMap[[nextSquare[0], nextSquare[1]]] !== 'undefined') {
           if (vm.game.portalMap[[nextSquare[0], nextSquare[1]]][(direction + 2) % 4] !== 'undefined') {
             var player = vm.game.players[vm.game.portalMap[[nextSquare[0], nextSquare[1]]][(direction + 2) % 4].owner];
-            var otherPortalBlock;
-            var throughPortalSquare;
-            if (vm.game.portalMap[[nextSquare[0], nextSquare[1]]][(direction + 2) % 4].portalColor === 'orange') {
-              otherPortalBlock = [player.bluePortal.x, player.bluePortal.y];
-              throughPortalSquare = simulateMovement(player.bluePortal.x, player.bluePortal.y, player.bluePortal.direction);
-            } else {
-              otherPortalBlock = [player.orangePortal.x, player.orangePortal.y];
-              throughPortalSquare = simulateMovement(player.orangePortal.x, player.orangePortal.y, player.orangePortal.direction);
+            if (player.orangePortal !== null && player.bluePortal !== null) {
+              var otherPortalBlock;
+              var throughPortalSquare;
+              if (vm.game.portalMap[[nextSquare[0], nextSquare[1]]][(direction + 2) % 4].portalColor === 'orange') {
+                otherPortalBlock = [player.bluePortal.x, player.bluePortal.y];
+                throughPortalSquare = simulateMovement(player.bluePortal.x, player.bluePortal.y, player.bluePortal.direction);
+              } else {
+                otherPortalBlock = [player.orangePortal.x, player.orangePortal.y];
+                throughPortalSquare = simulateMovement(player.orangePortal.x, player.orangePortal.y, player.orangePortal.direction);
+              }
+              if (throughPortalSquare[0] !== otherPortalBlock[0] || throughPortalSquare[1] !== otherPortalBlock[1])
+                return throughPortalSquare;
             }
-            if (throughPortalSquare[0] !== otherPortalBlock[0] || throughPortalSquare[1] !== otherPortalBlock[1])
-              return throughPortalSquare;
           }
         }
         return [x, y, direction];
@@ -212,6 +214,42 @@
       } else vm.game.trailMap[[x, y]][pIndex] = { tick: 2, type: type };
     }
 
+    function recursiveDetonate(x, y, direction, range, pierce, pierceMode, owner) {
+      console.log(range);
+      if (range === 0 || (pierceMode === true && pierce < 0)) return;
+      var output = getNextSquare(x, y, direction);
+      var outputContents = $scope.checkSpaceBlocked(output[0], output[1]);
+      if (outputContents === 'hb' || outputContents === 'sb') {
+        if (typeof vm.game.portalMap[[output[0], output[1]]] !== 'undefined') {
+          if (typeof vm.game.portalMap[[output[0], output[1]]][(direction + 2) % 4] !== 'undefined') {
+            var player = vm.game.players[vm.game.portalMap[[output[0], output[1]]][(direction + 2) % 4].owner];
+            if (player.orangePortal !== null && player.bluePortal !== null) { // then we're traveling through poooortals
+              console.log('traveling through portal');
+              if (vm.game.portalMap[[output[0], output[1]]][(direction + 2) % 4].portalColor === 'orange') {
+                recursiveDetonate(player.bluePortal.x, player.bluePortal.y, player.bluePortal.direction, range, pierce, pierceMode);
+              } else {
+                recursiveDetonate(player.orangePortal.x, player.orangePortal.y, player.orangePortal.direction, range, pierce, pierceMode);
+              }
+              return;
+            }
+          }
+        }
+      }
+      var type;
+      if (direction === 0 || direction === 2) type = 'h';
+      else type = 'v';
+      if (outputContents !== 'out') placeTrail(owner, output[0], output[1], type);
+      else return;
+      if (outputContents === 'b') detonate(output[0], output[1]);
+      if (outputContents !== '') {
+        pierceMode = true;
+      }
+
+      if (pierceMode === true) {
+        recursiveDetonate(output[0], output[1], direction, range - 1, pierce - 1, true, owner);
+      } else recursiveDetonate(output[0], output[1], direction, range - 1, pierce, false, owner);
+    }
+
     // general bomb destroying function, handles chain reactions pretty well
     function detonate(bombX, bombY) { // detonates bomb at x,y
       if (typeof vm.game.bombMap[[bombX, bombY]] === 'undefined') return; // no bomb here?
@@ -222,28 +260,35 @@
       for (var direction = 0; direction < 4; direction++) {
         var x = bombX;
         var y = bombY;
-        for (var step = 0; step < vm.game.players[bomb.owner].bombRange; step++) {
-          var output = getNextSquare(x, y, direction);
-          x = output[0]; y = output[1];
-          var type;
-          if (direction === 0 || direction === 2) type = 'h';
-          else type = 'v';
-          var space = $scope.checkSpaceBlocked(x, y);
-          if (space !== '') type = direction + '_end'; // TODO: this orientation stuff
-          if (space !== 'out') placeTrail(bomb.owner, x, y, type);
-          if (space === 'b') detonate(x, y); // chain reactions
-          if (space !== '') {
-            // once the detonation hits a solid object, pierce comes into effect
-            // however note that pierce cannot go further than regular bomb range
-            for (var pierce = 0; pierce < vm.game.players[bomb.owner].bombRange - step && pierce < vm.game.players[bomb.owner].bombPierce; pierce++) {
-              var pierceOutput = getNextSquare(x, y, direction);
-              x = pierceOutput[0]; y = pierceOutput[1];
-              if ($scope.checkInBounds(x, y)) placeTrail(bomb.owner, x, y, type);
-              else break;
-            }
-            break;
-          }
-        }
+        /*
+          determining trails:
+          1. check next square:
+            if hard/soft block and valid portal move, go through
+            detonate bombs
+            otherwise, place trail (and go into pierce mode if necessary)
+        */
+        recursiveDetonate(x, y, direction, vm.game.players[bomb.owner].bombRange, vm.game.players[bomb.owner].bombPierce, false, bomb.owner);
+        // for (var step = 0; step < vm.game.players[bomb.owner].bombRange; step++) {
+        //   var output = getNextSquare(x, y, direction);
+        //   x = output[0]; y = output[1];
+        //   var type;
+        //   if (direction === 0 || direction === 2) type = 'h';
+        //   else type = 'v';
+        //   var space = $scope.checkSpaceBlocked(x, y);
+        //   if (space !== 'out') placeTrail(bomb.owner, x, y, type);
+        //   if (space === 'b') detonate(x, y); // chain reactions
+        //   if (space !== '') {
+        //     // once the detonation hits a solid object, pierce comes into effect
+        //     // however note that pierce cannot go further than regular bomb range
+        //     for (var pierce = 0; pierce < vm.game.players[bomb.owner].bombRange - step && pierce < vm.game.players[bomb.owner].bombPierce; pierce++) {
+        //       var pierceOutput = getNextSquare(x, y, direction);
+        //       x = pierceOutput[0]; y = pierceOutput[1];
+        //       if ($scope.checkInBounds(x, y)) placeTrail(bomb.owner, x, y, type);
+        //       else break;
+        //     }
+        //     break;
+        //   }
+        // }
       }
     }
 
