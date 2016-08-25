@@ -215,7 +215,6 @@
     }
 
     function recursiveDetonate(x, y, direction, range, pierce, pierceMode, owner) {
-      console.log(range);
       if (range === 0 || (pierceMode === true && pierce < 0)) return;
       var output = getNextSquare(x, y, direction);
       var outputContents = $scope.checkSpaceBlocked(output[0], output[1]);
@@ -224,7 +223,6 @@
           if (typeof vm.game.portalMap[[output[0], output[1]]][(direction + 2) % 4] !== 'undefined') {
             var player = vm.game.players[vm.game.portalMap[[output[0], output[1]]][(direction + 2) % 4].owner];
             if (player.orangePortal !== null && player.bluePortal !== null) { // then we're traveling through poooortals
-              console.log('traveling through portal');
               if (vm.game.portalMap[[output[0], output[1]]][(direction + 2) % 4].portalColor === 'orange') {
                 recursiveDetonate(player.bluePortal.x, player.bluePortal.y, player.bluePortal.direction, range, pierce, pierceMode);
               } else {
@@ -260,35 +258,7 @@
       for (var direction = 0; direction < 4; direction++) {
         var x = bombX;
         var y = bombY;
-        /*
-          determining trails:
-          1. check next square:
-            if hard/soft block and valid portal move, go through
-            detonate bombs
-            otherwise, place trail (and go into pierce mode if necessary)
-        */
         recursiveDetonate(x, y, direction, vm.game.players[bomb.owner].bombRange, vm.game.players[bomb.owner].bombPierce, false, bomb.owner);
-        // for (var step = 0; step < vm.game.players[bomb.owner].bombRange; step++) {
-        //   var output = getNextSquare(x, y, direction);
-        //   x = output[0]; y = output[1];
-        //   var type;
-        //   if (direction === 0 || direction === 2) type = 'h';
-        //   else type = 'v';
-        //   var space = $scope.checkSpaceBlocked(x, y);
-        //   if (space !== 'out') placeTrail(bomb.owner, x, y, type);
-        //   if (space === 'b') detonate(x, y); // chain reactions
-        //   if (space !== '') {
-        //     // once the detonation hits a solid object, pierce comes into effect
-        //     // however note that pierce cannot go further than regular bomb range
-        //     for (var pierce = 0; pierce < vm.game.players[bomb.owner].bombRange - step && pierce < vm.game.players[bomb.owner].bombPierce; pierce++) {
-        //       var pierceOutput = getNextSquare(x, y, direction);
-        //       x = pierceOutput[0]; y = pierceOutput[1];
-        //       if ($scope.checkInBounds(x, y)) placeTrail(bomb.owner, x, y, type);
-        //       else break;
-        //     }
-        //     break;
-        //   }
-        // }
       }
     }
 
@@ -406,10 +376,10 @@
           }
           vm.game.softBlockBoard[newBlockPos[0]][newBlockPos[1]] = 1;
           player.coins -= blockCost;
-          // console.log('bought block that costs ' + blockCost);
           break;
         case 'op': // orange portal
           shootPortal(playerIndex, player.orientation, 'orange');
+          console.log(vm.game.portalMap);
           console.log(vm.game.players[playerIndex].orangePortal);
           break;
         case 'bp': // blue portal

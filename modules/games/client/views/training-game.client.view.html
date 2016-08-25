@@ -125,6 +125,16 @@
             </img>
           </div>
         </div>
+        <div ng-repeat="(pos, block) in vm.game.portalMap" ng-init="posArray = pos.split(',')">
+          <div ng-repeat="(direction, portal) in block">
+            <div ng-switch on="direction" style="position: absolute; left: {{posArray[0] * 40}}px; top: {{posArray[1] * 40}}px; width: 40px; height: 40px;">
+              <div ng-switch-when="0" style="border-left: solid {{portal.portalColor}} 5px; height: 100%; width: 100%;"></div>
+              <div ng-switch-when="1" style="border-up: solid {{portal.portalColor}} 5px; height: 100%; width: 100%;"></div>
+              <div ng-switch-when="2" style="border-right: solid {{portal.portalColor}} 5px; height: 100%; width: 100%;"></div>
+              <div ng-switch-when="3" style="border-down: solid {{portal.portalColor}} 5px; height: 100%; width: 100%;"></div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div id="buttons">
