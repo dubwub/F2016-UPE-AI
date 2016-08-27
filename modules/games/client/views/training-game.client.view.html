@@ -2,8 +2,8 @@
   <div class="page-header">
     <h1>TRAINING MODE</h1>
   </div>
-  <small>
-    <em class="text-muted">
+  <div class="row">
+    <div class="col-sm-4">
       Player 1:
       <table border="1">
         <tr>
@@ -43,6 +43,8 @@
           <td><span ng-bind="vm.game.players[0].bluePortal.x"></span>,<span ng-bind="vm.game.players[0].bluePortal.y"></span>,<span ng-bind="vm.game.players[0].bluePortal.direction"></span></td>
         </tr>
       </table>
+      </div>
+      <div class="col-sm-4">
       Player 2:
       <table border="1">
         <tr>
@@ -82,6 +84,8 @@
           <td><span ng-bind="vm.game.players[1].bluePortal.x"></span>,<span ng-bind="vm.game.players[1].bluePortal.y"></span>,<span ng-bind="vm.game.players[1].bluePortal.direction"></span></td>
         </tr>
       </table>
+      </div>
+      </div>
       <br>Player to move: <span ng-bind="vm.game.moveOrder[vm.game.moveIterator]"></span>
 
       <br><button type="button" ng-click="init()">reset board</button>
@@ -129,9 +133,9 @@
           <div ng-repeat="(direction, portal) in block">
             <div ng-switch on="direction" style="position: absolute; left: {{posArray[0] * 40}}px; top: {{posArray[1] * 40}}px; width: 40px; height: 40px;">
               <div ng-switch-when="0" style="border-left: solid {{portal.portalColor}} 5px; height: 100%; width: 100%;"></div>
-              <div ng-switch-when="1" style="border-up: solid {{portal.portalColor}} 5px; height: 100%; width: 100%;"></div>
+              <div ng-switch-when="1" style="border-top: solid {{portal.portalColor}} 5px; height: 100%; width: 100%;"></div>
               <div ng-switch-when="2" style="border-right: solid {{portal.portalColor}} 5px; height: 100%; width: 100%;"></div>
-              <div ng-switch-when="3" style="border-down: solid {{portal.portalColor}} 5px; height: 100%; width: 100%;"></div>
+              <div ng-switch-when="3" style="border-bottom: solid {{portal.portalColor}} 5px; height: 100%; width: 100%;"></div>
             </div>
           </div>
         </div>
@@ -156,6 +160,4 @@
         <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'buy_range')">buy bomb range (cost: 1)</button>
         <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'buy_block')">buy bomb block</button>
       </div>
-    </em>
-  </small>
 </section>

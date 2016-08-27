@@ -39,7 +39,7 @@
         y: y,
         orientation: 0,
         bombRange: 3,
-        bombPierce: 1,
+        bombPierce: 0,
         bombCount: 1,
         alive: true,
         coins: 0,
@@ -53,8 +53,7 @@
     // right now this only initializes two players, and only spaces for two players.
     $scope.init = function() {
       vm.game.players = [createPlayer(1, 1), createPlayer(vm.game.boardSize - 2, vm.game.boardSize - 2)];
-      // vm.game.moveOrder = [0, 1];
-      vm.game.moveOrder = [0, 0];
+      vm.game.moveOrder = [0, 1]; // if you want to just test single player logic, change this to [0, 0]
       vm.game.moveIterator = 0;
 
       // hard blocks appear in a gridlike pattern with no other hard blocks in any of the adjacent squres.
@@ -157,7 +156,7 @@
         return nextSquare;
       } else {
         if (typeof vm.game.portalMap[[nextSquare[0], nextSquare[1]]] !== 'undefined') {
-          if (vm.game.portalMap[[nextSquare[0], nextSquare[1]]][(direction + 2) % 4] !== 'undefined') {
+          if (typeof vm.game.portalMap[[nextSquare[0], nextSquare[1]]][(direction + 2) % 4] !== 'undefined') {
             var player = vm.game.players[vm.game.portalMap[[nextSquare[0], nextSquare[1]]][(direction + 2) % 4].owner];
             if (player.orangePortal !== null && player.bluePortal !== null) {
               var otherPortalBlock;
@@ -184,10 +183,11 @@
       var space = $scope.checkSpaceBlocked(x, y);
       if (space === 'sb') { // soft block here
         vm.game.softBlockBoard[x][y] = 0;
-        deletePortal(x, y, -1);
+        deletePortal(x, y, -1); // -1 means delete all portals
         console.log(vm.game.portalMap);
         for (var trail in vm.game.trailMap[[x, y]]) {
           if (vm.game.trailMap[[x, y]].hasOwnProperty(trail)) {
+            // THERE WAS A WEIRD BUG (unreproducible): crashed because vm.game.players[trail] was not defined
             vm.game.players[trail].coins += getBlockValue(x, y);
           }
         }
@@ -294,12 +294,16 @@
       var newPortalDirection = (direction + 2) % 4;
       var newPortal = { x: nextSquare[0], y: nextSquare[1], direction: newPortalDirection };
       if (portalColor === 'orange') {
+        if (vm.game.players[playerIndex].orangePortal !== null)
+          deletePortal(vm.game.players[playerIndex].orangePortal.x, vm.game.players[playerIndex].orangePortal.y, vm.game.players[playerIndex].orangePortal.direction);
         vm.game.players[playerIndex].orangePortal = newPortal;
         if (typeof vm.game.portalMap[[nextSquare[0], nextSquare[1]]] === 'undefined')
           vm.game.portalMap[[nextSquare[0], nextSquare[1]]] = {};
         else deletePortal(nextSquare[0], nextSquare[1], newPortalDirection);
         vm.game.portalMap[[nextSquare[0], nextSquare[1]]][newPortalDirection] = { owner: playerIndex, portalColor: 'orange' };
       } else {
+        if (vm.game.players[playerIndex].bluePortal !== null)
+          deletePortal(vm.game.players[playerIndex].bluePortal.x, vm.game.players[playerIndex].bluePortal.y, vm.game.players[playerIndex].bluePortal.direction);
         vm.game.players[playerIndex].bluePortal = newPortal;
         if (typeof vm.game.portalMap[[nextSquare[0], nextSquare[1]]] === 'undefined')
           vm.game.portalMap[[nextSquare[0], nextSquare[1]]] = {};
