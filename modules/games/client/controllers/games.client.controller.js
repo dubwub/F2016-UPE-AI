@@ -53,7 +53,7 @@
     // right now this only initializes two players, and only spaces for two players.
     $scope.init = function() {
       vm.game.players = [createPlayer(1, 1), createPlayer(vm.game.boardSize - 2, vm.game.boardSize - 2)];
-      vm.game.moveOrder = [0, 1]; // if you want to just test single player logic, change this to [0, 0]
+      vm.game.moveOrder = [0, 0]; // if you want to just test single player logic, change this to [0, 0]
       vm.game.moveIterator = 0;
 
       // hard blocks appear in a gridlike pattern with no other hard blocks in any of the adjacent squres.

@@ -41,24 +41,13 @@ var handlers = {};
 // var io = io();
 
 exports.search = function (req, res) {
-  // var io = require('socket.io-client')('http://localhost:3000/');
-  // io.on('connect', function() {
-  //   io.send('testEmit', { message: 'holy shit tihtithi' });
-  //   io.emit('testEmit', { message: 'holy shit it worked' });
-  // });
-  // io.emit('testEmit', { message: 'newGame' });
-  // console.log("req");
-  // console.log(req.socket);
-  // req.socket.emit('testEmit', { message: 'no fucking way' });
-  // console.log("res");
-  // console.log(res);
   if (saved_res === -1) { // first person who searches reaches here
     saved_res = res; // save their request object and ID
     saved_person_id = req.body.personID;
   } else { // second person reaches here
     var people = [saved_person_id, req.body.personID];
-    var new_handler = new Handler(people, function(err) { // create new Handler object for new Game, the new Game will be init in Handler constructor
-      res.status(400).send({
+    var new_handler = new Handler(people, Class, function(err) { // create new Handler object for new Game, the new Game will be init in Handler constructor
+      if (err) res.status(400).send({
         message: errorHandler.getErrorMessage(err)
       });
     });
@@ -70,7 +59,7 @@ exports.search = function (req, res) {
     var playerIndex = 0;
     for (var pid in new_handler.players) { // iterate through players
       if (new_handler.players.hasOwnProperty(pid)) {
-        output.playerID = new_handler.players[pid]._id;
+        output.playerID = pid;
         output.x = new_handler.players[pid].x;
         output.y = new_handler.players[pid].y;
         if (playerIndex === 0) {
@@ -87,51 +76,6 @@ exports.search = function (req, res) {
   }
 };
 
-
-/**
- * Create new game (DEPRECIATED, REMOVE)
- */
-/* exports.create = function (req, res) {
-  var game = new Game();
-  game.people = [0, 1]; // temporary
-  game.players = [];
-  game.people.forEach(function(person) {
-    var player = new Player();
-    player.game = game._id;
-    player.person = person;
-    if (person === game.people[0]) { // initialize player position
-      player.x = 0;
-      player.y = 0;
-    } else {
-      player.x = 9;
-      player.y = 9;
-    }
-    player.save(function (err) {
-      if (err) {
-        return res.status(400).send({
-          message: errorHandler.getErrorMessage(err)
-        });
-      } // else {
-        // res.json(game);
-      // }
-    });
-    game.players.push(player._id);
-  });
-  //  var players = new Game(req.body.player);
-
-  //  article.user = req.user;
-
-  game.save(function (err) {
-    if (err) {
-      return res.status(400).send({
-        message: errorHandler.getErrorMessage(err)
-      });
-    } else {
-      res.json(game);
-    }
-  });
-}; */
-
 /**
  * Show the current game
  */
@@ -139,58 +83,17 @@ exports.read = function (req, res) {
   // convert mongoose document to JSON
   var game = req.game ? req.game.toJSON() : {};
 
-  // Add a custom field to the Article, for determining if the current User is the "owner".
-  // NOTE: This field is NOT persisted to the database, since it doesn't exist in the Article model.
-  //  article.isCurrentUserOwner = !!(req.user && article.user && article.user._id.toString() === req.user._id.toString());
-
   res.json(game);
 };
-
-/**
- * Update game status, SHOULD BE DEPRECATED (updating should be entirely backend)
- */
-/* exports.update = function (req, res) {
-  var game = req.game;
-  game.status = req.body.status;
-
-  // article.title = req.body.title;
-  // article.content = req.body.content;
-
-  game.save(function (err) {
-    if (err) {
-      return res.status(400).send({
-        message: errorHandler.getErrorMessage(err)
-      });
-    } else {
-      res.json(game);
-    }
-  });
-}; */
-
-/**
- * Delete an article (SHOULD BE DEPRECATED)
- */
-/* exports.delete = function (req, res) {
-  var game = req.game;
-
-  game.remove(function (err) {
-    if (err) {
-      return res.status(400).send({
-        message: errorHandler.getErrorMessage(err)
-      });
-    } else {
-      res.json(game);
-    }
-  });
-}; */
 
 /**
  * Submit a move
  */
 exports.submit = function (req, res) {
   var game = req.game;
+  console.log(game);
   handlers[game._id].submitMove(req.body.move, req.body.playerID, function(err) {
-    if (err === "success") res.json(err);
+    res.json(err);
   });
 };
 
