@@ -15,11 +15,11 @@ var Player = new Schema({
     type: Boolean,
     default: true
   },
-  // orientation: Number,
-  // bombCount: Number,
-  // bombPierce: Number,
-  // bombRange: Number,
-  // coins: Number,
+  orientation: Number,
+  bombCount: Number,
+  bombPierce: Number,
+  bombRange: Number,
+  coins: Number,
   // person: { type: Schema.ObjectId, ref: 'Person' },
   person: {
     type: Number,
@@ -45,7 +45,10 @@ var Game = new Schema({
     default: "in progress"
   },
   hardBlockBoard: [Number],
-  softBlockBoard: [Number]
+  softBlockBoard: [Number],
+  trailMap: Object,
+  bombMap: Object,
+  portalMap: Object
 });
 
 // END GAME RELATED SCHEMAS

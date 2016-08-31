@@ -28,6 +28,10 @@ function Player(index, boardSize) {
 Player.prototype = {
 	x: 0,
 	y: 0,
+	orientation: 0,
+	bombCount: 1,
+	bombRange: 3,
+	bombPierce: 0,
 	alive: true,
 	model: null,
 	getID: function() {
@@ -38,6 +42,10 @@ Player.prototype = {
 		if (this.model === null) this.model = new mongoosePlayer();
 		this.model.x = this.x;
 		this.model.y = this.y;
+		this.model.orientation = this.orientation;
+		this.model.bombCount = this.bombCount;
+		this.model.bombRange = this.bombRange;
+		this.model.bombPierce = this.bombPierce;
 		this.model.alive = this.alive;
 		this.model.save(callback);
 	}

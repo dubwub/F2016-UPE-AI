@@ -56,21 +56,17 @@ exports.search = function (req, res) {
     var output = {}; // create output to be sent back to requestors
     output.gameID = new_handler.id;
 
-    var playerIndex = 0;
-    for (var pid in new_handler.players) { // iterate through players
-      if (new_handler.players.hasOwnProperty(pid)) {
-        output.playerID = pid;
-        output.x = new_handler.players[pid].x;
-        output.y = new_handler.players[pid].y;
-        if (playerIndex === 0) {
-          saved_res.json(output);
-        } else if (playerIndex === 1) {
-          res.json(output);
-        }
-        playerIndex++;
+    // for loop that will run exactly twice all the time (still a four loop in case this needs to be extended)
+    for (var i = 0; i < new_handler.players.length; i++) {
+      output.playerID = new_handler.players[i].getID();
+      output.x = new_handler.players[i].x;
+      output.y = new_handler.players[i].y;
+      if (i === 0) {
+        saved_res.json(output);
+      } else if (i === 1) {
+        res.json(output);
       }
     }
-
     saved_res = -1; // reset search request (PROBABLY STILL NEEDS MUTEX)
     saved_person_id = -1;
   }
@@ -91,9 +87,10 @@ exports.read = function (req, res) {
  */
 exports.submit = function (req, res) {
   var game = req.game;
-  console.log(game);
-  handlers[game._id].submitMove(req.body.move, req.body.playerID, function(err) {
-    res.json(err);
+  // console.log(game);
+  handlers[game._id].submitMove(req.body.move, req.body.playerID, function(err, data) {
+    if (err) res.json(err);
+    else console.log(data);
   });
 };
 
