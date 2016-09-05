@@ -3,14 +3,91 @@
     <h1>Game TV</h1>
     <!--<h1 ng-bind="vm.game.title"></h1>-->
   </div>
-  <!--<div class="pull-right" ng-show="vm.game.isCurrentUserOwner">
-    <a class="btn btn-primary" ui-sref="games.edit({ gameId: vm.game._id })">
-      <i class="glyphicon glyphicon-edit"></i>
-    </a>
-    <a class="btn btn-primary" ng-click="vm.remove()">
-      <i class="glyphicon glyphicon-trash"></i>
-    </a>
-  </div>-->
+    <div class="row">
+    <div class="col-sm-4">
+      Player 1:
+      <table border="1">
+        <tr>
+          <td>Position</td>
+          <td><span ng-bind="vm.game.players[0].x"></span>, <span ng-bind="vm.game.players[0].y"></span></td>
+        </tr>
+        <tr>
+          <td>Orientation</td>
+          <td><span ng-bind="vm.game.players[0].orientation"></span></td>
+        </tr>
+        <tr>
+          <td>Coins</td>
+          <td><span ng-bind="vm.game.players[0].coins"></span></td>
+        </tr>
+        <tr>
+          <td>bombRange</td>
+          <td><span ng-bind="vm.game.players[0].bombRange"></span></td>
+        </tr>
+        <tr>
+          <td>bombCount</td>
+          <td><span ng-bind="vm.game.players[0].bombCount"></span></td>
+        </tr>
+        <tr>
+          <td>bombPierce</td>
+          <td><span ng-bind="vm.game.players[0].bombPierce"></span></td>
+        </tr>
+        <tr>
+          <td>alive</td>
+          <td><span ng-bind="vm.game.players[0].alive"></span></td>
+        </tr>
+        <tr>
+          <td>orangePortal</td>
+          <td><span ng-bind="vm.game.players[0].orangePortal.x"></span>,<span ng-bind="vm.game.players[0].orangePortal.y"></span>,<span ng-bind="vm.game.players[0].orangePortal.direction"></span></td>
+        </tr>
+        <tr>
+          <td>bluePortal</td>
+          <td><span ng-bind="vm.game.players[0].bluePortal.x"></span>,<span ng-bind="vm.game.players[0].bluePortal.y"></span>,<span ng-bind="vm.game.players[0].bluePortal.direction"></span></td>
+        </tr>
+      </table>
+      </div>
+      <div class="col-sm-4">
+      Player 2:
+      <table border="1">
+        <tr>
+          <td>Position</td>
+          <td><span ng-bind="vm.game.players[1].x"></span>, <span ng-bind="vm.game.players[1].y"></span></td>
+        </tr>
+        <tr>
+          <td>Orientation</td>
+          <td><span ng-bind="vm.game.players[1].orientation"></span></td>
+        </tr>
+        <tr>
+          <td>Coins</td>
+          <td><span ng-bind="vm.game.players[1].coins"></span></td>
+        </tr>
+        <tr>
+          <td>bombRange</td>
+          <td><span ng-bind="vm.game.players[1].bombRange"></span></td>
+        </tr>
+        <tr>
+          <td>bombCount</td>
+          <td><span ng-bind="vm.game.players[1].bombCount"></span></td>
+        </tr>
+        <tr>
+          <td>bombPierce</td>
+          <td><span ng-bind="vm.game.players[1].bombPierce"></span></td>
+        </tr>
+        <tr>
+          <td>alive</td>
+          <td><span ng-bind="vm.game.players[1].alive"></span></td>
+        </tr>
+        <tr>
+          <td>orangePortal</td>
+          <td><span ng-bind="vm.game.players[1].orangePortal.x"></span>,<span ng-bind="vm.game.players[1].orangePortal.y"></span>,<span ng-bind="vm.game.players[1].orangePortal.direction"></span></td>
+        </tr>
+        <tr>
+          <td>bluePortal</td>
+          <td><span ng-bind="vm.game.players[1].bluePortal.x"></span>,<span ng-bind="vm.game.players[1].bluePortal.y"></span>,<span ng-bind="vm.game.players[1].bluePortal.direction"></span></td>
+        </tr>
+      </table>
+      </div>
+      </div>
+      <br>Player to move: <span ng-bind="vm.game.moveOrder[vm.game.moveIterator]"></span>
   <small>
     <em class="text-muted">
       Game started: 
@@ -31,20 +108,6 @@
             <img src="/img/sb.png" style="position: absolute; width: 100%; height: 100%;"></img>
           </div>
         </div>
-        <div id="player1" ng-switch on="vm.game.players[0].alive">
-          <div ng-switch-when="true" ng-switch on="vm.game.moveOrder[vm.game.moveIterator]" style="position: absolute; left: {{40*vm.game.players[0].x}}px; top: {{40*vm.game.players[0].y}}px; width:40px; height:40px;">
-            <img src="/img/player{{vm.game.players[0].orientation}}.png" style="position: absolute; width: 100%; height: 100%;"></img>
-            <div ng-switch-when="0" style="border:5px solid black; width:40px; height:40px;">
-            </div>
-          </div>
-        </div>
-        <div id="player2" ng-switch on="vm.game.players[1].alive">
-          <div ng-switch-when="true" ng-switch on="vm.game.moveOrder[vm.game.moveIterator]" style="position: absolute; left: {{40*vm.game.players[1].x}}px; top: {{40*vm.game.players[1].y}}px; width:40px; height:40px;">
-            <img src="/img/player{{vm.game.players[1].orientation}}.png" style="position: absolute; width: 100%; height: 100%;"></img>
-            <div ng-switch-when="1" style="border:5px solid black; width:40px; height:40px;">
-            </div>
-          </div>
-        </div>
         <div ng-repeat="(pos, bomb) in vm.game.bombMap" ng-init="posArray = pos.split(',')">
           <img src="/img/bomb{{bomb.tick}}.png" style="position: absolute; left: {{posArray[0] * 40}}px; top: {{posArray[1] * 40}}px; width: 40px; height: 40px;">
           </img>
@@ -62,6 +125,20 @@
               <div ng-switch-when="1" style="border-top: solid {{portal.portalColor}} 5px; height: 100%; width: 100%;"></div>
               <div ng-switch-when="2" style="border-right: solid {{portal.portalColor}} 5px; height: 100%; width: 100%;"></div>
               <div ng-switch-when="3" style="border-bottom: solid {{portal.portalColor}} 5px; height: 100%; width: 100%;"></div>
+            </div>
+          </div>
+        </div>
+        <div id="player1" ng-switch on="vm.game.players[0].alive">
+          <div ng-switch-when="true" ng-switch on="vm.game.moveOrder[vm.game.moveIterator]" style="position: absolute; left: {{40*vm.game.players[0].x}}px; top: {{40*vm.game.players[0].y}}px; width:40px; height:40px;">
+            <img src="/img/player{{vm.game.players[0].orientation}}.png" style="position: absolute; width: 100%; height: 100%;"></img>
+            <div ng-switch-when="0" style="border:5px solid black; width:40px; height:40px;">
+            </div>
+          </div>
+        </div>
+        <div id="player2" ng-switch on="vm.game.players[1].alive">
+          <div ng-switch-when="true" ng-switch on="vm.game.moveOrder[vm.game.moveIterator]" style="position: absolute; left: {{40*vm.game.players[1].x}}px; top: {{40*vm.game.players[1].y}}px; width:40px; height:40px;">
+            <img src="/img/player{{vm.game.players[1].orientation}}.png" style="position: absolute; width: 100%; height: 100%;"></img>
+            <div ng-switch-when="1" style="border:5px solid black; width:40px; height:40px;">
             </div>
           </div>
         </div>

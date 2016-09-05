@@ -24,7 +24,9 @@ var Player = new Schema({
   person: {
     type: Number,
     default: -1
-  }
+  },
+  orangePortal: Object,
+  bluePortal: Object
   // game: { type: Schema.ObjectId, ref: 'Game' }
 });
 
@@ -38,6 +40,10 @@ var Game = new Schema({
     type: Number,
     default: 11
   },
+  // fuckObjects: {
+  //   type: Object,
+  //   default: { }
+  // },
   people: [Number], // temporary, it's important to note the distinction between players (actual in-game obj) and people (accounts)
   players: [{ type: Schema.ObjectId, ref: 'Player' }],
   state: {
@@ -46,9 +52,11 @@ var Game = new Schema({
   },
   hardBlockBoard: [Number],
   softBlockBoard: [Number],
+  // bombList: [Object],
   trailMap: Object,
   bombMap: Object,
   portalMap: Object
+  // saveCount: Number
 });
 
 // END GAME RELATED SCHEMAS

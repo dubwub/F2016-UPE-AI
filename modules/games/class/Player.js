@@ -32,8 +32,11 @@ Player.prototype = {
 	bombCount: 1,
 	bombRange: 3,
 	bombPierce: 0,
+	coins: 0,
 	alive: true,
 	model: null,
+	orangePortal: null,
+	bluePortal: null,
 	getID: function() {
 		if (this.model === null) this.model = new mongoosePlayer();
 		return this.model._id;
@@ -47,6 +50,13 @@ Player.prototype = {
 		this.model.bombRange = this.bombRange;
 		this.model.bombPierce = this.bombPierce;
 		this.model.alive = this.alive;
+		this.model.coins = this.coins;
+
+		this.model.orangePortal = this.orangePortal;
+		this.model.bluePortal = this.bluePortal;
+		this.model.markModified('orangePortal'); // marking modified required for objs apparently
+		this.model.markModified('bluePortal');
+
 		this.model.save(callback);
 	}
 };
