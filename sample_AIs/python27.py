@@ -1,6 +1,8 @@
 # posting to: http://localhost:3000/api/articles/update/:articleid with title, content
 # changes title, content
 #
+# id1: (darwinbot1 P@ssw0rd!! 57ce1b199ff88e641c605d67)
+# id2: 
 import time # for testing, this is not good
 import requests # if not installed already, run python -m pip install requests OR pip install requests, whatever you normally do
 r = requests.post('http://localhost:3000/api/games/search', data={'personID': 0}) # search for new game

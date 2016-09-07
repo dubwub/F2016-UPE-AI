@@ -395,6 +395,8 @@ Game.prototype = {
 		if (this.model === null) this.model = new mongooseGame();
 		this.model.boardSize = this.boardSize;
 		this.model.people = this.people;
+		this.model.moveOrder = this.moveOrder;
+		this.model.moveIterator = this.moveIterator;
 		var playerIDs = []; // player IDs are what are saved in mongo, not the player objects themselves (those are separate)
 		for (var i = 0; i < this.players.length; i++) {
 			playerIDs.push(this.players[i].getID());
@@ -402,23 +404,6 @@ Game.prototype = {
 		this.model.players = playerIDs;
 		this.model.hardBlockBoard = this.hardBlockBoard;
 		this.model.softBlockBoard = this.softBlockBoard;
-		// var bombList = new createArray(0);
-		// for (var bomb in this.bombMap) {
-		// 	if (this.bombMap.hasOwnProperty(bomb)) {
-		// 		var bombArray = bomb.split(',');
-		// 		var bombX = Number.parseInt(bombArray[0], 10);
-		// 		var bombY = Number.parseInt(bombArray[1], 10);
-		// 		var object = new Object();
-		// 		object.x = bombX;
-		// 		object.y = bombY;
-		// 		object.owner = this.bombMap[[bombX, bombY]].owner;
-		// 		object.tick = this.bombMap[[bombX, bombY]].tick;
-		// 		bombList.push(object);
-		// 	}
-		// }
-		// console.log(bombList);
-        // this.model.bombList = bombList;
-        // console.log(this.model.bombList);
 		this.model.bombMap = this.bombMap;
 		this.model.markModified('bombMap'); // have to mark as modified to let mongoose know to update (objects only?)
 		this.model.trailMap = this.trailMap;

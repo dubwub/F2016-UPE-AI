@@ -40,10 +40,8 @@ var Game = new Schema({
     type: Number,
     default: 11
   },
-  // fuckObjects: {
-  //   type: Object,
-  //   default: { }
-  // },
+  moveOrder: [Number],
+  moveIterator: Number,
   people: [Number], // temporary, it's important to note the distinction between players (actual in-game obj) and people (accounts)
   players: [{ type: Schema.ObjectId, ref: 'Player' }],
   state: {
