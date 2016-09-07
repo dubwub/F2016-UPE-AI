@@ -10,10 +10,9 @@ module.exports = function (app) {
   // Articles collection routes
   app.route('/api/games') // .all(gamesPolicy.isAllowed)
     .get(games.list);
-    // .post(games.create);
 
   // Training mode
-  app.route('/api/games/training1')
+  app.route('/api/games/training')
     .get(games.training);
 
   // Test update article with POST
@@ -25,8 +24,6 @@ module.exports = function (app) {
   // route before registering that one
   app.route('/api/games/:gameId') // .all(gamesPolicy.isAllowed)
     .get(games.read);
-    // .put(games.update)
-    // .delete(games.delete);
 
   // Submit move
   app.route('/api/games/submit/:gameId')
@@ -34,5 +31,5 @@ module.exports = function (app) {
 
   // Finish by binding the article middleware
   app.param('gameId', games.gameByID);
-  app.param('playerId', games.playerByID);
+  app.param('accountID', games.accountByID);
 };

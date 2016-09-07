@@ -11,6 +11,7 @@ var path = require('path'),
   mongoose = require('mongoose'),
   Game = mongoose.model('Game'),
   Player = mongoose.model('Player'),
+  User = mongoose.model('User'),
   Handler = require('./Handler'),
   errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller'));
 
@@ -43,9 +44,9 @@ var handlers = {};
 exports.search = function (req, res) {
   if (saved_res === -1) { // first person who searches reaches here
     saved_res = res; // save their request object and ID
-    saved_person_id = req.body.personID;
+    saved_person_id = req.body.accountID;
   } else { // second person reaches here
-    var people = [saved_person_id, req.body.personID];
+    var people = [saved_person_id, req.body.accountID];
     var new_handler = new Handler(people, Class, function(err) { // create new Handler object for new Game, the new Game will be init in Handler constructor
       if (err) res.status(400).send({
         message: errorHandler.getErrorMessage(err)
@@ -145,27 +146,28 @@ exports.gameByID = function (req, res, next, id) {
   });
 };
 
-exports.playerByID = function (req, res, next, id) {
+exports.accountByID = function (req, res, next, id) {
 
-  /* if (!mongoose.Types.ObjectId.isValid(id)) {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(400).send({
-      message: 'Game is invalid'
+      message: 'Account ID is invalid'
     });
-  }*/
+  }
 
 
-  req.player = id; // TEMOPRARY UNTIL CREDENTIALS ARE ADDED
-  next();
+  // req.player = id; // TEMOPRARY UNTIL CREDENTIALS ARE ADDED
+  // next();
 
-  /* Game.findById(id).populate('players', 'people').exec(function (err, game) {
+  User.findById(id).populate('users').exec(function (err, user) {
     if (err) {
       return next(err);
-    } else if (!article) {
+    } else if (!user) {
       return res.status(404).send({
-        message: 'No article with that identifier has been found'
+        message: 'No user with that identifier has been found'
       });
     }
-    req.game = game;
+    console.log(user);
+    req.user = user;
     next();
-  });*/
+  });
 };

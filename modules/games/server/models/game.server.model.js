@@ -42,7 +42,7 @@ var Game = new Schema({
   },
   moveOrder: [Number],
   moveIterator: Number,
-  people: [Number], // temporary, it's important to note the distinction between players (actual in-game obj) and people (accounts)
+  people: [{ type: Schema.ObjectId, ref: 'User' }],
   players: [{ type: Schema.ObjectId, ref: 'Player' }],
   state: {
     type: String, // "in progress", "complete"
