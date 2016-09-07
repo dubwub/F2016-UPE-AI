@@ -31,5 +31,5 @@ module.exports = function (app) {
 
   // Finish by binding the article middleware
   app.param('gameId', games.gameByID);
-  app.param('accountID', games.accountByID);
+  // app.param('accountID', games.accountByID);
 };

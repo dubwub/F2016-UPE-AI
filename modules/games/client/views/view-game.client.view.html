@@ -3,6 +3,12 @@
     <h1>Game TV</h1>
     <!--<h1 ng-bind="vm.game.title"></h1>-->
   </div>
+
+    <div class="row">
+      <div class="col-sm-4">
+        <span ng-bind="vm.game.people[0].displayName"></span> vs. <span ng-bind="vm.game.people[1].displayName"></span>
+      </div>
+    </div>
     <div class="row">
     <div class="col-sm-4">
       Player 1:

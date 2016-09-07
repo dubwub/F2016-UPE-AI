@@ -41,7 +41,34 @@ var handlers = {};
 // console.log(socketio);
 // var io = io();
 
-exports.search = function (req, res) {
+function verifyAccount (req, res, id, username, next) {
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    res.status(400).send({
+      message: 'Account ID is invalid'
+    });
+    return false;
+  }
+
+  var returnValue = true;
+  User.findById(id).populate('users').exec(function (err, user) {
+    if (err) {
+      console.log(err);
+    } else if (!user || user && user.username !== username) {
+      res.status(404).send({
+        message: 'No user with that identifier has been found'
+      });
+      returnValue = false;
+      return returnValue;
+    }
+    req.user = user;
+    returnValue = true;
+    next(req, res);
+  });
+  return returnValue;
+}
+
+function performSearch(req, res) {
   if (saved_res === -1) { // first person who searches reaches here
     saved_res = res; // save their request object and ID
     saved_person_id = req.body.accountID;
@@ -71,6 +98,11 @@ exports.search = function (req, res) {
     saved_res = -1; // reset search request (PROBABLY STILL NEEDS MUTEX)
     saved_person_id = -1;
   }
+}
+
+
+exports.search = function (req, res) {
+  verifyAccount(req, res, req.body.accountID, req.body.username, performSearch);
 };
 
 /**
@@ -132,7 +164,7 @@ exports.gameByID = function (req, res, next, id) {
   }
 
   // Game.findById(id).populate('players', 'people').exec(function (err, game) { // MERGE EVENTUALLY
-  Game.findById(id).populate('players').exec(function (err, game) {
+  Game.findById(id).populate('players people').exec(function (err, game) {
     if (err) {
       return next(err);
     } else if (!game) {
@@ -141,6 +173,8 @@ exports.gameByID = function (req, res, next, id) {
       });
     }
     req.game = game;
+    console.log(game.players);
+    console.log(game.people);
     // console.log(game.players[0]); <-- TEST TO SEE IF POPULATE WORKED
     next();
   });
@@ -153,7 +187,6 @@ exports.accountByID = function (req, res, next, id) {
       message: 'Account ID is invalid'
     });
   }
-
 
   // req.player = id; // TEMOPRARY UNTIL CREDENTIALS ARE ADDED
   // next();
