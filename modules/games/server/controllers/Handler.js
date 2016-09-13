@@ -18,9 +18,11 @@
 
 var mongoose = require('mongoose'),
   Game = mongoose.model('Game'),
-  Player = mongoose.model('Player');
+  Player = mongoose.model('Player'),
+  Elo = require('elo-rank')(32);
 
 var Handler = function Handler(people, Class, callback) { // TODO: CALLBACK NOT USED
+  this.Class = Class;
   this.people = people;
   this.game = new Class.Game();
   // var players = [];
@@ -40,17 +42,65 @@ var Handler = function Handler(people, Class, callback) { // TODO: CALLBACK NOT 
   this.id = this.game.getID();
 };
 
+// helper functions related to updating elo after the game has terminated (is there a better way of doing this lol)
+function calculateElosAndUpdate(user0, user1, winnerIndex) {
+  var expectedScore0 = Elo.getExpected(user0.elo, user1.elo);
+  var expectedScore1 = Elo.getExpected(user1.elo, user0.elo);
+  // update score, 1 if won 0 if lost
+  if (winnerIndex === -1) {
+    user0.elo = Elo.updateRating(expectedScore0, 0.5, user0.elo);
+    user1.elo = Elo.updateRating(expectedScore1, 0.5, user1.elo);
+  } else if (winnerIndex === 0) {
+    user0.elo = Elo.updateRating(expectedScore0, 1, user0.elo);
+    user1.elo = Elo.updateRating(expectedScore1, 0, user1.elo);
+  } else if (winnerIndex === 1) {
+    user0.elo = Elo.updateRating(expectedScore0, 0, user0.elo);
+    user1.elo = Elo.updateRating(expectedScore1, 1, user1.elo);
+  }
+  console.log('done calculating, new elos: ' + user0.elo + ', ' + user1.elo);
+  user0.save();
+  user1.save();
+}
+
+function findSecondUser(Class, user0, id1, winnerIndex) {
+  Class.User.findById(id1).populate('users').exec(function (err, user1) {
+    if (err) {
+      console.log(err);
+    } else if (!user1) {
+      console.log('Tried to update rating, but personID ' + id1 + ' but couldn\'t find it');
+    }
+    calculateElosAndUpdate(user0, user1, winnerIndex);
+  });
+}
+
+function findFirstUser(Class, id0, id1, winnerIndex) {
+  Class.User.findById(id0).populate('users').exec(function (err, user0) {
+    if (err) {
+      console.log(err);
+    } else if (!user0) {
+      console.log('Tried to update rating, but personID ' + this.players[0].person + ' but couldn\'t find it');
+    }
+    findSecondUser(Class, user0, id1, winnerIndex);
+  });
+}
+
 Handler.prototype =
 {
+  Class: null,
   id: "", // represents the gameID of the game this Handler handles
   game: null, // the actual game object this Handler handles
   people: [], // list of people IDs
   players: [], // assoc. array (hashmap) of playerID vs. player object
-  // moves: {}, // assoc. array (hashmap) of all submitted moves
   submitMove: function(new_move, playerID, callback) {
+    // TODO: when submitting to a complete game, should quit out
     for (var i = 0; i < this.players.length; i++) {
       if (this.players[i].getID().toString() === playerID) {
-        this.game.submit(i, new_move);
+        var winnerIndex = this.game.submit(i, new_move);
+        // if output === -2, game is ongoing
+        if (winnerIndex === -1 || winnerIndex >= 0) { // tie game
+          console.log('game ended, going here');
+          findFirstUser(this.Class, this.players[0].person, this.players[1].person, winnerIndex);
+        }
       }
     }
     // this.players[playerID].save();

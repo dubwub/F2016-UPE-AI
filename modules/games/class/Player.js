@@ -50,6 +50,7 @@ Player.prototype = {
 		this.model.bombRange = this.bombRange;
 		this.model.bombPierce = this.bombPierce;
 		this.model.alive = this.alive;
+		console.log('this.coins = ' + this.coins);
 		this.model.coins = this.coins;
 
 		this.model.orangePortal = this.orangePortal;

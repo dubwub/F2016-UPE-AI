@@ -100,6 +100,10 @@ var UserSchema = new Schema({
   },
   resetPasswordExpires: {
     type: Date
+  },
+  elo: {
+    type: Number,
+    default: 1200
   }
 });
 

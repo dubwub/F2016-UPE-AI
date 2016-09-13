@@ -15,11 +15,26 @@ var Player = new Schema({
     type: Boolean,
     default: true
   },
-  orientation: Number,
-  bombCount: Number,
-  bombPierce: Number,
-  bombRange: Number,
-  coins: Number,
+  orientation: {
+    type: Number,
+    default: 0
+  },
+  bombCount: {
+    type: Number,
+    default: 1
+  },
+  bombPierce: {
+    type: Number,
+    default: 0
+  },
+  bombRange: {
+    type: Number,
+    default: 3
+  },
+  coins: {
+    type: Number,
+    default: 0
+  },
   // person: { type: Schema.ObjectId, ref: 'Person' },
   person: {
     type: Number,

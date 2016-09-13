@@ -17,7 +17,8 @@ var path = require('path'),
 
 var Class = {
   Game: require('../../Class/Game'),
-  Player: require('../../Class/Player')
+  Player: require('../../Class/Player'),
+  User: mongoose.model('User')
 };
 
 /*
@@ -123,7 +124,7 @@ exports.submit = function (req, res) {
   // console.log(game);
   handlers[game._id].submitMove(req.body.move, req.body.playerID, function(err, data) {
     if (err) res.json(err);
-    else console.log(data);
+    // else console.log(data);
   });
 };
 
@@ -173,8 +174,8 @@ exports.gameByID = function (req, res, next, id) {
       });
     }
     req.game = game;
-    console.log(game.players);
-    console.log(game.people);
+    // console.log(game.players);
+    // console.log(game.people);
     // console.log(game.players[0]); <-- TEST TO SEE IF POPULATE WORKED
     next();
   });

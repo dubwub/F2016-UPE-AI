@@ -87,6 +87,8 @@ Game.prototype = {
 	trailMap: {},
 	portalMap: {},
 	model: null,
+	state: 'in progress',
+	winnerIndex: -2, // when state is 'done', this will be set to the index of the winner (or -1 for tie, -2 for in progress)
 	/*
 		note that the following function will, if a bomb and player share the same spot, return bomb.
 		this is ideal for detonate functionality but might want to be fixed in the future.
@@ -149,7 +151,7 @@ Game.prototype = {
 		if (space === 'sb') { // soft block here
 			this.softBlockBoard[x * this.boardSize + y] = 0;
 			this.deletePortal(x, y, -1); // -1 means delete all portals
-			console.log(this.portalMap);
+			// console.log(this.portalMap);
 			for (var trail in this.trailMap[[x, y]]) {
 				if (this.trailMap[[x, y]].hasOwnProperty(trail)) {
 					// THERE WAS A WEIRD BUG (unreproducible): crashed because this.players[trail] was not defined
@@ -159,8 +161,9 @@ Game.prototype = {
 		} else if (space[0] === 'p') { // kill player
 			var index = Number.parseInt(space.split(':')[1], 10);
 			console.log('player: ' + index + ' was killed by bomb');
-			// this.players[index].alive = false; // should be killing player, turned off for now
-			// this.players[index].x = this.players[index].y = -1;
+			this.players[index].alive = false; // should be killing player, turned off for now
+			this.players[index].x = -1;
+			this.players[index].y = -1;
 		}
 	},
 	placeTrail: function(pIndex, x, y, type) {
@@ -304,7 +307,7 @@ Game.prototype = {
 			case 'b': // drop bomb
 				if (typeof this.bombMap[[player.x, player.y]] !== 'undefined' || player.bombCount === 0) break; // already standing on bomb or bombCount = 0
 				player.bombCount--;
-				this.bombMap[[player.x, player.y]] = { owner: playerIndex, tick: 4 }; // TODO: change this to 4
+				this.bombMap[[player.x, player.y]] = { owner: playerIndex, tick: 1 }; // TODO: change this to 4
 				break;
 			case 'buy_count': // buys an extra bomb
 				if (player.coins < 1) break;
@@ -336,21 +339,22 @@ Game.prototype = {
 				break;
 			case 'op': // orange portal
 				this.shootPortal(playerIndex, player.orientation, 'orange');
-				console.log(this.portalMap);
+				// console.log(this.portalMap);
 				console.log(this.players[playerIndex].orangePortal);
 				break;
 			case 'bp': // blue portal
 				this.shootPortal(playerIndex, player.orientation, 'blue');
-				console.log(this.players[playerIndex].bluePortal);
+				// console.log(this.players[playerIndex].bluePortal);
 				break;
 		}
 		this.moveIterator++;
+		// console.log(this.moveIterator + ', ' + this.players.length);
 		// once moveIterator hits the end of the list, we're at the end of turn resolving
 		// 1. switch move order (first player is put to the back of the list)
 		// 2. bombs are ticked down, bombs with tick = 0 generate trails
 		// 3. trails are ticked, killing players/blocks etc
 		// 4. MORE COMING THX
-		if (this.moveIterator === this.players.length) { // currently doesn't switch move order, change?
+		if (this.moveIterator >= this.players.length) {
 			this.moveIterator = 0;
 			// first, move player who moved first time to end of the list
 			this.moveOrder.push(this.moveOrder[0]); // add first player to end
@@ -382,10 +386,18 @@ Game.prototype = {
 					}
 				}
 			}
+			// check victory step, right now only does two players
+			var alivePlayers = [];
+			for (var i = 0; i < this.players.length; i++) {
+				if (this.players[i].alive === true) alivePlayers.push(i); 
+			}
+			if (alivePlayers.length === 0) this.winnerIndex = -1; // if no winners, tie game
+			else if (alivePlayers.length === 1) this.winnerIndex = alivePlayers[0]; // otherwise return winnerIndex
 		}
-		this.save(function (err, data) { if (err) console.log(err); else console.log(data); });
+		this.save(function (err, data) { if (err) console.log(err); /* else console.log(data); */ });
 		for (var i = 0; i < this.players.length; i++)
-			this.players[i].save(function (err, data) { if (err) console.log(err); else console.log(data); });
+			this.players[i].save(function (err, data) { if (err) console.log(err); /* else console.log(data); */ });
+		return this.winnerIndex; // will return -2 until the game is complete
 	},
 	getID: function() { // returns the Mongo ID of the game
 		if (this.model === null) this.model = new mongooseGame();
