@@ -29,10 +29,12 @@ function getNextSquare(x, y, direction) {
 
 // helper function to calculate value of a block at a specific position
 function getBlockValue(x, y) {
+	x = parseInt(x, 10);
+	y = parseInt(y, 10);
 	var rawScore = Math.abs((this.boardSize - 1 - x) * x * (this.boardSize - 1 - y) * y);
 	var scaledScore = Math.floor(10 * rawScore / ((this.boardSize - 1) * (this.boardSize - 1) * (this.boardSize - 1) * (this.boardSize - 1) / 16));
 	if (scaledScore === 0) return 1;
-	else return scaledScore; // guaranteed to be a number from 1 to 10 distributed more heavily towards center blocks
+	else return scaledScore, 10; // guaranteed to be a number from 1 to 10 distributed more heavily towards center blocks
 }
 
 // game obj constructor
@@ -51,14 +53,6 @@ function Game() {
 	}
 
 	this.softBlockBoard = createArray(this.boardSize * this.boardSize);
-	// guaranteed spots for soft blocks:
-	// players have one horizontal and vertical move they can make at the beginning
-	// this will allow for players to actually place a bomb at the beginning and not be doomed from the start
-	this.softBlockBoard[3*this.boardSize + 1] = 1;
-	this.softBlockBoard[1*this.boardSize + 3] = 1;
-	this.softBlockBoard[(this.boardSize - 2) * this.boardSize + this.boardSize - 4] = 1;
-	this.softBlockBoard[(this.boardSize - 4) * this.boardSize + this.boardSize - 2] = 1;
-
 	for (i = 0; i < this.boardSize; i++) {
 		for (j = 0; j < this.boardSize; j++) {
 			if ((i === 1 || j === 1) && (i <= 2 && j <= 2)) {
@@ -73,6 +67,13 @@ function Game() {
 			else this.softBlockBoard[i * this.boardSize + j] = 1;
 		}
 	}
+	// guaranteed spots for soft blocks:
+	// players have one horizontal and vertical move they can make at the beginning
+	// this will allow for players to actually place a bomb at the beginning and not be doomed from the start
+	this.softBlockBoard[3*this.boardSize + 1] = 1;
+	this.softBlockBoard[1*this.boardSize + 3] = 1;
+	this.softBlockBoard[(this.boardSize - 2) * this.boardSize + this.boardSize - 4] = 1;
+	this.softBlockBoard[(this.boardSize - 4) * this.boardSize + this.boardSize - 2] = 1;
 }
 
 Game.prototype = {
@@ -81,7 +82,7 @@ Game.prototype = {
 	players: [],
 	moveOrder: [],
 	moveIterator: 0,
-	hardBlockBoard: null,
+	hardBlockBoard: null, // 1-D boolean array, 0 = no hard block, 1 = hard block here.
 	softBlockBoard: null,
 	bombMap: {},
 	trailMap: {},
@@ -307,7 +308,7 @@ Game.prototype = {
 			case 'b': // drop bomb
 				if (typeof this.bombMap[[player.x, player.y]] !== 'undefined' || player.bombCount === 0) break; // already standing on bomb or bombCount = 0
 				player.bombCount--;
-				this.bombMap[[player.x, player.y]] = { owner: playerIndex, tick: 1 }; // TODO: change this to 4
+				this.bombMap[[player.x, player.y]] = { owner: playerIndex, tick: 3 }; // TODO: change this to 4
 				break;
 			case 'buy_count': // buys an extra bomb
 				if (player.coins < 1) break;
@@ -339,15 +340,13 @@ Game.prototype = {
 				break;
 			case 'op': // orange portal
 				this.shootPortal(playerIndex, player.orientation, 'orange');
-				// console.log(this.portalMap);
 				console.log(this.players[playerIndex].orangePortal);
 				break;
 			case 'bp': // blue portal
 				this.shootPortal(playerIndex, player.orientation, 'blue');
-				// console.log(this.players[playerIndex].bluePortal);
 				break;
 		}
-		this.moveIterator++;
+		this.moveIterator++; // occasionally this doesn't reset?? wtf is happening
 		// console.log(this.moveIterator + ', ' + this.players.length);
 		// once moveIterator hits the end of the list, we're at the end of turn resolving
 		// 1. switch move order (first player is put to the back of the list)
@@ -355,6 +354,7 @@ Game.prototype = {
 		// 3. trails are ticked, killing players/blocks etc
 		// 4. MORE COMING THX
 		if (this.moveIterator >= this.players.length) {
+			// console.log('resetting');
 			this.moveIterator = 0;
 			// first, move player who moved first time to end of the list
 			this.moveOrder.push(this.moveOrder[0]); // add first player to end

@@ -35,14 +35,9 @@ var Player = new Schema({
     type: Number,
     default: 0
   },
-  // person: { type: Schema.ObjectId, ref: 'Person' },
-  person: {
-    type: Number,
-    default: -1
-  },
+  person: { type: Schema.ObjectId, ref: 'Person' },
   orangePortal: Object,
   bluePortal: Object
-  // game: { type: Schema.ObjectId, ref: 'Game' }
 });
 
 var Game = new Schema({

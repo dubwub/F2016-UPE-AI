@@ -1,4 +1,4 @@
-var mongoose = require('mongoose'),
+	var mongoose = require('mongoose'),
   mongoosePlayer = mongoose.model('Player');
 
 function Player(index, boardSize) {
@@ -50,7 +50,6 @@ Player.prototype = {
 		this.model.bombRange = this.bombRange;
 		this.model.bombPierce = this.bombPierce;
 		this.model.alive = this.alive;
-		console.log('this.coins = ' + this.coins);
 		this.model.coins = this.coins;
 
 		this.model.orangePortal = this.orangePortal;

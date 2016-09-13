@@ -133,7 +133,7 @@ exports.submit = function (req, res) {
  */
 exports.list = function (req, res) {
   // Game.find().sort('-created').populate('people').exec(function (err, games) { // need to populate eventually
-  Game.find().sort('-created').populate('players').exec(function (err, games) {
+  Game.find().sort('-created').populate('people').exec(function (err, games) {
     if (err) {
       // console.log(err);
       return res.status(400).send({
