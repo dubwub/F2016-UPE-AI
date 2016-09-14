@@ -43,8 +43,8 @@ function Game() {
 		// for odd numbered boardSizes, this initializer can simply put hard blocks in the odd indices
 	this.hardBlockBoard = createArray(this.boardSize * this.boardSize); // storing 2d array in 1d array (x*11 + y is index)
 	var i = 0; // "global" iterators because grunt hates everything that is fun
-	var j = 0;
-	for (i = 0; i < this.boardSize; i++) {
+	var j = 0
+;	for (i = 0; i < this.boardSize; i++) {
 		for (j = 0; j < this.boardSize; j++) {
 			if (i === 0 || j === 0 || i === this.boardSize - 1 || j === this.boardSize - 1 ||
 				(i % 2 === 0 && j % 2 === 0)) this.hardBlockBoard[i*this.boardSize + j] = 1; // odd indices = add block
@@ -95,7 +95,7 @@ Game.prototype = {
 		this is ideal for detonate functionality but might want to be fixed in the future.
 	*/
 	querySpace: function(x, y) {
-		if (x < 0 || x >= this.boardSize || y <= 0 || y >= this.boardSize) return 'out';
+		if (x < 0 || x >= this.boardSize || y < 0 || y >= this.boardSize) return 'out';
 		if (this.hardBlockBoard[x * this.boardSize + y] === 1) return 'hb';
 		if (this.softBlockBoard[x * this.boardSize + y] === 1) return 'sb';
 		if (typeof this.bombMap[[x, y]] !== 'undefined') return 'b'; // bomb

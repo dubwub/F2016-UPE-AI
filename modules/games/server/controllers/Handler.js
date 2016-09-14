@@ -103,8 +103,7 @@ Handler.prototype =
         }
       }
     }
-    // this.players[playerID].save();
-    callback("success");
+    callback(this.game.model);
   }
 };
 

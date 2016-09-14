@@ -3,10 +3,12 @@
     <h1>Game TV</h1>
     <!--<h1 ng-bind="vm.game.title"></h1>-->
   </div>
+    Game started: 
+    <span ng-bind="vm.game.date | date:'mediumDate'"></span><br>
 
     <div class="row">
       <div class="col-sm-4">
-        <span ng-bind="vm.game.people[0].displayName"></span> vs. <span ng-bind="vm.game.people[1].displayName"></span>
+        <span ng-bind="vm.game.people[0].username"></span> (<span ng-bind="vm.game.people[0].elo"></span>) vs. <span ng-bind="vm.game.people[1].username"></span> (<span ng-bind="vm.game.people[1].elo"></span>)
       </div>
     </div>
     <div class="row">
@@ -96,12 +98,7 @@
       <br>Player to move: <span ng-bind="vm.game.moveOrder[vm.game.moveIterator]"></span>
   <small>
     <em class="text-muted">
-      Game started: 
-      <span ng-bind="vm.game.date | date:'mediumDate'"></span><br>
-      
-      <span ng-bind="vm.game.people[0]"></span> vs. <span ng-bind="vm.game.people[1]"></span>
 
-      <br>Positions: <span ng-bind="vm.game.players[0].x"></span>, <span ng-bind="vm.game.players[0].y"></span> vs. <span ng-bind="vm.game.players[1].x"></span>,<span ng-bind="vm.game.players[1].y"></span>
 
       <div id="testTV" style="background-color: lightblue; width:{{40*vm.game.boardSize}}px; height:{{40*vm.game.boardSize}}px; position: relative;">
         <div ng-repeat="blockIndex in vm.game.hardBlockBoard track by $index" ng-init="x = ($index-$index%11)/11 * 40; y = $index%11 * 40" ng-switch on="blockIndex">
