@@ -11,8 +11,8 @@
   (JS's answer to a hashmap).
 
   How these work:
-  These store all of the moves of each of the players in an assoc. array (again, hashmap esque structure), and then when
-  all players' moves are submitted the Handler will submit everything and advance the game state.
+  These connect the server game logic (Games and Players), and serve as the functionality beyond the game for any particular game.
+  For instance, this handles the first level of POST request, and calculates elos for post-match.
 
 */
 
@@ -42,7 +42,10 @@ var Handler = function Handler(people, Class, callback) { // TODO: CALLBACK NOT 
   this.id = this.game.getID();
 };
 
-// helper functions related to updating elo after the game has terminated (is there a better way of doing this lol)
+/*
+  Below are helper functions called when the game ends that first finds the first player in Mongo, then finds the second
+  player in Mongo, then calculates what their elos should be, and saves.
+*/
 function calculateElosAndUpdate(user0, user1, winnerIndex) {
   var expectedScore0 = Elo.getExpected(user0.elo, user1.elo);
   var expectedScore1 = Elo.getExpected(user1.elo, user0.elo);
@@ -57,7 +60,7 @@ function calculateElosAndUpdate(user0, user1, winnerIndex) {
     user0.elo = Elo.updateRating(expectedScore0, 0, user0.elo);
     user1.elo = Elo.updateRating(expectedScore1, 1, user1.elo);
   }
-  console.log('done calculating, new elos: ' + user0.elo + ', ' + user1.elo);
+  // console.log('done calculating, new elos: ' + user0.elo + ', ' + user1.elo);
   user0.save();
   user1.save();
 }
@@ -95,15 +98,14 @@ Handler.prototype =
     // TODO: when submitting to a complete game, should quit out
     for (var i = 0; i < this.players.length; i++) {
       if (this.players[i].getID().toString() === playerID) {
-        var winnerIndex = this.game.submit(i, new_move);
-        // if output === -2, game is ongoing
-        if (winnerIndex === -1 || winnerIndex >= 0) { // tie game
-          console.log('game ended, going here');
-          findFirstUser(this.Class, this.players[0].person, this.players[1].person, winnerIndex);
+        var returnJSON = this.game.submit(i, new_move);
+        // check winnerIndex, if === -2, game is ongoing otherwise finish
+        if (this.game.winnerIndex === -1 || this.game.winnerIndex >= 0) { // finish the game
+          findFirstUser(this.Class, this.players[0].person, this.players[1].person, this.game.winnerIndex);
         }
+        callback(returnJSON.err, returnJSON);
       }
     }
-    callback(this.game.model);
   }
 };
 

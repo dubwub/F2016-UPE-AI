@@ -34,16 +34,7 @@ var handlers = {};
  at the same time
  */
 
-// willThisEvenWork.$inject = ['Socket'];
-// function willThisEvenWork(Socket) {
-//   console.log('Socket');
-//   console.log(Socket);
-// }
-// console.log(socketio);
-// var io = io();
-
 function verifyAccount (req, res, id, username, next) {
-
   if (!mongoose.Types.ObjectId.isValid(id)) {
     res.status(400).send({
       message: 'Account ID is invalid'
@@ -82,18 +73,15 @@ function performSearch(req, res) {
     });
     handlers[new_handler.id] = new_handler; // add to assoc. array (hashmap)
 
-    var output = {}; // create output to be sent back to requestors
-    output.gameID = new_handler.id;
+    // var output = {}; // create output to be sent back to requestors
+    // output.gameID = new_handler.id;
 
     // for loop that will run exactly twice all the time (still a four loop in case this needs to be extended)
     for (var i = 0; i < new_handler.players.length; i++) {
-      output.playerID = new_handler.players[i].getID();
-      output.x = new_handler.players[i].x;
-      output.y = new_handler.players[i].y;
       if (i === 0) {
-        saved_res.json(output);
+        saved_res.json(new_handler.game.sanitizedForm(0));
       } else if (i === 1) {
-        res.json(output);
+        res.json(new_handler.game.sanitizedForm(1));
       }
     }
     saved_res = -1; // reset search request (PROBABLY STILL NEEDS MUTEX)
@@ -121,10 +109,12 @@ exports.read = function (req, res) {
  */
 exports.submit = function (req, res) {
   var game = req.game;
-  // console.log(game);
+  // if (typeof handlers[game._id] === 'undefined') {
+  //   res.json('That game does not exist, it may have been completed.');
+  // }
   handlers[game._id].submitMove(req.body.move, req.body.playerID, function(err, data) {
     if (err) res.json(err);
-    // else console.log(data);
+    else res.json(data);
   });
 };
 
@@ -174,9 +164,6 @@ exports.gameByID = function (req, res, next, id) {
       });
     }
     req.game = game;
-    // console.log(game.players);
-    // console.log(game.people);
-    // console.log(game.players[0]); <-- TEST TO SEE IF POPULATE WORKED
     next();
   });
 };

@@ -13,7 +13,7 @@ function createArray(length) { // literally creates a new array with params e.g.
 	return arr;
 }
 
-// used for trail creation, helper function that helps determine where the trail goes next
+// Overall helper function that lets you input the direction you're facing and current position that outputs next position.
 function getNextSquare(x, y, direction) {
 	switch (direction) {
 		case 0: // left
@@ -40,11 +40,11 @@ function getBlockValue(x, y) {
 // game obj constructor
 function Game() {
 	// hard blocks appear in a gridlike pattern with no other hard blocks in any of the adjacent squres.
-		// for odd numbered boardSizes, this initializer can simply put hard blocks in the odd indices
+	// for odd numbered boardSizes, this initializer can simply put hard blocks in the odd indices
 	this.hardBlockBoard = createArray(this.boardSize * this.boardSize); // storing 2d array in 1d array (x*11 + y is index)
 	var i = 0; // "global" iterators because grunt hates everything that is fun
-	var j = 0
-;	for (i = 0; i < this.boardSize; i++) {
+	var j = 0;
+	for (i = 0; i < this.boardSize; i++) {
 		for (j = 0; j < this.boardSize; j++) {
 			if (i === 0 || j === 0 || i === this.boardSize - 1 || j === this.boardSize - 1 ||
 				(i % 2 === 0 && j % 2 === 0)) this.hardBlockBoard[i*this.boardSize + j] = 1; // odd indices = add block
@@ -238,7 +238,6 @@ Game.prototype = {
 			}
 		}
 	},
-
 	shootPortal: function(playerIndex, direction, portalColor) {
 		var playerX = this.players[playerIndex].x;
 		var playerY = this.players[playerIndex].y;
@@ -271,7 +270,10 @@ Game.prototype = {
 		}
 	},
 	submit: function(playerIndex, move) {
-		if (playerIndex !== this.moveOrder[this.moveIterator]) return; // ignore moves out of order
+		var outputNote; // note to be sent back with the output
+		if (playerIndex !== this.moveOrder[this.moveIterator]) {
+			return { err: 'Not your turn.' };
+		}
 		var player = this.players[playerIndex];
 		var output; // used in the switch case
 		switch (move) {
@@ -311,17 +313,26 @@ Game.prototype = {
 				this.bombMap[[player.x, player.y]] = { owner: playerIndex, tick: 3 }; // TODO: change this to 4
 				break;
 			case 'buy_count': // buys an extra bomb
-				if (player.coins < 1) break;
+				if (player.coins < 1) {
+					outputNote = 'Insufficient funds to buy bomb';
+					break;
+				}
 				player.bombCount++;
 				player.coins -= 1;
 				break;
 			case 'buy_pierce': // buys pierce
-				if (player.coins < 1) break;
+				if (player.coins < 1) {
+					outputNote = 'Insufficient funds to buy pierce';
+					break;
+				}
 				player.bombPierce++;
 				player.coins -= 1;
 				break;
 			case 'buy_range': // buys pierce
-				if (player.coins < 1) break;
+				if (player.coins < 1) {
+					outputNote = 'Insufficient funds to buy bomb range';
+					break;
+				}
 				player.bombRange++;
 				player.coins -= 1;
 				break;
@@ -332,7 +343,8 @@ Game.prototype = {
 				if (this.querySpace(newBlockPos[0], newBlockPos[1]) !== '') break; // can't put a block on something else
 				var blockCost = getBlockValue(newBlockPos[0], newBlockPos[1]);
 				if (player.coins < blockCost) {
-					console.log('insufficient coinage to buy block, block cost at ' + newBlockPos[0] + ',' + newBlockPos[1] + '=' + blockCost);
+					outputNote = 'Insufficient funds to buy block, requires: ' + blockCost;
+					// console.log('insufficient coinage to buy block, block cost at ' + newBlockPos[0] + ',' + newBlockPos[1] + '=' + blockCost);
 					break;
 				}
 				this.softBlockBoard[newBlockPos[0] * this.boardSize + newBlockPos[1]] = 1;
@@ -347,14 +359,12 @@ Game.prototype = {
 				break;
 		}
 		this.moveIterator++; // occasionally this doesn't reset?? wtf is happening
-		// console.log(this.moveIterator + ', ' + this.players.length);
 		// once moveIterator hits the end of the list, we're at the end of turn resolving
 		// 1. switch move order (first player is put to the back of the list)
 		// 2. bombs are ticked down, bombs with tick = 0 generate trails
 		// 3. trails are ticked, killing players/blocks etc
 		// 4. MORE COMING THX
 		if (this.moveIterator >= this.players.length) {
-			// console.log('resetting');
 			this.moveIterator = 0;
 			// first, move player who moved first time to end of the list
 			this.moveOrder.push(this.moveOrder[0]); // add first player to end
@@ -391,20 +401,46 @@ Game.prototype = {
 			for (var i = 0; i < this.players.length; i++) {
 				if (this.players[i].alive === true) alivePlayers.push(i); 
 			}
+			this.state = 'complete';
 			if (alivePlayers.length === 0) this.winnerIndex = -1; // if no winners, tie game
 			else if (alivePlayers.length === 1) this.winnerIndex = alivePlayers[0]; // otherwise return winnerIndex
+			else this.state = 'in progress';
 		}
 		this.save(function (err, data) { if (err) console.log(err); /* else console.log(data); */ });
 		for (var i = 0; i < this.players.length; i++)
 			this.players[i].save(function (err, data) { if (err) console.log(err); /* else console.log(data); */ });
-		return this.winnerIndex; // will return -2 until the game is complete
+		var returnJSON = this.sanitizedForm(playerIndex);
+		returnJSON.note = outputNote;
+		return returnJSON; // will return -2 until the game is complete
 	},
 	getID: function() { // returns the Mongo ID of the game
 		if (this.model === null) this.model = new mongooseGame();
 		return this.model._id;
 	},
+	sanitizedForm: function(playerIndex) {
+		var output = {};
+		output.gameID = this.getID();
+		output.playerID = this.players[playerIndex].getID();
+		output.state = this.state;
+		output.boardSize = this.boardSize;
+		output.player = this.players[playerIndex].sanitizedForm();
+		output.moveOrder = this.moveOrder;
+		output.moveIterator = this.moveIterator;
+		output.playerIndex = playerIndex;
+		if (playerIndex === 0) {
+			output.opponent = this.players[1].sanitizedForm();
+		}
+		else output.opponent = this.players[0].sanitizedForm();
+		output.hardBlockBoard = this.hardBlockBoard;
+		output.softBlockBoard = this.softBlockBoard;
+		output.trailMap = this.trailMap;
+		output.bombMap = this.bombMap;
+		output.portalMap = this.portalMap;
+		return output;
+	},
 	save: function(callback) { // saves the game into the database (should be called after attachPlayers always)
 		if (this.model === null) this.model = new mongooseGame();
+		this.model.state = this.state;
 		this.model.boardSize = this.boardSize;
 		this.model.people = this.people;
 		this.model.moveOrder = this.moveOrder;

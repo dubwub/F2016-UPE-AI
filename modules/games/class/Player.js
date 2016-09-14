@@ -37,6 +37,20 @@ Player.prototype = {
 	model: null,
 	orangePortal: null,
 	bluePortal: null,
+	sanitizedForm: function() {
+		var output = {};
+		output.x = this.x;
+		output.y = this.y;
+		output.orientation = this.orientation;
+		output.bombCount = this.bombCount;
+		output.bombRange = this.bombRange;
+		output.bombPierce = this.bombPierce;
+		output.alive = this.alive;
+		output.coins = this.coins;
+		output.orangePortal = this.orangePortal;
+		output.bluePortal = this.bluePortal;
+		return output;
+	},
 	getID: function() {
 		if (this.model === null) this.model = new mongoosePlayer();
 		return this.model._id;
