@@ -6,7 +6,7 @@
     <a ng-repeat="game in vm.games" ui-sref="games.view({ gameId: game._id })" class="list-group-item">
       <small class="list-group-item-text">
         <span ng-bind="game.date | date:'mediumDate'"></span>
-        <span ng-bind="game.people[0].username"></span> (<span ng-bind="game.people[0].elo"></span>) vs. <span ng-bind="game.people[1].username"></span> (<span ng-bind="game.people[1].elo"></span>)
+        <span ng-bind="game.people[0].username"></span> (<span ng-bind="game.people[0].elo"></span>) vs. <span ng-bind="game.people[1].username"></span> (<span ng-bind="game.people[1].elo"></span>) -- <span ng-bind="game.state"></span>
       </small>
       <h4 class="list-group-item-heading" ng-bind="game.title"></h4>
       <p class="list-group-item-text" ng-bind="game.content"></p>

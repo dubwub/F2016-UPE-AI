@@ -11,7 +11,8 @@
 
     menuService.addMenuItem('topbar', {
       title: 'Documentation',
-      state: 'docs'
+      state: 'docs',
+      roles: ['*']
     });
 
     menuService.addMenu('account', {
