@@ -311,7 +311,7 @@ Game.prototype = {
 			case 'b': // drop bomb
 				if (typeof this.bombMap[[player.x, player.y]] !== 'undefined' || player.bombCount === 0) break; // already standing on bomb or bombCount = 0
 				player.bombCount--;
-				this.bombMap[[player.x, player.y]] = { owner: playerIndex, tick: 3 }; // TODO: change this to 4
+				this.bombMap[[player.x, player.y]] = { owner: playerIndex, tick: 4 };
 				break;
 			case 'buy_count': // buys an extra bomb
 				if (player.coins < 1) {
