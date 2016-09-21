@@ -66,7 +66,7 @@ function performSearch(req, res) {
     saved_person_id = req.body.accountID;
   } else { // second person reaches here
     var people = [saved_person_id, req.body.accountID];
-    var new_handler = new Handler(people, Class, function(err) { // create new Handler object for new Game, the new Game will be init in Handler constructor
+    var new_handler = new Handler(people, Class, [res, saved_res], function(err) { // create new Handler object for new Game, the new Game will be init in Handler constructor
       if (err) res.status(400).send({
         message: errorHandler.getErrorMessage(err)
       });
@@ -77,13 +77,13 @@ function performSearch(req, res) {
     // output.gameID = new_handler.id;
 
     // for loop that will run exactly twice all the time (still a four loop in case this needs to be extended)
-    for (var i = 0; i < new_handler.players.length; i++) {
-      if (i === 0) {
-        saved_res.json(new_handler.game.sanitizedForm(0));
-      } else if (i === 1) {
-        res.json(new_handler.game.sanitizedForm(1));
-      }
-    }
+    // for (var i = 0; i < new_handler.players.length; i++) {
+    //   if (i === 0) {
+    //     saved_res.json(new_handler.game.sanitizedForm(0));
+    //   } else if (i === 1) {
+    //     res.json(new_handler.game.sanitizedForm(1));
+    //   }
+    // }
     saved_res = -1; // reset search request (PROBABLY STILL NEEDS MUTEX)
     saved_person_id = -1;
   }
@@ -112,10 +112,11 @@ exports.submit = function (req, res) {
   // if (typeof handlers[game._id] === 'undefined') {
   //   res.json('That game does not exist, it may have been completed.');
   // }
-  handlers[game._id].submitMove(req.body.move, req.body.playerID, function(err, data) {
-    if (err) res.json(err);
-    else res.json(data);
-  });
+  handlers[game._id].submitMove(req.body.move, req.body.playerID, res);
+  // handlers[game._id].submitMove(req.body.move, req.body.playerID, function(err, data) {
+  //   if (err) res.json(err);
+  //   else res.json(data);
+  // });
 };
 
 /**

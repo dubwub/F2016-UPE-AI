@@ -33,6 +33,12 @@
         controller: 'HomeController',
         controllerAs: 'vm'
       })
+      .state('docs', {
+        url: '/docs',
+        templateUrl: 'modules/core/client/views/documentation.client.view.html',
+        controller: 'HomeController',
+        controllerAs: 'vm'
+      })
       .state('not-found', {
         url: '/not-found',
         templateUrl: 'modules/core/client/views/404.client.view.html',

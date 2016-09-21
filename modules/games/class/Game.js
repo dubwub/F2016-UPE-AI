@@ -107,13 +107,13 @@ Game.prototype = {
 		return '';
 	},	
 	attachPlayers: function(people, players) { // helper function that is used during game initialization (see handler)
-		this.people = people; // TODO: is slicing (copying by value) necessary?
+		this.people = people;
 		this.players = players;
 		this.moveOrder = [];
 		this.moveIterator = 0;
 		for (var i = 0; i < people.length; i++) {
-			// this.moveOrder.push(i);
-			this.moveOrder.push(0);
+			this.moveOrder.push(i);
+			// this.moveOrder.push(0); <-- uncomment for testing purposes
 		}
 	},
 	// returns x, y and direction of a solid object move in a specific direction
@@ -269,8 +269,9 @@ Game.prototype = {
 			this.portalMap[[nextSquare[0], nextSquare[1]]][newPortalDirection] = { owner: playerIndex, portalColor: 'blue' };
 		}
 	},
-	submit: function(playerIndex, move) {
+	submit: function(playerIndex, move, callback) {
 		var outputNote; // note to be sent back with the output
+		// console.log(playerIndex + ', ' + this.moveOrder[this.moveIterator]);
 		if (playerIndex !== this.moveOrder[this.moveIterator]) {
 			return { err: 'Not your turn.' };
 		}
@@ -357,13 +358,16 @@ Game.prototype = {
 			case 'bp': // blue portal
 				this.shootPortal(playerIndex, player.orientation, 'blue');
 				break;
+			default: // none of the above?
+				outputNote = 'invalid move, submitting no move this turn'
+				break;
 		}
-		this.moveIterator++; // occasionally this doesn't reset?? wtf is happening
+		this.moveIterator++;
 		// once moveIterator hits the end of the list, we're at the end of turn resolving
 		// 1. switch move order (first player is put to the back of the list)
 		// 2. bombs are ticked down, bombs with tick = 0 generate trails
 		// 3. trails are ticked, killing players/blocks etc
-		// 4. MORE COMING THX
+		// 4. check if the game's ended
 		if (this.moveIterator >= this.players.length) {
 			this.moveIterator = 0;
 			// first, move player who moved first time to end of the list

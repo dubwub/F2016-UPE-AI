@@ -1,0 +1,168 @@
+<section>
+  <div class="jumbotron text-center">
+    <div class="row">
+      <p class="lead">
+        <h1>Documentation</h1>
+      </p>
+    </div>
+  </div>
+  <div>
+    <h3>Getting started</h3>
+    <ul>
+      <li>If you haven't already, create an account! Sign up in the top right corner of the screen.
+      <li>Go to Edit Profile, which can be found after logging in by clicking on your name in the top right and clicking "Edit Profile"
+      <li>There you should find your developer key (which you should NOT share with anyone), and your current ELO. You will need your dev key for developing your AI.
+      <li>If anything doesn't make sense, consult: https://docs.google.com/document/d/1fRC1EvRcNP17UQdy2mRlxaClRezLiTTGL9MW3bGafS8
+    </ul>
+    <h3>Using the matchmaking server</h3>
+    <ul>
+      <li>First, write an AI! For inspiration, feel free to use the sample AIs provided &lt;link needed&gt;
+      <li>In your AI, to search for a game, write a post request to &lt;server URL&gt;/api/games/search with data = {accountID: &lt;dev key goes here&gt;, username: &lt;your username&gt;}
+      <li>This will put your AI into matchmaking. Once another player joins matchmaking (or if someone was already searching), the server will create a game with you two! You will receive a post response to your request once it is your turn. See below for what that looks like and what to expect.
+    </ul>
+    <h3>Sample output</h3>
+    <div class="well">
+    <samp>
+    {
+    <br>&nbsp;&nbsp;u'hardBlockBoard': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    <br>&nbsp;&nbsp;u'boardSize': 11,
+    <br>&nbsp;&nbsp;u'gameID': u'57e1d18e04fa591c2c1ddca4',
+    <br>&nbsp;&nbsp;u'bombMap': {u'2,1': {u'owner': 0, u'tick': 1}},
+    <br>&nbsp;&nbsp;u'moveIterator': 0,
+    <br>&nbsp;&nbsp;u'playerID': u'57e1d18e04fa591c2c1ddca3',
+    <br>&nbsp;&nbsp;u'portalMap': {u'7,9': {u'2': {u'owner': 1, u'portalColor': u'orange'}}, u'9,7': {u'3': {u'owner': 1, u'portalColor': u'blue'}}},
+    <br>&nbsp;&nbsp;u'playerIndex': 1,
+    <br>&nbsp;&nbsp;u'trailMap': {},
+    <br>&nbsp;&nbsp;u'player': {u'bluePortal': {u'y': 7, u'x': 9, u'direction': 3}, u'orientation': 1, u'orangePortal': {u'y': 9, u'x': 7, u'direction': 2}, u'coins': 0, u'bombCount': 1, u'bombPierce': 0, u'alive': True, u'y': 8, u'x': 9, u'bombRange': 3},
+    <br>&nbsp;&nbsp;u'state': u'in progress',
+    <br>&nbsp;&nbsp;u'softBlockBoard': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    <br>&nbsp;&nbsp;u'moveOrder': [1, 0],
+    <br>&nbsp;&nbsp;u'opponent': {u'bluePortal': None, u'orientation': 0, u'orangePortal': None, u'coins': 0, u'bombCount': 0, u'bombPierce': 0, u'alive': True, u'y': 1, u'x': 1, u'bombRange': 3}
+    <br>}</samp>
+    </div>
+    <h3>Interpreting the output</h3>
+    This may look really complicated, but it all makes sense when you break it down.
+    <br><br>A few definitions:
+    <ul>
+      <li>Directions (for orientations) are typically represented as numbers. Left corresponds to 0, up is 1, right is 2 and down is 3.
+      <li>The game board is an 11x11 grid, and the x and y coordinates go from (0, 0) to (10, 10). Note that incrementing and decrementing x-values moves you horizontally, and doing that to y-values moves you vertically. (0, 0) represents the top left corner and (10, 10) is the bottom right corner.
+    </ul>
+    <h4>hardBlockBoard, softBlockBoard</h4>
+    <div class="well">
+    <samp>
+    u'hardBlockBoard': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    <br>u'softBlockBoard': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    </samp>
+    </div>
+    hardBlockBoard/softBlockBoard is a 121-length array that tells you where all the hard/soft blocks are (1) and aren't (0) on the map. If square (x, y) has a hard/soft block, then the array value at index (x * 11 + y) = 1.
+    <h4>boardSize</h4>
+    <div class="well">
+    <samp>
+    u'boardSize': 11
+    </samp>
+    </div>
+    boardSize tells you the length of any side of the board grid. It defaults to 11 and this will probably not change.
+    <h4>moveOrder, moveIterator, playerIndex</h4>
+    <div class="well">
+    <samp>u'moveOrder': [1, 0]
+    <br>u'moveIterator': 0
+    <br>u'playerIndex': 1
+    </samp>
+    </div>
+    <p>moveOrder is a list representing the move order for this specific turn. Player indices populate this move order list, and index 0 will move first. You can figure out where you are in this list using the moveIterator, which is the exact index that the moveOrder is at in the server. Since you are receiving a post response, you can expect that moveOrder[moveIterator] = your player index, but just for convenience your playerIndex is given too.</p>
+    <p>Note that the moveOrder changes each turn: the player that moves first one turn moves last the next turn.</p>
+    <h4>gameID, playerID</h4>
+    <div class="well">
+    <samp>u'gameID': u'57e1d18e04fa591c2c1ddca4'
+    <br>u'playerID': u'57e1d18e04fa591c2c1ddca3'
+    </samp>
+    </div>
+    <p>The gameID is the ID of the game. The player ID is your specific player ID. Save these, you're going to need them to submit your moves.</p>
+    <p>Neither the gameID or playerID is the same as your dev key.</p>
+    <h4>state</h4>
+    <div class="well">
+    <samp>u'state': u'in progress'
+    </samp>
+    </div>
+    <p>The state is either 'in progress' or 'complete'. Typically the state will be in progress, until obviously only one or zero players remain.</p>
+    <h4>player, opponent</h4>
+    <div class="well">
+    <samp>u'player': {u'bluePortal': {u'y': 7, u'x': 9, u'direction': 3}, u'orientation': 1, u'orangePortal': {u'y': 9, u'x': 7, u'direction': 2}, u'coins': 0, u'bombCount': 1, u'bombPierce': 0, u'alive': True, u'y': 8, u'x': 9, u'bombRange': 3}
+    <br>u'opponent': {u'bluePortal': None, u'orientation': 0, u'orangePortal': None, u'coins': 0, u'bombCount': 0, u'bombPierce': 0, u'alive': True, u'y': 1, u'x': 1, u'bombRange': 3}
+    </samp>
+    </div>
+    player and opponent are formatted the same way, here's the breakdown:
+    <ul>
+      <li>orientation - the direction that player is facing (refer to directions list above)
+      <li>bluePortal, orangePortal - either None or an object that tells you the (x, y) coordinates of the block the portal is on, and the direction (see direction's list above) that it is facing outwards. For example, in the given sample output, player.bluePortal has direction 3, which means it's on the bottom face of the block at (9, 7).
+      <li>bombRange, bombCount, bombPierce, coins, x, y - these are all your values for these attributes of the player
+      <li>alive - True/False depending on whether that player still exists on the game board or not.
+    </ul>
+    <h4>bombMap</h4>
+    <div class="well">
+    <samp>
+    u'bombMap': {u'2,1': {u'owner': 0, u'tick': 1}}
+    </samp>
+    </div>
+    <p>bombMap is a JSON object that acts as a map between x, y coordinates and bombs. The keys are strings which are in 'x,y' format.</p>
+    <p>Each bomb has an owner, which refers to a playerIndex, and a tick count, which tells you how many turns it has left on the board.</p>
+    <h4>portalMap</h4>
+    <div class="well">
+    <samp>
+    u'portalMap': {u'7,9': {u'2': {u'owner': 1, u'portalColor': u'orange'}}, u'9,7': {u'3': {u'owner': 1, u'portalColor': u'blue'}}}
+    </samp>
+    </div>
+    <p>You can find the orange/blue portal data in the player/opponent output, but if you want to find them all in one coherent place use the portalMap.</p>
+    <p>Keys are strings in 'x,y' format for the square that the portals are on, and values are mappings between directions (which would be opposite from the direction that you walk into the portal) facing out and the portal object. The portal object has an owner (player index) and color (either orange or blue).</p>
+    <h4>trailMap</h4>
+    <div class="well">
+    <samp>
+    u'trailMap': {u'7,9': {u'1': {u'tick': 1, u'type': u'h'}}, u'8,10': {u'1': {u'tick': 1, u'type': u'v'}}, u'9,9': {u'1': {u'tick': 1, u'type': u'h'}}, u'10,9': {u'1': {u'tick': 1, u'type': u'h'}}, u'8,9': {u'1': {u'tick': 1, u'type': u'origin'}}
+    </samp>
+    </div>
+    <p>trailMap is a JSON object that acts as a map between x, y coordinates and explosion trail squares. The keys are strings which are in 'x,y' format.</p>
+    <p>On each square there is a mapping of player indices to trail objects. Player indices are the same as the ones given in the moveOrder and playerIndex. Explosion trail objects have <b>ticks</b>, which represent how many more turns they'll exist on the game board, and <b>types</b>, which are literally for graphical representation.</p>
+    <p>For the purposes of creating an AI, all you really need to know is that you should avoid the squares that have objects in this trailMap for movement</p>
+    <h3>Submitting your move</h3>
+    In order to submit your move, just make a post request to &lt;server url&gt;/api/games/submit/&lt;gameID from above&gt; with data: {playerID: &lt;playerID from above&gt;, move:&lt;your move to submit, see legal list below&gt;}
+    <br><br>LEGAL MOVES:
+    <ul>
+    <li>mu - move up
+    <li>ml - move left
+    <li>md - move down
+    <li>mr - move right
+    <li>tu - turn up
+    <li>tl - turn left
+    <li>td - turn down
+    <li>tr - turn right
+    <li>b - place bomb
+    <li>op - shoot orange portal
+    <li>bp - shoot blue portal
+    <li>(empty string) - do nothing
+    <li>buy_count - costs 1, increases number of bombs you can have out by 1
+    <li>buy_pierce - costs 1, increases whether your bombs can go through walls
+    <li>buy_range - costs 1, increases raw range of bombs
+    <li>buy_block - costs &lt;value of block&gt;, creates a block in the square you’re facing assuming there’s not a solid object already there
+    <li>Value of block = floor((board size - 1 - x) * x * (board size - 1 - y) * y * 10 / ((board size - 1)^4 / 16))
+    </ul>
+    <!--<h2>High Level Overview</h2>
+    <p>Inspired by existing AI competitions at other schools (i.e. MIT’s Battlecode and Pokerbots), UPE has created an AI competition for RPI students. This is motivated by the same factors that motivate UPE’s semesterly ProgComp: UPE is always looking for new talent, and UPE loves to foster interest in coding at RPI. Plus, there’s cash and sponsors involved, what a plus!</p>
+
+<p>In case you’re not familiar with AI competitions in general, here’s a general overview of how this one will work.</p>
+
+<p>UPE has devised and programmed a game that takes AI input and uses those to determine a winner -- that’s where you come in! The full rules of the game (this document), as well as the source code of the game engine are all released at the beginning of the semester. With these as a guide, RPI students in teams of four or less will spend the semester developing and testing their AIs to most optimally play the game.</p>
+
+<p>UPE will be running a server with the game logic on it continuously throughout the semester that teams can use to test their AIs. This server will handle matchmaking and have an internal ELO system that will be used to rank AIs before the main events.</p>
+
+<p>Midway through the semester, there will be a seeding tournament with either a small prizepool or no prizepool. The purpose is to allow teams to feel out the competition, and for the organizers (UPE) to figure out how to seed the final main event.</p>
+
+<p>At the main event, all interested teams will battle to the death in a large double elimination bracket, and a champion is crowned.</p>
+
+<p>The game is a modified variant of Bomberman, which can best be described as a deterministic Bomberman with portals. The full description of everything that is modified is explained in explicit detail below. Any questions can be asked to Darwin Ding (dingd@rpi.edu).</p>
+
+<p>However, this is not all. There’s two types of Bomberman that are available to competitors:
+Hard-track: Contains the entirety of the rules below, including power-ups and portals. Has the largest prize pool, but will have some fierce competition.
+Easy-track: Contains a smaller, modified ruleset that is meant for students who aren’t as familiar with programming but still want to dive right in. Still does have a prize pool, however.</p>-->
+  </div>
+  <br><center>Any additional questions? Reach out! Email Darwin Ding at dingd@rpi.edu</center>
+</section>

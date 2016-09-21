@@ -8,6 +8,12 @@
   menuConfig.$inject = ['menuService'];
 
   function menuConfig(menuService) {
+
+    menuService.addMenuItem('topbar', {
+      title: 'Documentation',
+      state: 'docs'
+    });
+
     menuService.addMenu('account', {
       roles: ['user']
     });
@@ -34,9 +40,9 @@
       state: 'settings.password'
     });
 
-    menuService.addSubMenuItem('account', 'settings', {
-      title: 'Manage Social Accounts',
-      state: 'settings.accounts'
-    });
+    // menuService.addSubMenuItem('account', 'settings', {
+    //   title: 'Manage Social Accounts',
+    //   state: 'settings.accounts'
+    // });
   }
 }());

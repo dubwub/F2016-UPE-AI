@@ -21,11 +21,12 @@ var mongoose = require('mongoose'),
   Player = mongoose.model('Player'),
   Elo = require('elo-rank')(32);
 
-var Handler = function Handler(people, Class, callback) { // TODO: CALLBACK NOT USED
+var Handler = function Handler(people, Class, reses, callback) { // TODO: CALLBACK NOT USED
   this.Class = Class;
   this.people = people;
   this.game = new Class.Game();
-  // var players = [];
+  this.requests = reses;
+
   for (var i = 0; i < people.length; i++) {
     var player = new Class.Player(i, this.game.boardSize); // create new players using input data, then save them (add validation)
     player.person = people[i];
@@ -40,6 +41,9 @@ var Handler = function Handler(people, Class, callback) { // TODO: CALLBACK NOT 
     if (err) console.log(err);
   });
   this.id = this.game.getID();
+  var firstPlayerIndex = this.game.moveOrder[this.game.moveIterator]; // send message out to the first player to move
+  this.requests[firstPlayerIndex].json(this.game.sanitizedForm(firstPlayerIndex));
+  this.requests[firstPlayerIndex] = null;
 };
 
 /*
@@ -93,17 +97,23 @@ Handler.prototype =
   id: "", // represents the gameID of the game this Handler handles
   game: null, // the actual game object this Handler handles
   people: [], // list of people IDs
-  players: [], // assoc. array (hashmap) of playerID vs. player object
-  submitMove: function(new_move, playerID, callback) {
+  players: [], // list of player objects
+  requests: [null, null], // list of requests sent in
+  submitMove: function(new_move, playerID, res) {
     // TODO: when submitting to a complete game, should quit out
     for (var i = 0; i < this.players.length; i++) {
       if (this.players[i].getID().toString() === playerID) {
+        this.requests[i] = res;
         var returnJSON = this.game.submit(i, new_move);
         // check winnerIndex, if === -2, game is ongoing otherwise finish
         if (this.game.winnerIndex === -1 || this.game.winnerIndex >= 0) { // finish the game
           findFirstUser(this.Class, this.players[0].person, this.players[1].person, this.game.winnerIndex);
         }
-        callback(returnJSON.err, returnJSON);
+        var nextPlayer = this.game.moveOrder[this.game.moveIterator];
+        if (this.requests[nextPlayer] === null) console.log('null res when trying to respond? ' + this.game.moveIterator);
+        this.requests[nextPlayer].json(this.game.sanitizedForm(nextPlayer));
+        this.requests[nextPlayer] = null;
+        // callback(returnJSON.err, returnJSON);
       }
     }
   }
