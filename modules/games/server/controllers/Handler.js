@@ -99,10 +99,10 @@ Handler.prototype =
   people: [], // list of people IDs
   players: [], // list of player objects
   requests: [null, null], // list of requests sent in
-  submitMove: function(new_move, playerID, res) {
+  submitMove: function(new_move, playerID, devkey, res) {
     // TODO: when submitting to a complete game, should quit out
     for (var i = 0; i < this.players.length; i++) {
-      if (this.players[i].getID().toString() === playerID) {
+      if (this.players[i].getID().toString() === playerID && this.people[i].toString() === devkey) {
         this.requests[i] = res;
         var returnJSON = this.game.submit(i, new_move);
         // check winnerIndex, if === -2, game is ongoing otherwise finish
@@ -110,6 +110,9 @@ Handler.prototype =
           findFirstUser(this.Class, this.players[0].person, this.players[1].person, this.game.winnerIndex);
         }
         var nextPlayer = this.game.moveOrder[this.game.moveIterator];
+        console.log(this.game.moveIterator);
+        console.log(nextPlayer);
+        // console.log(this.requests[nextPlayer]);
         if (this.requests[nextPlayer] === null) console.log('null res when trying to respond? ' + this.game.moveIterator);
         this.requests[nextPlayer].json(this.game.sanitizedForm(nextPlayer));
         this.requests[nextPlayer] = null;

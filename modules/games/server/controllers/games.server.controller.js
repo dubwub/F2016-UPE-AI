@@ -63,9 +63,9 @@ function verifyAccount (req, res, id, username, next) {
 function performSearch(req, res) {
   if (saved_res === -1) { // first person who searches reaches here
     saved_res = res; // save their request object and ID
-    saved_person_id = req.body.accountID;
+    saved_person_id = req.body.devkey;
   } else { // second person reaches here
-    var people = [saved_person_id, req.body.accountID];
+    var people = [saved_person_id, req.body.devkey];
     var new_handler = new Handler(people, Class, [res, saved_res], function(err) { // create new Handler object for new Game, the new Game will be init in Handler constructor
       if (err) res.status(400).send({
         message: errorHandler.getErrorMessage(err)
@@ -91,7 +91,7 @@ function performSearch(req, res) {
 
 
 exports.search = function (req, res) {
-  verifyAccount(req, res, req.body.accountID, req.body.username, performSearch);
+  verifyAccount(req, res, req.body.devkey, req.body.username, performSearch);
 };
 
 /**
@@ -112,7 +112,7 @@ exports.submit = function (req, res) {
   // if (typeof handlers[game._id] === 'undefined') {
   //   res.json('That game does not exist, it may have been completed.');
   // }
-  handlers[game._id].submitMove(req.body.move, req.body.playerID, res);
+  handlers[game._id].submitMove(req.body.move, req.body.playerID, req.body.devkey, res);
   // handlers[game._id].submitMove(req.body.move, req.body.playerID, function(err, data) {
   //   if (err) res.json(err);
   //   else res.json(data);
