@@ -11,6 +11,12 @@
   function routeConfig($stateProvider) {
     // Users state routing
     $stateProvider
+      .state('leaderboard', {
+        url: '/leaderboard',
+        templateUrl: 'modules/users/client/views/leaderboard.client.view.html',
+        controller: 'LeaderboardController',
+        controllerAs: 'vm'
+      })
       .state('settings', {
         abstract: true,
         url: '/settings',

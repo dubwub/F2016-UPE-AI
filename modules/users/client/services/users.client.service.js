@@ -6,6 +6,19 @@
     .module('users.services')
     .factory('UsersService', UsersService);
 
+  angular
+    .module('users.services')
+    .factory('LeaderboardService', LeaderboardService);
+
+  LeaderboardService.$inject = ['$resource'];
+  function LeaderboardService($resource) {
+    return $resource('api/users/leaderboard', {
+      update: {
+        method: 'GET'
+      }
+    });
+  }
+
   UsersService.$inject = ['$resource'];
 
   function UsersService($resource) {
