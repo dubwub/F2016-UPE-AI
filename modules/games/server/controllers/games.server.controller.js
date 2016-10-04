@@ -156,7 +156,7 @@ exports.gameByID = function (req, res, next, id) {
   }
 
   // Game.findById(id).populate('players', 'people').exec(function (err, game) { // MERGE EVENTUALLY
-  Game.findById(id).populate('players people').exec(function (err, game) {
+  Game.findById(id).populate('players people replay').exec(function (err, game) {
     if (err) {
       return next(err);
     } else if (!game) {

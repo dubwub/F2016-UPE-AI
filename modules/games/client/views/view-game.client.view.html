@@ -146,12 +146,13 @@
           </div>
         </div>
       </div>
-
-      <!--<span ng-if="vm.game.people[0]" ng-bind="vm.game.people[0]"></span>
-      <span ng-if="!vm.game.people[0]">Deleted User</span>
-      vs
-      <span ng-if="vm.game.people[1]" ng-bind="vm.game.people[1]"></span>
-      <span ng-if="!vm.game.people[1]">Deleted User</span>--> 
+      <div class="row">
+      <button type="button" ng-click="stepForward()">step forward</button>
+      <button type="button" ng-click="stepBack()">step back</button>
+      </div>
+      <div ng-repeat="snapshot in vm.replay track by $index">
+        <br>Move {{$index}}: <button type="button" ng-click="stepTo($index)">{{snapshot.lastMove}}</button>
+      </div>
     </em>
   </small>
   <!--<p class="lead" ng-bind="vm.game.content"></p>-->

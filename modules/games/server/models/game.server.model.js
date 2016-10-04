@@ -40,6 +40,25 @@ var Player = new Schema({
   bluePortal: Object
 });
 
+var Snapshot = new Schema({
+  boardSize: { // size of game board
+    type: Number,
+    default: 11
+  },
+  lastMove: {
+    type: String,
+    default: 'Start' // the first snapshot created is of the origin
+  },
+  moveOrder: [Number],
+  moveIterator: Number,
+  players: [],
+  hardBlockBoard: [Number],
+  softBlockBoard: [Number],
+  trailMap: Object,
+  bombMap: Object,
+  portalMap: Object
+});
+
 var Game = new Schema({
   // people: [{ type: Schema.Types.ObjectId, ref: 'Person' }],
   date: {
@@ -63,11 +82,12 @@ var Game = new Schema({
   // bombList: [Object],
   trailMap: Object,
   bombMap: Object,
-  portalMap: Object
-  // saveCount: Number
+  portalMap: Object,
+  replay: [{ type: Schema.ObjectId, ref: 'Snapshot' }]
 });
 
 // END GAME RELATED SCHEMAS
 
 mongoose.model('Player', Player);
 mongoose.model('Game', Game);
+mongoose.model('Snapshot', Snapshot);

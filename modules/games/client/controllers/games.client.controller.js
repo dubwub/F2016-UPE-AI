@@ -32,6 +32,8 @@
     vm.game = {
       boardSize: 11 // can be customized, LEAVE TO ODD NUMBERS FOR OPTIMAL BLOCK PLACEMENT
     };
+    // vm.game = new Game();
+    // console.log(vm.game);
 
     function createPlayer(x, y) { // player factory
       return {
@@ -437,9 +439,32 @@
 
   function GamesController($scope, $state, game, $window, Socket) {
     var vm = this;
+    vm.fullGame = game; // holds current game state, also game details
+    vm.replay = game.replay;
+    vm.game = vm.replay[0]; // current snapshot to show on the screen
+    vm.replayIterator = 0;
 
-    vm.game = game;
-    // vm.authentication = Authentication;
+    $scope.stepTo = function(i) {
+      if (i < vm.replay.length) {
+        vm.replayIterator = i;
+        vm.game = vm.replay[i];
+      }
+    };
+
+    $scope.stepForward = function() {
+      if (vm.replayIterator < vm.replay.length - 1) {
+        vm.replayIterator++;
+        vm.game = vm.replay[vm.replayIterator];
+      }
+    };
+
+    $scope.stepBack = function() {
+      if (vm.replayIterator > 0) {
+        vm.replayIterator--;
+        vm.game = vm.replay[vm.replayIterator];
+      }
+    };
+
     vm.error = null;
     vm.form = {};
   }

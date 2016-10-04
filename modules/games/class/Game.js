@@ -1,5 +1,6 @@
 var mongoose = require('mongoose'),
-	mongooseGame = mongoose.model('Game');
+	mongooseGame = mongoose.model('Game'),
+	mongooseSnapshot = mongoose.model('Snapshot');
 
 // createArray() is a small helper function that helps with initialization of the boards
 // TODO: SINCE 2-D ARRAYS CAN'T BE STORED IN MONGO, THIS IS PROBABLY DEPRECIATED AND SHOULD BE REMOVED
@@ -87,6 +88,7 @@ Game.prototype = {
 	bombMap: {},
 	trailMap: {},
 	portalMap: {},
+	replay: [],
 	model: null,
 	state: 'in progress',
 	winnerIndex: -2, // when state is 'done', this will be set to the index of the winner (or -1 for tie, -2 for in progress)
@@ -115,6 +117,23 @@ Game.prototype = {
 			this.moveOrder.push(i);
 			// this.moveOrder.push(0); <-- uncomment for testing purposes
 		}
+	},
+	createSnapshot: function(lastMove) {
+		var newSnap = new mongooseSnapshot();
+		newSnap.hardBlockBoard = this.hardBlockBoard;
+		newSnap.softBlockBoard = this.softBlockBoard;
+		newSnap.moveOrder = this.moveOrder;
+		newSnap.moveIterator = this.moveIterator;
+		if (lastMove) newSnap.lastMove = lastMove;
+		newSnap.players = [];
+		for (var index = 0; index < this.players.length; index++) {
+			newSnap.players.push(this.players[index].sanitizedForm());
+		}
+		newSnap.trailMap = this.trailMap;
+		newSnap.bombMap = this.bombMap;
+		newSnap.portalMap = this.portalMap;
+		this.replay.push(newSnap._id);
+		newSnap.save();
 	},
 	// returns x, y and direction of a solid object move in a specific direction
 	simulateMovement: function(x, y, direction) {
@@ -277,6 +296,7 @@ Game.prototype = {
 		}
 		var player = this.players[playerIndex];
 		var output; // used in the switch case
+		// this.replay.push(move);
 		switch (move) {
 			case 'ml': // move left
 				output = this.simulateMovement(player.x, player.y, 0);
@@ -410,6 +430,7 @@ Game.prototype = {
 			else if (alivePlayers.length === 1) this.winnerIndex = alivePlayers[0]; // otherwise return winnerIndex
 			else this.state = 'in progress';
 		}
+		this.createSnapshot(move);
 		this.save(function (err, data) { if (err) console.log(err); /* else console.log(data); */ });
 		for (var i = 0; i < this.players.length; i++)
 			this.players[i].save(function (err, data) { if (err) console.log(err); /* else console.log(data); */ });
@@ -462,6 +483,10 @@ Game.prototype = {
 		this.model.markModified('trailMap');
 		this.model.portalMap = this.portalMap;
 		this.model.markModified('portalMap');
+		if (this.replay.length === 0) this.createSnapshot(); // initial save
+		this.model.replay = this.replay;
+		this.model.markModified('replay');
+		// console.log(this.replay);
 		// console.log(this.model);
 		this.model.save(callback);
 	}
