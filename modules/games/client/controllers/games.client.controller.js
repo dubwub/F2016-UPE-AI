@@ -441,8 +441,9 @@
     var vm = this;
     vm.fullGame = game; // holds current game state, also game details
     vm.replay = game.replay;
-    vm.game = vm.replay[0]; // current snapshot to show on the screen
-    vm.replayIterator = 0;
+    vm.game = vm.replay[vm.replay.length - 1]; // current snapshot to show on the screen
+    vm.replayIterator = vm.replay.length - 1;
+    console.log(vm.replayIterator);
 
     $scope.stepTo = function(i) {
       if (i < vm.replay.length) {
@@ -464,8 +465,5 @@
         vm.game = vm.replay[vm.replayIterator];
       }
     };
-
-    vm.error = null;
-    vm.form = {};
   }
 }());
