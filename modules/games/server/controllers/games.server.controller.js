@@ -16,8 +16,8 @@ var path = require('path'),
   errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller'));
 
 var Class = {
-  Game: require('../../Class/Game'),
-  Player: require('../../Class/Player'),
+  Game: require('../../class/Game'),
+  Player: require('../../class/Player'),
   User: mongoose.model('User')
 };
 
