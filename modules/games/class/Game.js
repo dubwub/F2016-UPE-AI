@@ -28,6 +28,16 @@ function getNextSquare(x, y, direction) {
 	}
 }
 
+// checks if a map is empty (helper function specifically used for trailMap, may be extended later)
+function isEmpty(map) {
+   for(var key in map) {
+      if (map.hasOwnProperty(key)) {
+         return false;
+      }
+   }
+   return true;
+}
+
 // helper function to calculate value of a block at a specific position
 function getBlockValue(x, y) {
 	x = parseInt(x, 10);
@@ -95,7 +105,7 @@ Game.prototype = {
 	/*
 		note that the following function will, if a bomb and player share the same spot, return bomb.
 		this is ideal for detonate functionality but might want to be fixed in the future.
-	*/
+ 	*/
 	querySpace: function(x, y) {
 		if (x < 0 || x >= this.boardSize || y < 0 || y >= this.boardSize) return 'out';
 		if (this.hardBlockBoard[x * this.boardSize + y] === 1) return 'hb';
@@ -390,6 +400,7 @@ Game.prototype = {
 		// 4. check if the game's ended
 		if (this.moveIterator >= this.players.length) {
 			this.moveIterator = 0;
+			console.log("reset mI to 0");
 			// first, move player who moved first time to end of the list
 			this.moveOrder.push(this.moveOrder[0]); // add first player to end
 			this.moveOrder.splice(0, 1); // remove first element
@@ -415,7 +426,11 @@ Game.prototype = {
 							var trailY = Number.parseInt(trailArray[1], 10);
 							this.trailMap[trailSquare][trail].tick -= 1;
 							this.trailResolveSquare(trailX, trailY);
-							if (this.trailMap[trailSquare][trail].tick === 0) delete this.trailMap[trailSquare][trail];
+							if (this.trailMap[trailSquare][trail].tick === 0) {
+								delete this.trailMap[trailSquare][trail];
+								if (isEmpty(this.trailMap[trailSquare]))
+									delete this.trailMap[trailSquare];
+							}
 						}
 					}
 				}

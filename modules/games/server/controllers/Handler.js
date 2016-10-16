@@ -21,7 +21,8 @@ var mongoose = require('mongoose'),
   Player = mongoose.model('Player'),
   Elo = require('elo-rank')(32);
 
-var Handler = function Handler(people, Class, reses, callback) { // TODO: CALLBACK NOT USED
+var Handler = function Handler(handlers, people, Class, reses, callback) { // TODO: CALLBACK NOT USED
+  this.handlers = handlers;
   this.Class = Class;
   this.people = people;
   this.game = new Class.Game();
@@ -98,25 +99,33 @@ Handler.prototype =
   game: null, // the actual game object this Handler handles
   people: [], // list of people IDs
   players: [], // list of player objects
+  handlers: null,
   requests: [null, null], // list of requests sent in
   submitMove: function(new_move, playerID, devkey, res) {
-    // TODO: when submitting to a complete game, should quit out
     for (var i = 0; i < this.players.length; i++) {
       if (this.players[i].getID().toString() === playerID && this.people[i].toString() === devkey) {
         this.requests[i] = res;
         var returnJSON = this.game.submit(i, new_move);
+        var nextPlayer = this.game.moveOrder[this.game.moveIterator];
         // check winnerIndex, if === -2, game is ongoing otherwise finish
         if (this.game.winnerIndex === -1 || this.game.winnerIndex >= 0) { // finish the game
-          findFirstUser(this.Class, this.players[0].person, this.players[1].person, this.game.winnerIndex);
+          if (this.players[0].person !== this.players[1].person) // if someone plays themselves, no elo update
+            findFirstUser(this.Class, this.players[0].person, this.players[1].person, this.game.winnerIndex);
+          delete this.handlers[this.id];
+          console.log(this.handlers); // test to see if purging worked
+          this.requests[0].json(this.game.sanitizedForm(0));
+          this.requests[1].json(this.game.sanitizedForm(1));
+          this.requests[0] = null;
+          this.requests[1] = null;
+        } else {
+          console.log(this.game.moveIterator);
+          console.log(nextPlayer);
+          if (this.requests[nextPlayer] === null) console.log('null res when trying to respond? ' + this.game.moveIterator);
+          this.requests[nextPlayer].json(this.game.sanitizedForm(nextPlayer));
+          this.requests[nextPlayer] = null;
+          // callback(returnJSON.err, returnJSON);
+          // TODO: do we need a callback?
         }
-        var nextPlayer = this.game.moveOrder[this.game.moveIterator];
-        console.log(this.game.moveIterator);
-        console.log(nextPlayer);
-        // console.log(this.requests[nextPlayer]);
-        if (this.requests[nextPlayer] === null) console.log('null res when trying to respond? ' + this.game.moveIterator);
-        this.requests[nextPlayer].json(this.game.sanitizedForm(nextPlayer));
-        this.requests[nextPlayer] = null;
-        // callback(returnJSON.err, returnJSON);
       }
     }
   }
