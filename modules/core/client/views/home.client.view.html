@@ -6,42 +6,53 @@
     <br>
     <div class="row">
       <p class="lead">
-        RPI & UPE's very first AI programming competition!
+        RPI & UPE's very first AI programming competition! Over $5000 in prizes!
       </p>
     </div>
   </div>
-  <div>
-    <h2>What is this?</h2>
-    <p>This is an AI competition where we provide the game and the rules, and you guys provide the AIs that compete for prizes!</p>
-    <h2>How do I get involved?</h2>
-    <ul>
-      <li>
-        If you're not familiar with Bomberman, rectify that immediately! It's a classic retro game that you may have played when you were a kid. The rules for this competition are somewhat different from traditional Bomberman, so go to Games > Training Mode to play around with it for yourself or read up in the Documentation!
-      </li>
-      <li>
-        Create an account from the Sign Up page, and get started making your AI! More information on competing and testing your AI will come later!
-      </li>
-      <li>
-        Have fun!
-      </li>
-    </ul>
+  <div class="container">
+    <div class="row"> 
+      <div class="col-xs-1"></div>
+      <div class="col-xs-10">
+        <h2>What is this?</h2>
+        <p>Inspired by existing AI competitions at other schools (i.e. MIT’s Battlecode and Pokerbots), UPE has created an AI competition for RPI students. This is motivated by the same factors that motivate UPE’s semesterly ProgComp: UPE is always looking for new talent, and UPE loves to foster interest in coding at RPI. Plus, there’s cash and sponsors involved, what a plus!</p>
+        <p>In case you’re not familiar with AI competitions in general, here’s a general overview of how this one will work.</p>
+        <p>UPE has devised and programmed a game that takes AI input and uses those to determine a winner -- that’s where you come in! The full rules of the game, as well as the source code of the game engine are all released at the beginning of the competition. With these as a guide, RPI students in teams of four or less will spend the semester developing and testing their AIs to most optimally play the game.</p>
+        <p>UPE will be running a server with the game logic on it continuously throughout the semester that teams can use to test their AIs. This server will handle matchmaking and have an internal ELO system that will be used to rank AIs before the main events.</p>
+        <p>At the main event, all interested teams will battle to the death in a large double elimination bracket, and a champion will be crowned.</p>
+        <p>The game is a modified variant of Bomberman, which can best be described as a deterministic Bomberman with portals. The full description of everything that is modified is explained in explicit detail in the documentation.</p>
+        <h2>How do I get involved?</h2>
+        <ul>
+          <li>
+            If you're not familiar with Bomberman, rectify that immediately! It's a classic retro game that you may have played when you were a kid. The rules for this competition are somewhat different from traditional Bomberman, so go to Games > Training Mode to play around with it for yourself or read up in the Documentation!
+          </li>
+          <li>
+            Create an account from the Sign Up page, and get started making your AI! The details of testing your AI against the server are in the Documentation!
+          </li>
+          <li>
+            Have fun!
+          </li>
+        </ul>
+      </div>
+      <div class="col-xs-1"></div>
+    </div>
+  </div>
   </div>
   <div class="row">
     <div class="col-md-3">
       <h2>Learn</h2>
       <ul>
-        <li>Read the <a href="https://docs.google.com/document/d/1fRC1EvRcNP17UQdy2mRlxaClRezLiTTGL9MW3bGafS8/edit?usp=drive_webx">Bomberman documentation</a>
-        <li>Read the other documentation (soon to be merged) <a href="./docs">here</a>
+        <li>Read the <a href="./docs">Bomberman documentation</a>
         <li><a href="./games/training">Play around with the game yourself</a>
       </ul>
     </div>
     <div class="col-md-3">
       <h2>Develop</h2>
-      <p>Code in your favorite language! The server and clients communicate using HTTP requests (see the documentation for more details), and pretty much all languages can interface this way, so go nuts!</p>
+      <p>Code in your favorite language! The server and clients communicate using HTTP requests (see the documentation for more details), and pretty much all languages can interface this way. Go nuts!</p>
     </div>
     <div class="col-md-3">
       <h2>Test</h2>
-      <p>More on this coming later! There will be a way to connect to the server with matchmaking details to test your AI online against other searching AIs.</p>
+      <p>Testing your AI against other AIs on the matchmaking server is super easy using our API! Check out the Documentation for more details.</p>
     </div>
     <div class="col-md-3">
       <h2>Compete</h2>
