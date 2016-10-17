@@ -65,19 +65,27 @@ function performSearch(req, res) {
     saved_res = res; // save their request object and ID
     saved_person_id = req.body.devkey;
   } else { // second person reaches here
-    if (saved_person_id === req.body.devKey) {
+    if (saved_person_id === req.body.devkey) {
       saved_res = res;
-      return;
-    }
-    var people = [saved_person_id, req.body.devkey];
-    var new_handler = new Handler(handlers, people, Class, [res, saved_res], function(err) { // create new Handler object for new Game, the new Game will be init in Handler constructor
-      if (err) res.status(400).send({
-        message: errorHandler.getErrorMessage(err)
+    } else {
+      // console.log(saved_person_id);
+      // console.log(req.body.devkey);
+      var people = [saved_person_id, req.body.devkey]; // the first player who searches will be player 1
+      // var new_handler = new Handler();
+      // new_handler.init(handlers, people, Class, [saved_res, res], function(err) { // create new Handler object for new Game, the new Game will be init in Handler constructor
+      //   if (err) res.status(400).send({
+      //     message: errorHandler.getErrorMessage(err)
+      //   });
+      // });
+      var new_handler = new Handler(handlers, people, Class, [saved_res, res], function(err) { // create new Handler object for new Game, the new Game will be init in Handler constructor
+        if (err) res.status(400).send({
+          message: errorHandler.getErrorMessage(err)
+        });
       });
-    });
-    handlers[new_handler.id] = new_handler; // add to assoc. array (hashmap)
-    saved_res = -1; // reset search request (PROBABLY STILL NEEDS MUTEX)
-    saved_person_id = -1;
+      handlers[new_handler.id] = new_handler; // add to assoc. array (hashmap)
+      saved_res = -1; // reset search request (PROBABLY STILL NEEDS MUTEX)
+      saved_person_id = -1;
+    }
   }
 }
 

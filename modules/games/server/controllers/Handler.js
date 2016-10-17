@@ -21,10 +21,12 @@ var mongoose = require('mongoose'),
   Player = mongoose.model('Player'),
   Elo = require('elo-rank')(32);
 
-var Handler = function Handler(handlers, people, Class, reses, callback) { // TODO: CALLBACK NOT USED
+// var Handler = function Handler() {};
+var Handler = function Handler(handlers, people, Class, reses, callback) {
   this.handlers = handlers;
   this.Class = Class;
   this.people = people;
+  this.players = [];
   this.game = new Class.Game();
   this.requests = reses;
 
@@ -34,8 +36,7 @@ var Handler = function Handler(handlers, people, Class, reses, callback) { // TO
     player.save(function(err) {
       if (err) console.log(err);
     });
-    // players.push(player.getID());
-    this.players.push(player); // handlers keep player objects in memory
+    this.players.push(player); // Handlers keep player objects in memory
   }
   this.game.attachPlayers(people, this.players);
   this.game.save(function(err) {
@@ -45,6 +46,7 @@ var Handler = function Handler(handlers, people, Class, reses, callback) { // TO
   var firstPlayerIndex = this.game.moveOrder[this.game.moveIterator]; // send message out to the first player to move
   this.requests[firstPlayerIndex].json(this.game.sanitizedForm(firstPlayerIndex));
   this.requests[firstPlayerIndex] = null;
+  return this;
 };
 
 /*
@@ -101,8 +103,11 @@ Handler.prototype =
   players: [], // list of player objects
   handlers: null,
   requests: [null, null], // list of requests sent in
+  // init: ,
   submitMove: function(new_move, playerID, devkey, res) {
     for (var i = 0; i < this.players.length; i++) {
+      // console.log("submitting: " + playerID + "," + devkey);
+      // console.log("comparing to: " + this.players[i].getID().toString() + "," + this.people[i].toString());
       if (this.players[i].getID().toString() === playerID && this.people[i].toString() === devkey) {
         this.requests[i] = res;
         var returnJSON = this.game.submit(i, new_move);

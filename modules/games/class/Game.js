@@ -2,6 +2,58 @@ var mongoose = require('mongoose'),
 	mongooseGame = mongoose.model('Game'),
 	mongooseSnapshot = mongoose.model('Snapshot');
 
+function Game() {
+	this.people = [];
+	this.players = [];
+	this.moveOrder = [];
+	this.moveIterator = 0,
+	this.hardBlockBoard = null; // 1-D boolean array, 0 = no hard block, 1 = hard block here.
+	this.softBlockBoard = null;
+	this.bombMap = {};
+	this.trailMap = {};
+	this.portalMap = {};
+	this.replay = [];
+	this.model = null;
+	this.state = 'in progress';
+	this.winnerIndex = -2;
+	// hard blocks appear in a gridlike pattern with no other hard blocks in any of the adjacent squres.
+	// for odd numbered boardSizes, this initializer can simply put hard blocks in the odd indices
+	this.hardBlockBoard = createArray(this.boardSize * this.boardSize); // storing 2d array in 1d array (x*11 + y is index)
+	var i = 0; // "global" iterators because grunt hates everything that is fun
+	var j = 0;
+	for (i = 0; i < this.boardSize; i++) {
+		for (j = 0; j < this.boardSize; j++) {
+			if (i === 0 || j === 0 || i === this.boardSize - 1 || j === this.boardSize - 1 ||
+				(i % 2 === 0 && j % 2 === 0)) this.hardBlockBoard[i*this.boardSize + j] = 1; // odd indices = add block
+			else this.hardBlockBoard[i*this.boardSize + j] = 0;
+		}
+	}
+
+	this.softBlockBoard = createArray(this.boardSize * this.boardSize);
+	for (i = 0; i < this.boardSize; i++) {
+		for (j = 0; j < this.boardSize; j++) {
+			if ((i === 1 || j === 1) && (i <= 2 && j <= 2)) {
+				this.softBlockBoard[i * this.boardSize + j] = 0;
+				continue;
+			}
+			if ((i === this.boardSize - 2 || j === this.boardSize - 2) && (i >= this.boardSize - 3 && j >= this.boardSize - 3)) {
+				this.softBlockBoard[i * this.boardSize + j] = 0;
+				continue;
+			}
+			if (this.hardBlockBoard[i * this.boardSize + j] === 1 || Math.random() > 0.7) this.softBlockBoard[i * this.boardSize + j] = 0; // might fiddle with %
+			else this.softBlockBoard[i * this.boardSize + j] = 1;
+		}
+	}
+	// guaranteed spots for soft blocks:
+	// players have one horizontal and vertical move they can make at the beginning
+	// this will allow for players to actually place a bomb at the beginning and not be doomed from the start
+	this.softBlockBoard[3*this.boardSize + 1] = 1;
+	this.softBlockBoard[1*this.boardSize + 3] = 1;
+	this.softBlockBoard[(this.boardSize - 2) * this.boardSize + this.boardSize - 4] = 1;
+	this.softBlockBoard[(this.boardSize - 4) * this.boardSize + this.boardSize - 2] = 1;
+	return this;
+}
+
 // createArray() is a small helper function that helps with initialization of the boards
 // TODO: SINCE 2-D ARRAYS CAN'T BE STORED IN MONGO, THIS IS PROBABLY DEPRECIATED AND SHOULD BE REMOVED
 function createArray(length) { // literally creates a new array with params e.g. createArray(5,3)
@@ -48,45 +100,6 @@ function getBlockValue(x, y) {
 	else return scaledScore, 10; // guaranteed to be a number from 1 to 10 distributed more heavily towards center blocks
 }
 
-// game obj constructor
-function Game() {
-	// hard blocks appear in a gridlike pattern with no other hard blocks in any of the adjacent squres.
-	// for odd numbered boardSizes, this initializer can simply put hard blocks in the odd indices
-	this.hardBlockBoard = createArray(this.boardSize * this.boardSize); // storing 2d array in 1d array (x*11 + y is index)
-	var i = 0; // "global" iterators because grunt hates everything that is fun
-	var j = 0;
-	for (i = 0; i < this.boardSize; i++) {
-		for (j = 0; j < this.boardSize; j++) {
-			if (i === 0 || j === 0 || i === this.boardSize - 1 || j === this.boardSize - 1 ||
-				(i % 2 === 0 && j % 2 === 0)) this.hardBlockBoard[i*this.boardSize + j] = 1; // odd indices = add block
-			else this.hardBlockBoard[i*this.boardSize + j] = 0;
-		}
-	}
-
-	this.softBlockBoard = createArray(this.boardSize * this.boardSize);
-	for (i = 0; i < this.boardSize; i++) {
-		for (j = 0; j < this.boardSize; j++) {
-			if ((i === 1 || j === 1) && (i <= 2 && j <= 2)) {
-				this.softBlockBoard[i * this.boardSize + j] = 0;
-				continue;
-			}
-			if ((i === this.boardSize - 2 || j === this.boardSize - 2) && (i >= this.boardSize - 3 && j >= this.boardSize - 3)) {
-				this.softBlockBoard[i * this.boardSize + j] = 0;
-				continue;
-			}
-			if (this.hardBlockBoard[i * this.boardSize + j] === 1 || Math.random() > 0.7) this.softBlockBoard[i * this.boardSize + j] = 0; // might fiddle with %
-			else this.softBlockBoard[i * this.boardSize + j] = 1;
-		}
-	}
-	// guaranteed spots for soft blocks:
-	// players have one horizontal and vertical move they can make at the beginning
-	// this will allow for players to actually place a bomb at the beginning and not be doomed from the start
-	this.softBlockBoard[3*this.boardSize + 1] = 1;
-	this.softBlockBoard[1*this.boardSize + 3] = 1;
-	this.softBlockBoard[(this.boardSize - 2) * this.boardSize + this.boardSize - 4] = 1;
-	this.softBlockBoard[(this.boardSize - 4) * this.boardSize + this.boardSize - 2] = 1;
-}
-
 Game.prototype = {
 	boardSize: 11,
 	people: [],
@@ -102,6 +115,44 @@ Game.prototype = {
 	model: null,
 	state: 'in progress',
 	winnerIndex: -2, // when state is 'done', this will be set to the index of the winner (or -1 for tie, -2 for in progress)
+	// game obj constructor
+	init: function() {
+		// hard blocks appear in a gridlike pattern with no other hard blocks in any of the adjacent squres.
+		// for odd numbered boardSizes, this initializer can simply put hard blocks in the odd indices
+		this.hardBlockBoard = createArray(this.boardSize * this.boardSize); // storing 2d array in 1d array (x*11 + y is index)
+		var i = 0; // "global" iterators because grunt hates everything that is fun
+		var j = 0;
+		for (i = 0; i < this.boardSize; i++) {
+			for (j = 0; j < this.boardSize; j++) {
+				if (i === 0 || j === 0 || i === this.boardSize - 1 || j === this.boardSize - 1 ||
+					(i % 2 === 0 && j % 2 === 0)) this.hardBlockBoard[i*this.boardSize + j] = 1; // odd indices = add block
+				else this.hardBlockBoard[i*this.boardSize + j] = 0;
+			}
+		}
+
+		this.softBlockBoard = createArray(this.boardSize * this.boardSize);
+		for (i = 0; i < this.boardSize; i++) {
+			for (j = 0; j < this.boardSize; j++) {
+				if ((i === 1 || j === 1) && (i <= 2 && j <= 2)) {
+					this.softBlockBoard[i * this.boardSize + j] = 0;
+					continue;
+				}
+				if ((i === this.boardSize - 2 || j === this.boardSize - 2) && (i >= this.boardSize - 3 && j >= this.boardSize - 3)) {
+					this.softBlockBoard[i * this.boardSize + j] = 0;
+					continue;
+				}
+				if (this.hardBlockBoard[i * this.boardSize + j] === 1 || Math.random() > 0.7) this.softBlockBoard[i * this.boardSize + j] = 0; // might fiddle with %
+				else this.softBlockBoard[i * this.boardSize + j] = 1;
+			}
+		}
+		// guaranteed spots for soft blocks:
+		// players have one horizontal and vertical move they can make at the beginning
+		// this will allow for players to actually place a bomb at the beginning and not be doomed from the start
+		this.softBlockBoard[3*this.boardSize + 1] = 1;
+		this.softBlockBoard[1*this.boardSize + 3] = 1;
+		this.softBlockBoard[(this.boardSize - 2) * this.boardSize + this.boardSize - 4] = 1;
+		this.softBlockBoard[(this.boardSize - 4) * this.boardSize + this.boardSize - 2] = 1;
+	},
 	/*
 		note that the following function will, if a bomb and player share the same spot, return bomb.
 		this is ideal for detonate functionality but might want to be fixed in the future.
@@ -398,6 +449,7 @@ Game.prototype = {
 		// 2. bombs are ticked down, bombs with tick = 0 generate trails
 		// 3. trails are ticked, killing players/blocks etc
 		// 4. check if the game's ended
+		console.log(this.players);
 		if (this.moveIterator >= this.players.length) {
 			this.moveIterator = 0;
 			console.log("reset mI to 0");
