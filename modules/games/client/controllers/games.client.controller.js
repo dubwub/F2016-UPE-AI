@@ -353,7 +353,7 @@
         case 'b': // drop bomb
           if (typeof vm.game.bombMap[[player.x, player.y]] !== 'undefined' || player.bombCount === 0) break; // already standing on bomb or bombCount = 0
           player.bombCount--;
-          vm.game.bombMap[[player.x, player.y]] = { owner: playerIndex, tick: 4 }; // TODO: change this to 4
+          vm.game.bombMap[[player.x, player.y]] = { owner: playerIndex, tick: 5 }; // TODO: change this to 4
           break;
         case 'buy_count': // buys an extra bomb
           if (player.coins < 1) break;
