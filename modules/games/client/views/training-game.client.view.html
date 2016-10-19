@@ -1,11 +1,13 @@
   <section>
   <div class="page-header">
-    <h1>TRAINING MODE</h1>
+    <h4>Training Mode</h4>
+    <b>Player to move: <span ng-bind="vm.game.moveOrder[vm.game.moveIterator]"></span></b>
+    <br><button class="btn btn-primary" ng-click="init()">reset board</button>
+
   </div>
-  <div class="row">
-    <div class="col-sm-4">
-      Player 1:
-      <table border="1">
+  <div class="col-sm-2">
+    Player 0:
+      <table class="table">
         <tr>
           <td>Position</td>
           <td><span ng-bind="vm.game.players[0].x"></span>, <span ng-bind="vm.game.players[0].y"></span></td>
@@ -44,9 +46,9 @@
         </tr>
       </table>
       </div>
-      <div class="col-sm-4">
-      Player 2:
-      <table border="1">
+      <div class="col-sm-2">
+      Player 1:
+      <table class="table">
         <tr>
           <td>Position</td>
           <td><span ng-bind="vm.game.players[1].x"></span>, <span ng-bind="vm.game.players[1].y"></span></td>
@@ -84,12 +86,9 @@
           <td><span ng-bind="vm.game.players[1].bluePortal.x"></span>,<span ng-bind="vm.game.players[1].bluePortal.y"></span>,<span ng-bind="vm.game.players[1].bluePortal.direction"></span></td>
         </tr>
       </table>
-      </div>
-      </div>
-      <br>Player to move: <span ng-bind="vm.game.moveOrder[vm.game.moveIterator]"></span>
-
-      <br><button type="button" ng-click="init()">reset board</button>
-
+    </div>
+    <div class="col-sm-5">
+      
       <div id="testTV" style="background-color: lightblue; width:{{40*vm.game.boardSize}}px; height:{{40*vm.game.boardSize}}px; position: relative;">
         <div id="player1" ng-switch on="vm.game.players[0].alive">
           <div ng-switch-when="true" ng-switch on="vm.game.moveOrder[vm.game.moveIterator]" style="position: absolute; left: {{40*vm.game.players[0].x}}px; top: {{40*vm.game.players[0].y}}px; width:40px; height:40px;">
@@ -140,24 +139,25 @@
           </div>
         </div>
       </div>
+      </div>
 
-      <div id="buttons">
+      <div id="buttons" class="col-sm-3">
         Player <span ng-bind="vm.game.moveOrder[vm.game.moveIterator]"></span> move: 
-        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'ml')">move left</button>
-        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'mu')">move up</button>
-        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'mr')">move right</button>
-        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'md')">move down</button>
-        <br><button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'tl')">turn left</button>
-        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'tu')">turn up</button>
-        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'tr')">turn right</button>
-        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'td')">turn down</button>
-        <br><button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'')">do nothing</button>
-        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'b')">drop bomb</button>
-        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'op')">shoot orange portal</button>
-        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'bp')">shoot blue portal</button>
-        <br><button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'buy_count')">buy extra bomb (cost: 1)</button>
-        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'buy_pierce')">buy bomb pierce (cost: 1)</button>
-        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'buy_range')">buy bomb range (cost: 1)</button>
-        <button type="button" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'buy_block')">buy bomb block</button>
+        <br><button class="btn btn-default" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'ml')">move left</button>
+        <button class="btn btn-default" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'mu')">move up</button>
+        <button class="btn btn-default" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'mr')">move right</button>
+        <button class="btn btn-default" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'md')">move down</button>
+        <br><button class="btn btn-default" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'tl')">turn left</button>
+        <button class="btn btn-default" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'tu')">turn up</button>
+        <button class="btn btn-default" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'tr')">turn right</button>
+        <button class="btn btn-default" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'td')">turn down</button>
+        <br><button class="btn btn-default" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'')">do nothing</button>
+        <button class="btn btn-default" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'b')">drop bomb</button>
+        <button class="btn btn-default" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'op')">shoot orange portal</button>
+        <button class="btn btn-default" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'bp')">shoot blue portal</button>
+        <br><button class="btn btn-default" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'buy_count')">buy extra bomb (cost: 1)</button>
+        <button class="btn btn-default" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'buy_pierce')">buy bomb pierce (cost: 1)</button>
+        <button class="btn btn-default" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'buy_range')">buy bomb range (cost: 1)</button>
+        <button class="btn btn-default" ng-click="submit(vm.game.moveOrder[vm.game.moveIterator],'buy_block')">buy bomb block</button>
       </div>
 </section>

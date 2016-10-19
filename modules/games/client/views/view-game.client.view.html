@@ -1,20 +1,16 @@
 <section>
   <div class="page-header">
-    <h1>Game TV</h1>
-    <!--<h1 ng-bind="vm.game.title"></h1>-->
+    <h4>Game TV</h4>
+    <span ng-bind="vm.fullGame.date | date:'mediumDate'" align="center"></span><br>
+      <span ng-bind="vm.fullGame.state" align="center"></span><br><br>
+
+      <b>Player to move: <span ng-bind="vm.fullGame.people[vm.game.moveOrder[vm.game.moveIterator]].username"></span></b>
+    <!-- <h1 ng-bind="vm.game.title"></h1> -->
   </div>
-    Game started: 
-    <span ng-bind="vm.game.date | date:'mediumDate'"></span><br>
-    <div class="col-md-8">
-      <div class="row">
-      <div class="col-sm-4">
-        <span ng-bind="vm.fullGame.people[0].username"></span> (<span ng-bind="vm.fullGame.people[0].elo"></span>) vs. <span ng-bind="vm.fullGame.people[1].username"></span> (<span ng-bind="vm.fullGame.people[1].elo"></span>)
-      </div>
-    </div>
-    <div class="row">
-    <div class="col-sm-4">
-      Player 1:
-      <table border="1">
+    <div class="col-md-2">
+      <small>
+      <span ng-bind="vm.fullGame.people[0].username"></span> (<span ng-bind="vm.fullGame.people[0].elo"></span>)
+      <table class="table">
         <tr>
           <td>Position</td>
           <td><span ng-bind="vm.game.players[0].x"></span>, <span ng-bind="vm.game.players[0].y"></span></td>
@@ -53,9 +49,9 @@
         </tr>
       </table>
       </div>
-      <div class="col-sm-4">
-      Player 2:
-      <table border="1">
+      <div class="col-sm-2">
+      <span ng-bind="vm.fullGame.people[1].username"></span> (<span ng-bind="vm.fullGame.people[1].elo"></span>)
+      <table class="table">
         <tr>
           <td>Position</td>
           <td><span ng-bind="vm.game.players[1].x"></span>, <span ng-bind="vm.game.players[1].y"></span></td>
@@ -93,13 +89,10 @@
           <td><span ng-bind="vm.game.players[1].bluePortal.x"></span>,<span ng-bind="vm.game.players[1].bluePortal.y"></span>,<span ng-bind="vm.game.players[1].bluePortal.direction"></span></td>
         </tr>
       </table>
-      </div>
-      </div>
-      <br>Player to move: <span ng-bind="vm.game.moveOrder[vm.game.moveIterator]"></span>
-  <small>
-    <em class="text-muted">
 
-
+    </small>
+    </div>
+    <div class="col-md-5">
       <div id="testTV" style="background-color: lightblue; width:{{40*vm.game.boardSize}}px; height:{{40*vm.game.boardSize}}px; position: relative;">
         <div ng-repeat="blockIndex in vm.game.hardBlockBoard track by $index" ng-init="x = ($index-$index%11)/11 * 40; y = $index%11 * 40" ng-switch on="blockIndex">
           <div ng-switch-when="1" style="position: absolute; left: {{x}}px; top: {{y}}px; width: 40px; height: 40px;">
@@ -147,14 +140,21 @@
         </div>
       </div>
     </div>
-    <div class="col-md-4">
-      <div class="row">
-      <button type="button" ng-click="stepForward()">step forward</button>
-      <button type="button" ng-click="stepBack()">step back</button>
+    </div>
+    <div class="col-md-3 well">
+      <div class="row" align="center">
+      <small>{{vm.replayIterator}}: <span ng-bind="vm.replay[vm.replayIterator].lastMove"></span></small>
       </div>
-      <div ng-repeat="snapshot in vm.replay track by $index">
-        <br>Move {{$index}}: <button type="button" ng-click="stepTo($index)">{{snapshot.lastMove}}</button>
+      <div class="row center-block" align="center">
+      <button type="button" class="btn btn-primary" ng-click="stepTo(0)"><<</button>
+      <button type="button" class="btn btn-primary" ng-click="stepBack()"><</button>
+      <button type="button" class="btn btn-primary" ng-click="stepForward()">></button>
+      <button type="button" class="btn btn-primary" ng-click="stepTo(vm.replay.length - 1)">>></button>
       </div>
+      <br>
+      <span ng-repeat="snapshot in vm.replay track by $index">
+        <small>{{$index}}:</small> <button type="button" class="btn btn-default" ng-click="stepTo($index)">{{snapshot.lastMove}}</button>
+      </span>
     </div>
     </em>
   </small>
