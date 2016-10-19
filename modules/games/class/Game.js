@@ -186,6 +186,7 @@ Game.prototype = {
 		newSnap.moveOrder = this.moveOrder;
 		newSnap.moveIterator = this.moveIterator;
 		if (lastMove) newSnap.lastMove = lastMove;
+		// newSnap.markModified('lastMove');
 		newSnap.players = [];
 		for (var index = 0; index < this.players.length; index++) {
 			newSnap.players.push(this.players[index].sanitizedForm());
