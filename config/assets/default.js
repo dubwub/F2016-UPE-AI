@@ -6,7 +6,9 @@ module.exports = {
       css: [
         // bower:css
         'public/lib/bootstrap/dist/css/bootstrap.css',
-        'public/lib/bootstrap/dist/css/bootstrap-theme.css'
+        // 'public/lib/bootstrap/dist/css/bootstrap-theme.css'
+        // 'public/lib/bootflat/css/bootflat.css'
+        'public/bootflat/scss/bootflat.css' // pretty sure this is incorrect
         // endbower
       ],
       js: [
@@ -18,7 +20,12 @@ module.exports = {
         'public/lib/angular-ui-router/release/angular-ui-router.js',
         'public/lib/angular-bootstrap/ui-bootstrap-tpls.js',
         'public/lib/angular-file-upload/dist/angular-file-upload.js',
-        'public/lib/owasp-password-strength-test/owasp-password-strength-test.js'
+        'public/lib/owasp-password-strength-test/owasp-password-strength-test.js',
+        // bootflat
+        'public/lib/bootflat/js/icheck.min.js',
+        'public/lib/bootflat/js/jquery.fs.selecter.min.js',
+        'public/lib/bootflat/js/jquery.fs.stepper.min.js'
+        // end bootflat
         // endbower
       ],
       tests: ['public/lib/angular-mocks/angular-mocks.js']
