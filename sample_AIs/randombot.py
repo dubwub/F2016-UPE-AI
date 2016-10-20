@@ -1,8 +1,4 @@
-# posting to: http://localhost:3000/api/articles/update/:articleid with title, content
-# changes title, content
-#
-# id1: (darwinbot1 P@ssw0rd!! 57d748bc67d0eaf026dff431) <-- this will change with differing mongo instances
-import time # for testing, this is not good
+import time
 import requests # if not installed already, run python -m pip install requests OR pip install requests, whatever you normally do
 import random
 r = requests.post('http://upe21.cs.rpi.edu:3000/api/games/search', data={'devkey': "57fc3d08ae9d4f817fb61b56", 'username': 'darwinbot1'}) # search for new game

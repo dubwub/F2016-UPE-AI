@@ -8,26 +8,28 @@
   </div>
   <div>
     <h3 id="toc">Table of Contents</h3>
-    <li><a href="#gettingstarted">Getting Started</a>
+    <div class="well">
+    <li><a href="#gettingstarted">Getting Started</a></li>
     <li><a href="#gamerules">Game Rules</a><ul>
-        <li><a href="#premise">Premise</a>
-        <li><a href="#highleveloo">High Level Object Overview</a>
-        <li><a href="#playeroverview">Player Overview</a>
-        <li><a href="#bombtrailoverview">Bomb and Explosion Trail Overview</a>
-        <li><a href="#portaloverview">Portal Overview</a>
-        <li><a href="#shopoverview">Shop Overview</a>
-        <li><a href="#init">Initialization</a>
-        <li><a href="#enginedetails">Engine Details</a>
+        <li><a href="#premise">Premise</a></li>
+        <li><a href="#highleveloo">High Level Object Overview</a></li>
+        <li><a href="#playeroverview">Player Overview</a></li>
+        <li><a href="#bombtrailoverview">Bomb and Explosion Trail Overview</a></li>
+        <li><a href="#portaloverview">Portal Overview</a></li>
+        <li><a href="#shopoverview">Shop Overview</a></li>
+        <li><a href="#init">Initialization</a></li>
+        <li><a href="#enginedetails">Engine Details</a></li>
         </ul>
-    <li><a href="#developingyourai">Developing your AI</a>
-    <li><a href="#sampleoutput">Sample Output</a>
-    <li><a href="#interpretingoutput">Interpreting Output</a>
+    <li><a href="#developingyourai">Developing your AI</a></li>
+    <li><a href="#sampleoutput">Sample Output</a></li>
+    <li><a href="#interpretingoutput">Interpreting Output</a></li>
+    </div>
     <h3 id="gettingstarted">Getting started</h3>
     <ul>
-      <li>If you haven't already, create an account! Sign up in the top right corner of the screen.
-      <li>Go to Edit Profile, which can be found after logging in by clicking on your name in the top right in the dropdown.
-      <li>There you should find your developer key (which you should NOT share with anyone), and your current ELO. You will need your dev key for testing your AI on our server.
-      <li>If anything doesn't make sense, please email Darwin Ding (<b>dingd@rpi.edu</b>) with any questions you may have!
+      <li>If you haven't already, create an account and find a team (of up to four people)! Sign up in the top right corner of the screen.</li>
+      <li>Go to Edit Profile, which can be found after logging in by clicking on your name in the top right in the dropdown.</li>
+      <li>There you should find your developer key (which you should NOT share with anyone), and your current matchmaking rating. You will need your dev key for testing your AI on our server.</li>
+      <li>If anything doesn't make sense, please email Darwin Ding (<b>dingd@rpi.edu</b>) with any questions you may have!</li>
     </ul>
     <h3 id="gamerules">Game Rules</h3>
     <div class="row">
@@ -46,9 +48,9 @@
 
     <p><i>However, this isn’t default Bomberman.</i> The variant of Bomberman that will be used for this AI competition can most aptly be described as “deterministic Bomberman with portals”. To summarize the big changes that set this apart from the classic ruleset:
     <ul>
-    <li>Blocks are given values depending on their proximity to the center; blocks closer to the middle are the most valuable. Blowing up blocks give you coins you can spend in the global shop for power-ups. Buying from the global shop is considered an action that will take a turn.
-    <li>By turning everything into predictable formulas, AIs can rely on pure skill to defeat their opponents. People will not get screwed over by randomly getting the power-up they needed or by not getting any power-ups.
-    <li>Additionally, instead of doing any other action, players can choose to shoot an orange or blue portal (just like in the classic Valve game). Anything that would move through the portal (players, moved blocks or bombs) will go through the other portal end. Bomb explosion trails will even go through too.
+    <li>Blocks are given values depending on their proximity to the center; blocks closer to the middle are the most valuable. Blowing up blocks give you coins you can spend in the global shop for power-ups. Buying from the global shop is considered an action that will take a turn.</li>
+    <li>By turning everything into predictable formulas, AIs can rely on pure skill to defeat their opponents. People will not get screwed over by randomly getting the power-up they needed or by not getting any power-ups.</li>
+    <li>Additionally, instead of doing any other action, players can choose to shoot an orange or blue portal (just like in the classic Valve game). Anything that would move through the portal (players, moved blocks or bombs) will go through the other portal end. Bomb explosion trails will even go through too.</li>
     </ul>
     <h4 id="highleveloo">High-Level Object Overview</h4>
     <p>Below here is a brief overview of all the different things that will appear on the gameboard. Each of these are fleshed out in more detail below on the page.
@@ -101,17 +103,17 @@
     <br><img src="img/docs/sampletrail.png" width="150px" height="100px"></dt>
     <dd><p>Each turn, after each individual player has moved, all existing bombs will tick down. If any are at 0 (the tick count starts at 5), they detonate, creating detonation trails in the four squares immediately up, down, left and right from the detonation spot. These detonation trails will travel outwards for the extent of the player’s bomb range. However, if a detonation trail hits a solid object it will continue moving for the extent of the player’s bomb pierce (without surpassing the player’s bomb range).
     <p>For instance, if a bomb detonates with range 5, and after 3 spaces of travel the trail hits a block:
-    <li>It will normally stop moving (default bomb pierce is 0)
-    <li>If the detonated bomb’s owner has a bomb pierce of 1, the trail will continue to travel one more space.
-    <li>However, if the detonated bomb’s owner has a bomb pierce of 6, the trail will continue to travel until the bomb hits its max range of 5, regardless of how much pierce was remaining.
+    <li>It will normally stop moving (default bomb pierce is 0)</li>
+    <li>If the detonated bomb’s owner has a bomb pierce of 1, the trail will continue to travel one more space.</li>
+    <li>However, if the detonated bomb’s owner has a bomb pierce of 6, the trail will continue to travel until the bomb hits its max range of 5, regardless of how much pierce was remaining.</li>
     <br><br>One edge case to note is if a trail hits a block with a portal facing the trail, it will continue to the other end of the portal if it exists. It will also take the orientation of the paired portal. If this is confusing, just know that bomb trails do travel through portals and work how you'd expect.
     <br>&nbsp;</dd>
     <dt>Explosion trail collision</dt>
     <dd>
     <p>Colliding with explosion trails is generally bad for the objects in Bomberman:
-    <li>Bombs that are in the explosion trail will detonate on the turn that the explosion trail hits them. Chain reactions will all occur on the same turn, so a single bomb may trigger an extremely large explosion.
-    <li>Players in the explosion trail will die.
-    <li>Soft blocks in the explosion trail will be removed, and will award all players who own explosion trails crossing the block at the time of death coins. If a soft block is destroyed by a trail, all owners of trails that exist on the spot of the block’s destruction will be awarded coins equal to the block’s value given by the following formula: (min block value is set to 1, even though 0 is reachable)
+    <li>Bombs that are in the explosion trail will detonate on the turn that the explosion trail hits them. Chain reactions will all occur on the same turn, so a single bomb may trigger an extremely large explosion.</li>
+    <li>Players in the explosion trail will die.</li>
+    <li>Soft blocks in the explosion trail will be removed, and will award all players who own explosion trails crossing the block at the time of death coins. If a soft block is destroyed by a trail, all owners of trails that exist on the spot of the block’s destruction will be awarded coins equal to the block’s value given by the following formula: (min block value is set to 1, even though 0 is reachable)</li>
     <pre>floor((board size - 1 - x) * x * (board size - 1 - y) * y * 10 / ((board size - 1)^4 / 16))</pre>
     <p>The default has the board size as 11. The above formula is calculated using x, y as integers from 0 to 10 where 0, 0 is the top left corner and 10, 10 is the bottom right. If you're having trouble understanding the formula, just know that this returns integer values from 0 to 10 where being in the middle of the board grants higher values and being at the edge has lower values.
     </dd>
@@ -125,8 +127,8 @@
     <dl class="dl-horizontal">
     <dt><img src="img/docs/portal_mvmt.gif" align="left" width="150px" height="150px"></dt>
     <dd><p>Portals also act like in the original Valve game.
-    <li>Players that attempt to move into a block that has a portal facing them will appear at the space that the corresponding portal (of the same owner) faces. This assumes, of course, that the target space is not blocked by a block or bomb and that the other portal even exists. Note that players can use any pairing of portals of the same owner. Going through a portal will cause a player to assume the orientation of the portal it just came out of.
-    <li>Bomb explosions that attempt to move into a block that has a portal facing them will also go through like players would. Note that regardless of whether the other side is blocked or not, the explosion will go through as long as the portal has an existing pair. Explosion trails going through portals will assume the orientation of the exit portal.</dd>
+    <li>Players that attempt to move into a block that has a portal facing them will appear at the space that the corresponding portal (of the same owner) faces. This assumes, of course, that the target space is not blocked by a block or bomb and that the other portal even exists. Note that players can use any pairing of portals of the same owner. Going through a portal will cause a player to assume the orientation of the portal it just came out of.</li>
+    <li>Bomb explosions that attempt to move into a block that has a portal facing them will also go through like players would. Note that regardless of whether the other side is blocked or not, the explosion will go through as long as the portal has an existing pair. Explosion trails going through portals will assume the orientation of the exit portal.</li></dd>
     </dl>
     <a href="#toc">Back to top</a>
     <h4 id="shopoverview">Power-ups and Global Shop</h4>
@@ -151,23 +153,23 @@
     <p>Hard blocks are placed in every other column in every other row, creating a spaced out uniform grid as shown below. They also surround the entirety of the grid. See the attached picture to the right.
 
     <p>Players are initialized at start points in opposite corners of the grid (player 0 starts at [0, 0] (the top left corner), and player 1 starts at [10, 10] (the bottom right corner)), with the following characteristics:
-    <li>0 Coins
-    <li>Bomb count 1
-    <li>Bomb range 3
-    <li>Bomb pierce 0
-    <li>Orientation 0 (facing left, this doesn’t really matter)
+    <li>0 Coins</li>
+    <li>Bomb count 1</li>
+    <li>Bomb range 3</li>
+    <li>Bomb pierce 0</li>
+    <li>Orientation 0 (facing left, this doesn’t really matter)</li>
     <br><br><p>Soft blocks are initialized throughout the entirety of the board purely randomly (each non-occupied space has a 70% chance of having a soft block) with the exception being around the players' starting points. Each player is guaranteed exactly one vertical and horizontal free space to ensure that no player is completely doomed to begin with.
     <p>Additionally, the move order (see below for details) is initialized to [0, 1]. This is described more below in Engine Details.
     <p><a href="#toc">Back to top</a>
     <h4 id="enginedetails">Engine details</h4>
     <p>The engine handles each game by going through rounds until the game is completed.
     <p>A round in Bomberman follows the following steps:
-    <li>The first player in the move order moves. (At the start of every game, the move order is [0, 1], so player 0 always has the first move).
-    <li>The second player in the move order moves.
-    <li>Bombs all tick down. If any bomb is at 0, it will detonate and create explosion trails as in the Bomb Overview above.
-    <li>Explosion trails will resolve their squares and tick down (when a trail hits 0, it just disappears). Resolving a square involves killing players and blocks (as well as awarding the proper number of coins), and chain detonating bombs.
-    <li>The first player who moved in the move order is moved to the end of the move order queue. (On the end of the first round, the move order becomes [1, 0]).
-    <li>The game checks to see if there are either 0 players remaining or 1 player remaining. In the former case, the game is ended as a tie for both players (this happens if both players die from explosions on the same turn). In the latter case, the game is ended as a win for the remaining player.
+    <li>The first player in the move order moves. (At the start of every game, the move order is [0, 1], so player 0 always has the first move).</li>
+    <li>The second player in the move order moves.</li>
+    <li>Bombs all tick down. If any bomb is at 0, it will detonate and create explosion trails as in the Bomb Overview above.</li>
+    <li>Explosion trails will resolve their squares and tick down (when a trail hits 0, it just disappears). Resolving a square involves killing players and blocks (as well as awarding the proper number of coins), and chain detonating bombs.</li>
+    <li>The first player who moved in the move order is moved to the end of the move order queue. (On the end of the first round, the move order becomes [1, 0]).</li>
+    <li>The game checks to see if there are either 0 players remaining or 1 player remaining. In the former case, the game is ended as a tie for both players (this happens if both players die from explosions on the same turn). In the latter case, the game is ended as a win for the remaining player.</li>
     <a href="#toc">Back to top</a>
     <h3 id="developingyourai">Developing your AI</h3>
     <dl class="dl-horizontal">
@@ -178,61 +180,95 @@
     <dd>To search for a game, have your AI send a post request to:
     <pre>upe21.cs.rpi.edu:3000/api/games/search</pre>
     with the following information:
-    <pre>{ accountID: your dev key goes here, username: your username goes here }</pre>
-    This will put your account into matchmaking. Sending a second request before the first one resolves will override the first one in matchmaking. Once there are two players in matchmaking, the server will start a game between the two players. The server will send your AI a post response (in response to your matchmaking request) once it's your turn.
-    <br><br>In order to submit your move, just make a post request to:
-    <pre>upe21.cs.rpi.edu:3000/api/games/submit/(gameID of your game goes here, explained below)</pre>
+    <pre>{ devkey: your dev key goes here, username: your username goes here }</pre>
+    This will put your account into matchmaking. Once there are two players in matchmaking, the server will start a game between the two players. The server will send your AI a post response (in response to your matchmaking request) once a game has started AND it's your move. If you're the second player, the server will send your AI a post response after the first player moves. Note that whenever the server responds to your request with the board state, it's generally your turn.
+    <br><br>When you've received the server output in JSON format, first interpret it and extract the gameID and playerID (see the Sample Output breakdown below). Then, in order to submit your move send a post request to:
+    <pre>upe21.cs.rpi.edu:3000/api/games/submit/(gameID as interpreted from output)</pre>
     with data:
     <pre>{ playerID: playerID as interpreted from output, move: your move to submit, see legal list below }</pre>
-    </dl>
-    All of the legal moves are covered in depth above in the Game Rules, but just for your convenience here's a brief summary:
-    <ul>
-    <li><kbd>mu</kbd> - move up
-    <li><kbd>ml</kbd> - move left
-    <li><kbd>md</kbd> - move down
-    <li><kbd>mr</kbd> - move right
-    <li><kbd>tu</kbd> - turn up
-    <li><kbd>tl</kbd> - turn left
-    <li><kbd>td</kbd> - turn down
-    <li><kbd>tr</kbd> - turn right
-    <li><kbd>b</kbd> - place bomb
-    <li><kbd>op</kbd> - shoot orange portal
-    <li><kbd>bp</kbd> - shoot blue portal
-    <li><kbd>(empty string)</kbd> - do nothing
-    <li><kbd>buy_count</kbd> - costs 1, increases number of bombs you can have out by 1 (bomb count)
-    <li><kbd>buy_pierce</kbd> - costs 1, increases range of your bombs after collision with solid objects
-    <li><kbd>buy_range</kbd> - costs 1, increases raw range of bombs
-    <li><kbd>buy_block</kbd> - costs &lt;value of block&gt;, creates a block in the square you’re facing assuming there’s not a solid object already there
-    <li>Value formula: <pre>floor((board size - 1 - x) * x * (board size - 1 - y) * y * 10 / ((board size - 1)^4 / 16))</pre>
+    Your AI is not going to get a post response until it's your move again (or if the game ends), so sit back and relax! You've submitted your move.
+    <br><br>
+    </dd>
+    <dt>Sample AIs<br>(Click to expand)</dt>
+    <dd>
+    <uib-accordion close-others="oneAtATime">
+        <div uib-accordion-group class="panel-default" heading="&nbsp;Python Sample AI">
+          The below sample Python AI randomly generates moves and plays:
+    <pre>
+import time
+import requests # if not installed already, run python -m pip install requests OR pip install requests, whatever you normally do
+import random
+r = requests.post('http://upe21.cs.rpi.edu:3000/api/games/search', data={'devkey': "devkey", 'username': 'username'}) # search for new game
+json = r.json() # when request comes back, that means you've found a match! (validation if server goes down?)
+print(json)
+gameID = json['gameID']
+playerID = json['playerID']
+print(gameID)
+print(playerID)
+possibleMoves = ['mu', 'ml', 'mr', 'md', 'tu', 'tl', 'tr', 'td', 'b', '', 'op', 'bp', 'buy_count', 'buy_range', 'buy_pierce', 'buy_block']
+output = {'state': 'in progress'}
+while output['state'] != 'complete':
+    randomInt = random.randint(0,len(possibleMoves)-1)
+    r = requests.post('http://upe21.cs.rpi.edu:3000/api/games/submit/' + gameID, data={'playerID': playerID, 'move': possibleMoves[randomInt], 'devkey': "devkey"}); # submit sample move
+    json = r.json()
+    print(json)
+    output = json
+    </pre>
+    </div>
+    </uib-accordion>
+    </dd>
+    <dt>Legal Moves</dt>
+    <dd>All of the legal moves are covered in depth above in the Game Rules, but just for your convenience...
+    <uib-accordion close-others="oneAtATime">
+    <div uib-accordion-group class="panel-default" heading="&nbsp;(Click here to expand)">
+          <ul>
+    <li><kbd>mu</kbd> - move up</li>
+    <li><kbd>ml</kbd> - move left</li>
+    <li><kbd>md</kbd> - move down</li>
+    <li><kbd>mr</kbd> - move right</li>
+    <li><kbd>tu</kbd> - turn up</li>
+    <li><kbd>tl</kbd> - turn left</li>
+    <li><kbd>td</kbd> - turn down</li>
+    <li><kbd>tr</kbd> - turn right</li>
+    <li><kbd>b</kbd> - place bomb</li>
+    <li><kbd>op</kbd> - shoot orange portal</li>
+    <li><kbd>bp</kbd> - shoot blue portal</li>
+    <li><kbd>(empty string)</kbd> - do nothing</li>
+    <li><kbd>buy_count</kbd> - costs 1, increases number of bombs you can have out by 1 (bomb count)</li>
+    <li><kbd>buy_pierce</kbd> - costs 1, increases range of your bombs after collision with solid objects</li>
+    <li><kbd>buy_range</kbd> - costs 1, increases raw range of bombs</li>
+    <li><kbd>buy_block</kbd> - costs &lt;value of block&gt;, creates a block in the square you’re facing assuming there’s not a solid object already there</li>
+    <li>Value formula (min 1, even if the formula returns 0): <pre>floor((board size - 1 - x) * x * (board size - 1 - y) * y * 10 / ((board size - 1)^4 / 16))</pre></li>
     </ul>
+    </div>
+    </uib-accordion></dd>
+    </dl>
     <a href="#toc">Back to top</a>
     <h3 id="sampleoutput">Sample output</h3>
-    <div class="well">
-    <samp>
-    {
-    <br>&nbsp;&nbsp;u'hardBlockBoard': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    <br>&nbsp;&nbsp;u'boardSize': 11,
-    <br>&nbsp;&nbsp;u'gameID': u'57e1d18e04fa591c2c1ddca4',
-    <br>&nbsp;&nbsp;u'bombMap': {u'2,1': {u'owner': 0, u'tick': 1}},
-    <br>&nbsp;&nbsp;u'moveIterator': 0,
-    <br>&nbsp;&nbsp;u'playerID': u'57e1d18e04fa591c2c1ddca3',
-    <br>&nbsp;&nbsp;u'portalMap': {u'7,9': {u'2': {u'owner': 1, u'portalColor': u'orange'}}, u'9,7': {u'3': {u'owner': 1, u'portalColor': u'blue'}}},
-    <br>&nbsp;&nbsp;u'playerIndex': 1,
-    <br>&nbsp;&nbsp;u'trailMap': {},
-    <br>&nbsp;&nbsp;u'player': {u'bluePortal': {u'y': 7, u'x': 9, u'direction': 3}, u'orientation': 1, u'orangePortal': {u'y': 9, u'x': 7, u'direction': 2}, u'coins': 0, u'bombCount': 1, u'bombPierce': 0, u'alive': True, u'y': 8, u'x': 9, u'bombRange': 3},
-    <br>&nbsp;&nbsp;u'state': u'in progress',
-    <br>&nbsp;&nbsp;u'softBlockBoard': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    <br>&nbsp;&nbsp;u'moveOrder': [1, 0],
-    <br>&nbsp;&nbsp;u'opponent': {u'bluePortal': None, u'orientation': 0, u'orangePortal': None, u'coins': 0, u'bombCount': 0, u'bombPierce': 0, u'alive': True, u'y': 1, u'x': 1, u'bombRange': 3}
-    <br>}</samp>
-    </div>
+    <pre>
+{
+    u'hardBlockBoard': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    u'boardSize': 11,
+    u'gameID': u'57e1d18e04fa591c2c1ddca4',
+    u'bombMap': {u'2,1': {u'owner': 0, u'tick': 1}},
+    u'moveIterator': 0,
+    u'playerID': u'57e1d18e04fa591c2c1ddca3',
+    u'portalMap': {u'7,9': {u'2': {u'owner': 1, u'portalColor': u'orange'}}, u'9,7': {u'3': {u'owner': 1, u'portalColor': u'blue'}}},
+    u'playerIndex': 1,
+    u'trailMap': {},
+    u'player': {u'bluePortal': {u'y': 7, u'x': 9, u'direction': 3}, u'orientation': 1, u'orangePortal': {u'y': 9, u'x': 7, u'direction': 2}, u'coins': 0, u'bombCount': 1, u'bombPierce': 0, u'alive': True, u'y': 8, u'x': 9, u'bombRange': 3},
+    u'state': u'in progress',
+    u'softBlockBoard': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    u'moveOrder': [1, 0],
+    u'opponent': {u'bluePortal': None, u'orientation': 0, u'orangePortal': None, u'coins': 0, u'bombCount': 0, u'bombPierce': 0, u'alive': True, u'y': 1, u'x': 1, u'bombRange': 3}
+}</pre>
     <a href="#toc">Back to top</a>
     <h3 id="interpretingoutput">Interpreting the output</h3>
     This may look really complicated, but it all makes sense when you break it down.
     <br><br>A few definitions:
     <ul>
-      <li>Directions (for orientations) are typically represented as numbers. Left corresponds to 0, up is 1, right is 2 and down is 3.
-      <li>The game board is an 11x11 grid, and the x and y coordinates go from (0, 0) to (10, 10). Note that incrementing and decrementing x-values moves you horizontally, and doing that to y-values moves you vertically. (0, 0) represents the top left corner and (10, 10) is the bottom right corner.
+      <li>Directions (for orientations) are typically represented as numbers. Left corresponds to 0, up is 1, right is 2 and down is 3.</li>
+      <li>The game board is an 11x11 grid, and the x and y coordinates go from (0, 0) to (10, 10). Note that incrementing and decrementing x-values moves you horizontally, and doing that to y-values moves you vertically. (0, 0) represents the top left corner and (10, 10) is the bottom right corner.</li>
     </ul>
     <dl class="dl-horizontal">
     <dt>hardBlockBoard<br>softBlockBoard</dt>
@@ -289,10 +325,10 @@
     </div>
     player and opponent are formatted the same way, here's the breakdown:
     <ul>
-      <li><b>orientation</b> - the direction that player is facing (0 is left, 1 is up, 2 is right, 3 is down)
-      <li><b>bluePortal, orangePortal</b> - either None or an object that tells you the (x, y) coordinates of the block the portal is on, and the face (again, 0 is left, 1 is up, 2 is right, 3 is down) it is on. For example, in the given sample output, player.bluePortal has direction 3, which means it's on the bottom face of the block at (9, 7).
-      <li><b>bombRange, bombCount, bombPierce, coins, x, y</b> - these are all your values for these attributes of the player
-      <li><b>alive</b> - True/False depending on whether that player still exists on the game board or not.
+      <li><b>orientation</b> - the direction that player is facing (0 is left, 1 is up, 2 is right, 3 is down)</li>
+      <li><b>bluePortal, orangePortal</b> - either None or an object that tells you the (x, y) coordinates of the block the portal is on, and the face (again, 0 is left, 1 is up, 2 is right, 3 is down) it is on. For example, in the given sample output, player.bluePortal has direction 3, which means it's on the bottom face of the block at (9, 7).</li>
+      <li><b>bombRange, bombCount, bombPierce, coins, x, y</b> - these are all your values for these attributes of the player</li>
+      <li><b>alive</b> - True/False depending on whether that player still exists on the game board or not.</li>
     </ul>
     </dd>
     <dt>bombMap</dt>
