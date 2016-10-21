@@ -18,6 +18,7 @@ var path = require('path'),
 var Class = {
   Game: require('../../class/Game'),
   Player: require('../../class/Player'),
+  AI: require('../../class/AI'),
   User: mongoose.model('User')
 };
 
@@ -81,7 +82,7 @@ function performSearch(req, res) {
         if (err) res.status(400).send({
           message: errorHandler.getErrorMessage(err)
         });
-      });
+      }, false);
       handlers[new_handler.id] = new_handler; // add to assoc. array (hashmap)
       saved_res = -1; // reset search request (PROBABLY STILL NEEDS MUTEX)
       saved_person_id = -1;
@@ -89,6 +90,20 @@ function performSearch(req, res) {
   }
 }
 
+/**
+ * practice vs AI
+ */
+
+exports.practice = function (req, res) {
+  verifyAccount(req, res, req.body.devkey, req.body.username, function() {
+    var new_handler = new Handler(handlers, [req.body.devkey, null], Class, [res, null], function(err) { // create new Handler object for new Game, the new Game will be init in Handler constructor
+      if (err) res.status(400).send({
+        message: errorHandler.getErrorMessage(err)
+      });
+    }, true);
+    handlers[new_handler.id] = new_handler; // add to assoc. array (hashmap)
+  });
+};
 
 exports.search = function (req, res) {
   verifyAccount(req, res, req.body.devkey, req.body.username, performSearch);
@@ -109,6 +124,7 @@ exports.read = function (req, res) {
  */
 exports.submit = function (req, res) {
   var game = req.game;
+  console.log(req.body.move);
   if (typeof handlers[game._id] === 'undefined') {
     res.json('Game ID is undefined, maybe the game ended or does not exist!');
   } else handlers[game._id].submitMove(req.body.move, req.body.playerID, req.body.devkey, res);

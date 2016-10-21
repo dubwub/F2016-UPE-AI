@@ -15,6 +15,10 @@ module.exports = function (app) {
   app.route('/api/games/training')
     .get(games.training);
 
+  // Practice vs AI route
+  app.route('/api/games/practice')
+    .post(games.practice);
+
   // Test update article with POST
   app.route('/api/games/search')
     .post(games.search);

@@ -174,7 +174,7 @@ Game.prototype = {
 		this.players = players;
 		this.moveOrder = [];
 		this.moveIterator = 0;
-		for (var i = 0; i < people.length; i++) {
+		for (var i = 0; i < players.length; i++) {
 			this.moveOrder.push(i);
 			// this.moveOrder.push(0); <-- uncomment for testing purposes
 		}

@@ -21,16 +21,23 @@ var mongoose = require('mongoose'),
   Player = mongoose.model('Player'),
   Elo = require('elo-rank')(32);
 
-// var Handler = function Handler() {};
-var Handler = function Handler(handlers, people, Class, reses, callback) {
+// handlers = hashmap of all handlers by game_ids
+// people = list of person ids
+// CLass contains the js classes defined in /modules/game/class
+// reses is the res objects sent from matchmaking
+// callback, used currently exclusively for error messaging
+// practice = true if the player is playing vs AI, false otherwise
+// if practice == true, people[1] = null and reses[1] = null
+var Handler = function Handler(handlers, people, Class, reses, callback, practice) {
   this.handlers = handlers;
+  this.practice = practice;
   this.Class = Class;
   this.people = people;
   this.players = [];
   this.game = new Class.Game();
   this.requests = reses;
 
-  for (var i = 0; i < people.length; i++) {
+  for (var i = 0; i < 2; i++) {
     var player = new Class.Player(i, this.game.boardSize); // create new players using input data, then save them (add validation)
     player.person = people[i];
     player.save(function(err) {
@@ -103,31 +110,40 @@ Handler.prototype =
   players: [], // list of player objects
   handlers: null,
   requests: [null, null], // list of requests sent in
+  practice: false, // is this person playing against the AI?
   // init: ,
   submitMove: function(new_move, playerID, devkey, res) {
+    // console.log(new_move + ',' + playerID + ',' + devkey + ',' + res);
     for (var i = 0; i < this.players.length; i++) {
-      // console.log("submitting: " + playerID + "," + devkey);
-      // console.log("comparing to: " + this.players[i].getID().toString() + "," + this.people[i].toString());
-      if (this.players[i].getID().toString() === playerID && this.people[i].toString() === devkey) {
+      // console.log(devkey === null);
+      // console.log(this.practice);
+      // console.log(this.game.moveOrder[this.game.moveIterator]);
+      if ((i === 1 && devkey === null && this.practice && this.game.moveOrder[this.game.moveIterator] === 1) ||
+        (this.players[i].getID().toString() === playerID && this.people[i].toString() === devkey)) {
         this.requests[i] = res;
         var returnJSON = this.game.submit(i, new_move);
         var nextPlayer = this.game.moveOrder[this.game.moveIterator];
         // check winnerIndex, if === -2, game is ongoing otherwise finish
         if (this.game.winnerIndex === -1 || this.game.winnerIndex >= 0) { // finish the game
-          if (this.players[0].person !== this.players[1].person) // if someone plays themselves, no elo update
+          if (this.players[0].person !== this.players[1].person && !this.practice) // if someone plays themselves, no elo update
             findFirstUser(this.Class, this.players[0].person, this.players[1].person, this.game.winnerIndex);
           delete this.handlers[this.id];
-          console.log(this.handlers); // test to see if purging worked
+          // console.log(this.handlers); // test to see if purging worked (note: it does)
           this.requests[0].json(this.game.sanitizedForm(0));
-          this.requests[1].json(this.game.sanitizedForm(1));
+          if (!this.practice) this.requests[1].json(this.game.sanitizedForm(1));
           this.requests[0] = null;
-          this.requests[1] = null;
+          if (!this.practice) this.requests[1] = null;
         } else {
-          console.log(this.game.moveIterator);
-          console.log(nextPlayer);
-          if (this.requests[nextPlayer] === null) console.log('null res when trying to respond? ' + this.game.moveIterator);
-          this.requests[nextPlayer].json(this.game.sanitizedForm(nextPlayer));
-          this.requests[nextPlayer] = null;
+          console.log(this.practice);
+          console.log(this.game.moveOrder[this.game.moveIterator]);
+          if (this.practice === true && this.game.moveOrder[this.game.moveIterator] === 1) { // AI always goes second
+            console.log(this.Class.AI);
+            this.submitMove(this.Class.AI.getMove(this.game), this.players[1]._id, null, null);
+          } else {
+            if (this.requests[nextPlayer] === null) console.log('null res when trying to respond? ' + this.game.moveIterator);
+            this.requests[nextPlayer].json(this.game.sanitizedForm(nextPlayer));
+            this.requests[nextPlayer] = null;
+          }
           // callback(returnJSON.err, returnJSON);
           // TODO: do we need a callback?
         }

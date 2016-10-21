@@ -1,4 +1,4 @@
-	var mongoose = require('mongoose'),
+var mongoose = require('mongoose'),
   mongoosePlayer = mongoose.model('Player');
 
 function Player(index, boardSize) {
