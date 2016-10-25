@@ -50,9 +50,13 @@ var Handler = function Handler(handlers, people, Class, reses, callback, practic
     if (err) console.log(err);
   });
   this.id = this.game.getID();
+  this.moveNumber = 0;
+  this.lastMoveTime = Date.now();
   var firstPlayerIndex = this.game.moveOrder[this.game.moveIterator]; // send message out to the first player to move
   this.requests[firstPlayerIndex].json(this.game.sanitizedForm(firstPlayerIndex));
   this.requests[firstPlayerIndex] = null;
+  var that = this; // javascript freaking sucks
+  setTimeout(function() { that.checkTimeout(); }, 5000);
   return this;
 };
 
@@ -111,15 +115,43 @@ Handler.prototype =
   handlers: null,
   requests: [null, null], // list of requests sent in
   practice: false, // is this person playing against the AI?
-  // init: ,
+  lastMoveTime: null, // only used for timeout purposes
+  moveNumber: 0,
+  checkTimeout: function() { // after 5seconds, if the player hasn't moved yet, abort the game if short enough game or otherwise award victory
+    if (this.game.state !== 'in progress') return;
+    if (Date.now() - this.lastMoveTime >= 4999) { // timed out!
+      delete this.handlers[this.id];
+      if (this.moveNumber < 3) { // if it's early enough, abort the game
+        this.game.state = 'aborted';
+        this.game.winnerIndex = -1;
+        // don't update elos on abort
+      } else if (this.game.moveOrder[this.game.moveIterator] === 0) {
+        this.game.state = 'complete';
+        this.game.winnerIndex = 1;
+        if (!this.practice) findFirstUser(this.Class, this.players[0].person, this.players[1].person, this.game.winnerIndex);
+      } else if (this.game.moveOrder[this.game.moveIterator] === 1) {
+        this.game.state = 'complete';
+        this.game.winnerIndex = 0;
+        if (!this.practice) findFirstUser(this.Class, this.players[0].person, this.players[1].person, this.game.winnerIndex);
+      }
+      this.game.save();
+      if (this.requests[0] !== null) this.requests[0].json(this.game.sanitizedForm(0));
+      if (!this.practice && this.requests[1] !== null) this.requests[1].json(this.game.sanitizedForm(1));
+      this.requests[0] = null;
+      if (!this.practice) this.requests[1] = null;
+    } else {
+      // console.log(Date.now());
+      // console.log(this.lastMoveTime);
+    }
+  },
   submitMove: function(new_move, playerID, devkey, res) {
-    // console.log(new_move + ',' + playerID + ',' + devkey + ',' + res);
+    var that = this;
+    var timeoutFunc = function() { that.checkTimeout(); }; // used after submission, put here because you can't define funcs in a loop
     for (var i = 0; i < this.players.length; i++) {
-      // console.log(devkey === null);
-      // console.log(this.practice);
-      // console.log(this.game.moveOrder[this.game.moveIterator]);
       if ((i === 1 && devkey === null && this.practice && this.game.moveOrder[this.game.moveIterator] === 1) ||
         (this.players[i].getID().toString() === playerID && this.people[i].toString() === devkey)) {
+        this.moveNumber++;
+        this.lastMoveTime = Date.now();
         this.requests[i] = res;
         var returnJSON = this.game.submit(i, new_move);
         var nextPlayer = this.game.moveOrder[this.game.moveIterator];
@@ -128,22 +160,20 @@ Handler.prototype =
           if (this.players[0].person !== this.players[1].person && !this.practice) // if someone plays themselves, no elo update
             findFirstUser(this.Class, this.players[0].person, this.players[1].person, this.game.winnerIndex);
           delete this.handlers[this.id];
-          // console.log(this.handlers); // test to see if purging worked (note: it does)
           this.requests[0].json(this.game.sanitizedForm(0));
           if (!this.practice) this.requests[1].json(this.game.sanitizedForm(1));
           this.requests[0] = null;
           if (!this.practice) this.requests[1] = null;
         } else {
-          console.log(this.practice);
-          console.log(this.game.moveOrder[this.game.moveIterator]);
           if (this.practice === true && this.game.moveOrder[this.game.moveIterator] === 1) { // AI always goes second
-            console.log(this.Class.AI);
             this.submitMove(this.Class.AI.getMove(this.game), this.players[1]._id, null, null);
           } else {
             if (this.requests[nextPlayer] === null) console.log('null res when trying to respond? ' + this.game.moveIterator);
             this.requests[nextPlayer].json(this.game.sanitizedForm(nextPlayer));
             this.requests[nextPlayer] = null;
           }
+          this.lastMoveTime = Date.now();
+          setTimeout(timeoutFunc, 5000);
           // callback(returnJSON.err, returnJSON);
           // TODO: do we need a callback?
         }

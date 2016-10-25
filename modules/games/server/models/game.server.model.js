@@ -74,7 +74,7 @@ var Game = new Schema({
   people: [{ type: Schema.ObjectId, ref: 'User' }],
   players: [{ type: Schema.ObjectId, ref: 'Player' }],
   state: {
-    type: String, // "in progress", "complete"
+    type: String, // "in progress", "complete", or "aborted"
     default: "in progress"
   },
   hardBlockBoard: [Number],

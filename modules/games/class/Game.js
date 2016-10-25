@@ -435,7 +435,6 @@ Game.prototype = {
 				break;
 			case 'op': // orange portal
 				this.shootPortal(playerIndex, player.orientation, 'orange');
-				console.log(this.players[playerIndex].orangePortal);
 				break;
 			case 'bp': // blue portal
 				this.shootPortal(playerIndex, player.orientation, 'blue');
@@ -450,10 +449,8 @@ Game.prototype = {
 		// 2. bombs are ticked down, bombs with tick = 0 generate trails
 		// 3. trails are ticked, killing players/blocks etc
 		// 4. check if the game's ended
-		console.log(this.players);
 		if (this.moveIterator >= this.players.length) {
 			this.moveIterator = 0;
-			console.log("reset mI to 0");
 			// first, move player who moved first time to end of the list
 			this.moveOrder.push(this.moveOrder[0]); // add first player to end
 			this.moveOrder.splice(0, 1); // remove first element

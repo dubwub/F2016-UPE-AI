@@ -22,6 +22,10 @@ var Class = {
   User: mongoose.model('User')
 };
 
+// when starting up the server, set all in progress games to aborted just to clean things up
+Game.update({ state: 'in progress' }, { $set: { state: 'aborted' } }, { multi: true },
+  function(err, data) { if (err) console.log(err); console.log('Regular game cleanup performed: '); console.log(data); });
+
 /*
     Handler "hash map", maybe in the future convert it to an actual hashmap
     Each handler is hashed to the gameID of the game it handles
@@ -69,15 +73,7 @@ function performSearch(req, res) {
     if (saved_person_id === req.body.devkey) {
       saved_res = res;
     } else {
-      // console.log(saved_person_id);
-      // console.log(req.body.devkey);
       var people = [saved_person_id, req.body.devkey]; // the first player who searches will be player 1
-      // var new_handler = new Handler();
-      // new_handler.init(handlers, people, Class, [saved_res, res], function(err) { // create new Handler object for new Game, the new Game will be init in Handler constructor
-      //   if (err) res.status(400).send({
-      //     message: errorHandler.getErrorMessage(err)
-      //   });
-      // });
       var new_handler = new Handler(handlers, people, Class, [saved_res, res], function(err) { // create new Handler object for new Game, the new Game will be init in Handler constructor
         if (err) res.status(400).send({
           message: errorHandler.getErrorMessage(err)
@@ -134,14 +130,14 @@ exports.submit = function (req, res) {
  * List of Games
  */
 exports.list = function (req, res) {
-  // Game.find().sort('-created').populate('people').exec(function (err, games) { // need to populate eventually
-  Game.find().sort('-created').populate('people').exec(function (err, games) {
+  Game.find().sort('-date').populate('people').exec(function (err, games) {
     if (err) {
       // console.log(err);
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
       });
     } else {
+      // console.log(games);
       res.json(games);
     }
   });
@@ -187,9 +183,6 @@ exports.accountByID = function (req, res, next, id) {
       message: 'Account ID is invalid'
     });
   }
-
-  // req.player = id; // TEMOPRARY UNTIL CREDENTIALS ARE ADDED
-  // next();
 
   User.findById(id).populate('users').exec(function (err, user) {
     if (err) {

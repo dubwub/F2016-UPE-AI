@@ -174,8 +174,9 @@
     <h3 id="developingyourai">Developing your AI</h3>
     <dl class="dl-horizontal">
     <dt>Coding your AI</dt>
-    <dd><p>All of the game logic is handled internally on the server! All you need to worry about is how you want to interpret the board state into a move. Read the Sample Output breakdown below for more details on how to do that.
-    <p>For some inspiration on how best to play the game, hit up Games > Training Mode from the top nav bar!</dd>
+    <dd><p>All of the game logic is handled internally on the server! All you need to worry about is how you want to interpret the board state into a move. Read the Sample Output breakdown below for more details on how to do that. <b>We've also provided some sample AIs to get you get started!</b> See below.
+    <p>For some inspiration on how best to play the game, hit up Games > Training Mode from the top nav bar!
+    <p><b>Note that if a bot takes more than 5 seconds to input a move, the game will be ended as a win for the other player. If the game was not sufficiently long enough (less than 3 moves), the game will be aborted instead, which will not award any elo points to either player.</b></dd>
     <dt>Testing your bot</dt>
     <dd><p>Before trying the game out on the actual matchmaking server, you should definitely try it against our practice bot! All it does is make random moves, and it never drops bombs. <b>Your matches against the practice bot will not affect your matchmaking rating at all.</b> To do this, have your AI send a post request to:
     <pre>upe21.cs.rpi.edu:3000/api/games/practice</pre>
@@ -186,7 +187,7 @@
     To submit a move, send a post request to:
     <pre>upe21.cs.rpi.edu:3000/api/games/submit/(gameID as interpreted from output)</pre>
     with data:
-    <pre>{ playerID: playerID as interpreted from output, move: your move to submit, see legal list below }</pre>
+    <pre>{ devkey: your dev key goes here, playerID: playerID as interpreted from output, move: your move to submit, see legal list below }</pre>
     Your AI is not going to get a post response until it's your move again (or if the game ends), so sit back and relax! You've submitted your move.
     <br><br>
     </dd>
@@ -199,7 +200,7 @@
     <br><br>When you've received the server output in JSON format, first interpret it and extract the gameID and playerID (see the Sample Output breakdown below). Then, in order to submit your move send a post request to:
     <pre>upe21.cs.rpi.edu:3000/api/games/submit/(gameID as interpreted from output)</pre>
     with data:
-    <pre>{ playerID: playerID as interpreted from output, move: your move to submit, see legal list below }</pre>
+    <pre>{ devkey: your dev key goes here, playerID: playerID as interpreted from output, move: your move to submit, see legal list below }</pre>
     Your AI is not going to get a post response until it's your move again (or if the game ends), so sit back and relax! You've submitted your move.
     <br><br>
     </dd>
@@ -227,6 +228,192 @@ while output['state'] != 'complete':
     json = r.json()
     print(json)
     output = json
+    </pre>
+    </div>
+    <div uib-accordion-group class="panel-default" heading="&nbsp;Go Sample AI (thanks to Matt Poegel for writing this!)">
+          Instructions on how to use (README.md):
+    <pre>
+# Bomberman AI
+
+A bot to play a flavor of bomberman in the AI Competition held by Upsilon Pi Epsilon at RPI.
+
+Currently, all the bot can do is place a bomb and wait for it to explode, killing itself and ending
+the game.
+
+To run the bot, first create a credential file (*.key) in the root directory with the contents:
+```
+<dev key>
+<username>
+```
+
+Then build and run:
+```bash
+go build ai.go suicide.go && ai.exe <key_file>
+```
+    </pre>
+    Main file (ai.go):
+    <pre>
+package main
+
+/*
+ * Bomberman AI
+ *
+ * author: Matt Poegel
+ */
+
+import (
+    "encoding/json"
+    "fmt"
+    "io/ioutil"
+    "log"
+    "net/http"
+    "net/url"
+    "os"
+    "strings"
+)
+
+const serverURL = "http://upe21.cs.rpi.edu:3000/api/"
+
+// Strategy defines approach for choosing the next move
+type Strategy interface {
+    Execute(*Message) string
+}
+
+// Message defines the structure of responses from the game server
+type Message struct {
+    HardBlockBoard []int       `json:"hardBlockBoard"`
+    BoardSize      int         `json:"boardSize"`
+    GameID         string      `json:"gameID"`
+    BombMap        interface{} `json:"bombMap"`
+    MoveIterator   int         `json:"moveIterator"`
+    PlayerID       string      `json:"playerID"`
+    PortalMap      interface{} `json:"portalMap"`
+    PlayerIndex    int         `json:"playerIndex"`
+    TrailMap       interface{} `json:"trailMap"`
+    Player         interface{} `json:"player"`
+    State          string      `json:"state"`
+    SoftBlockBoard []int       `json:"softBlockBoard"`
+    MoveOrder      []int       `json:"moveOrder"`
+    Opponent       interface{} `json:"opponent"`
+}
+
+// Player encapsulates the user's credentials
+type Player struct {
+    DevKey   string
+    Username string
+}
+
+// NewPlayer reads the given credential file and returns a new Player
+func NewPlayer(credentialFile *string) *Player {
+    fp, err := os.Open(*credentialFile)
+    if err != nil {
+        panic(err)
+    }
+    defer func() {
+        if err := fp.Close(); err != nil {
+            panic(err)
+        }
+    }()
+
+    buf := make([]byte, 1024)
+    n, err := fp.Read(buf)
+    if err != nil {
+        panic(err)
+    }
+    if n == 0 {
+        return nil
+    }
+    res := string(buf[:n])
+    strres := string(res)
+    bits := strings.Split(strres, "\n")
+    p := &Player{bits[0], bits[1]}
+    return p
+}
+
+func decodeResponse(resp *http.Response) Message {
+    body, err := ioutil.ReadAll(resp.Body)
+    if err != nil {
+        panic(err)
+    }
+    dec := json.NewDecoder(strings.NewReader(string(body)))
+    var msg Message
+    if err := dec.Decode(&msg); err != nil {
+        log.Print(string(body))
+        panic(err)
+    }
+    return msg
+}
+
+// PracticeGame joins a practice game and begins making moves using the given strategy
+func PracticeGame(player *Player, strategy Strategy) {
+    resp, err := http.PostForm(serverURL+"games/practice",
+        url.Values{"devkey": {player.DevKey}, "username": {player.Username}})
+    if err != nil {
+        panic(err)
+    }
+    defer resp.Body.Close()
+    msg := decodeResponse(resp)
+    log.Printf("Joined game: %s\n", msg.GameID)
+    log.Printf("PlayerID: %s\n", msg.PlayerID)
+    for {
+        move := strategy.Execute(&msg)
+        log.Printf("Move: %s\n", move)
+        resp, err := http.PostForm(serverURL+"games/submit/"+msg.GameID,
+            url.Values{"devkey": {player.DevKey}, "playerID": {msg.PlayerID}, "move": {move}})
+        if err != nil {
+            panic(err)
+        }
+        defer resp.Body.Close()
+        msg := decodeResponse(resp)
+        if msg.State == "complete" {
+            break
+        }
+    }
+    log.Printf("Game over\n")
+}
+
+func main() {
+    args := os.Args
+    if len(args) < 1 {
+        fmt.Fprintf(os.Stderr, "Usage: go run ai.go <credential_file>\n")
+        os.Exit(1)
+    }
+    player := NewPlayer(&args[1])
+    log.Printf("Loaded credentials for: %s\n", player.Username)
+    strategy := NewSuicideStrategy()
+    log.Printf("Using strategy: %s\n", strategy.name)
+
+    PracticeGame(player, strategy)
+}
+    </pre>
+    Strategy file (suicide.go):
+    <pre>
+package main
+
+// SuicideStrategy is strategy that immediately suicides
+type SuicideStrategy struct {
+    name  string
+    count int
+}
+
+// Execute calculates the next move given this strategy
+func (strategy *SuicideStrategy) Execute(msg *Message) string {
+    var move string
+    if strategy.count == 0 {
+        move = "b"
+    } else {
+        move = ""
+    }
+    strategy.count++
+    return move
+}
+
+// NewSuicideStrategy creates a new SuicideStrategy
+func NewSuicideStrategy() *SuicideStrategy {
+    s := SuicideStrategy{"suicide", 0}
+    return &s
+}
+
     </pre>
     </div>
     </uib-accordion>
