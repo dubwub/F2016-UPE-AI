@@ -2,12 +2,12 @@
 
 module.exports = {
   app: {
-    title: 'MEAN.JS',
-    description: 'Full-Stack JavaScript with MongoDB, Express, AngularJS, and Node.js',
+    title: 'AICOMP.io',
+    description: 'RPI and UPEs first ever AI competition!',
     keywords: 'mongodb, express, angularjs, node.js, mongoose, passport',
     googleAnalyticsTrackingID: process.env.GOOGLE_ANALYTICS_TRACKING_ID || 'GOOGLE_ANALYTICS_TRACKING_ID'
   },
-  port: process.env.PORT || 3000,
+  port: process.env.PORT || 80,
   host: process.env.HOST || '0.0.0.0',
   templateEngine: 'swig',
   // Session Cookie settings
