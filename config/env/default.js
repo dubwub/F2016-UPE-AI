@@ -2,7 +2,7 @@
 
 module.exports = {
   app: {
-    title: 'AICOMP.io',
+    title: 'AICOMP.ME',
     description: 'RPI and UPEs first ever AI competition!',
     keywords: 'mongodb, express, angularjs, node.js, mongoose, passport',
     googleAnalyticsTrackingID: process.env.GOOGLE_ANALYTICS_TRACKING_ID || 'GOOGLE_ANALYTICS_TRACKING_ID'

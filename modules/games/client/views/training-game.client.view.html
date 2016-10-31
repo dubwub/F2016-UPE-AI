@@ -90,6 +90,13 @@
     <div class="col-sm-5">
       
       <div id="testTV" style="background-color: lightblue; width:{{40*vm.game.boardSize}}px; height:{{40*vm.game.boardSize}}px; position: relative;">
+        <div ng-repeat="blockRow in vm.game.hardBlockBoard track by $index" ng-init="x = $index * 40">
+          <div ng-repeat="blockCol in blockRow track by $index" ng-init="y = $index * 40" ng-switch on="blockCol">
+            <div style="position: absolute; left: {{x}}px; top: {{y}}px; width: 40px; height: 40px;">
+              <img src="/img/floor.png" style="position: absolute; width: 100%; height: 100%;"></img>
+            </div>
+          </div>
+        </div>
         <div id="player1" ng-switch on="vm.game.players[0].alive">
           <div ng-switch-when="true" ng-switch on="vm.game.moveOrder[vm.game.moveIterator]" style="position: absolute; left: {{40*vm.game.players[0].x}}px; top: {{40*vm.game.players[0].y}}px; width:40px; height:40px;">
             <img src="/img/player{{vm.game.players[0].orientation}}.png" style="position: absolute; width: 100%; height: 100%;"></img>
