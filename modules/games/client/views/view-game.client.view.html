@@ -122,24 +122,25 @@
         <div ng-repeat="(pos, block) in vm.game.portalMap" ng-init="posArray = pos.split(',')">
           <div ng-repeat="(direction, portal) in block">
             <div ng-switch on="direction" style="position: absolute; left: {{posArray[0] * 40}}px; top: {{posArray[1] * 40}}px; width: 40px; height: 40px;">
-              <div ng-switch-when="0" style="border-left: solid {{portal.portalColor}} 5px; height: 100%; width: 100%;"></div>
+              <img src="/img/{{portal.portalColor}}.png" style="transform: rotate({{direction * 90 - 90}}deg);">
+              <!-- <div ng-switch-when="0" style="border-left: solid {{portal.portalColor}} 5px; height: 100%; width: 100%;"></div>
               <div ng-switch-when="1" style="border-top: solid {{portal.portalColor}} 5px; height: 100%; width: 100%;"></div>
               <div ng-switch-when="2" style="border-right: solid {{portal.portalColor}} 5px; height: 100%; width: 100%;"></div>
-              <div ng-switch-when="3" style="border-bottom: solid {{portal.portalColor}} 5px; height: 100%; width: 100%;"></div>
+              <div ng-switch-when="3" style="border-bottom: solid {{portal.portalColor}} 5px; height: 100%; width: 100%;"></div> -->
             </div>
           </div>
         </div>
         <div id="player1" ng-switch on="vm.game.players[0].alive">
           <div ng-switch-when="true" ng-switch on="vm.game.moveOrder[vm.game.moveIterator]" style="position: absolute; left: {{40*vm.game.players[0].x}}px; top: {{40*vm.game.players[0].y}}px; width:40px; height:40px;">
             <img src="/img/player{{vm.game.players[0].orientation}}.png" style="position: absolute; width: 100%; height: 100%;"></img>
-            <div ng-switch-when="0" style="border:5px solid orange; width:40px; height:40px;">
+            <div ng-switch-when="0" style="border:2px solid blue; width:40px; height:40px;">
             </div>
           </div>
         </div>
         <div id="player2" ng-switch on="vm.game.players[1].alive">
           <div ng-switch-when="true" ng-switch on="vm.game.moveOrder[vm.game.moveIterator]" style="position: absolute; left: {{40*vm.game.players[1].x}}px; top: {{40*vm.game.players[1].y}}px; width:40px; height:40px;">
             <img src="/img/player{{vm.game.players[1].orientation}}.png" style="position: absolute; width: 100%; height: 100%;"></img>
-            <div ng-switch-when="1" style="border:5px solid orange; width:40px; height:40px;">
+            <div ng-switch-when="1" style="border:2px solid blue; width:40px; height:40px;">
             </div>
           </div>
         </div>
