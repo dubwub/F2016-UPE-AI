@@ -177,7 +177,7 @@
     <dd><p>All of the game logic is handled internally on the server! All you need to worry about is how you want to interpret the board state into a move. Read the Sample Output breakdown below for more details on how to do that. <b>We've also provided some sample AIs to get you get started!</b> See below.
     <p>For some inspiration on how best to play the game, hit up Games > Training Mode from the top nav bar!
     <p><b>Note that if a bot takes more than 5 seconds to input a move, the game will be ended as a win for the other player. If the game was not sufficiently long enough (less than 3 moves), the game will be aborted instead, which will not award any elo points to either player.</b></dd>
-    <dt>Testing your bot</dt>
+    <dt>Testing your bot<br>(AND QUALIFYING)</dt>
     <dd><p>Before trying the game out on the actual matchmaking server, you should definitely try it against our practice bot! All it does is make random moves, and it never drops bombs. <b>Your matches against the practice bot will not affect your matchmaking rating at all.</b> To do this, have your AI send a post request to:
     <pre>http://aicomp.io/api/games/practice</pre>
     with the following information:
@@ -189,6 +189,7 @@
     with data:
     <pre>{ devkey: your dev key goes here, playerID: playerID as interpreted from output, move: your move to submit, see legal list below }</pre>
     Your AI is not going to get a post response until it's your move again (or if the game ends), so sit back and relax! You've submitted your move.
+    <h4>Note that in order to qualify for the main events, you'll need to defeat our practice bot! It shouldn't be too bad... so go nuts!</h4>
     <br><br>
     </dd>
     <dt>Matchmaking details</dt>

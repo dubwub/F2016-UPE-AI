@@ -105,6 +105,18 @@ function findFirstUser(Class, id0, id1, winnerIndex) {
   });
 }
 
+function addQualified(Class, id) {
+  Class.User.findById(id).populate('users').exec(function (err, user) {
+    if (err) {
+      console.log(err);
+    } else if (!user) {
+      console.log('Tried to update qualified, personID ' + this.players[0].person + ' but couldn\'t find it');
+    }
+    user.qualified = true;
+    user.save();
+  });
+}
+
 Handler.prototype =
 {
   Class: null,
@@ -157,6 +169,9 @@ Handler.prototype =
         var nextPlayer = this.game.moveOrder[this.game.moveIterator];
         // check winnerIndex, if === -2, game is ongoing otherwise finish
         if (this.game.winnerIndex === -1 || this.game.winnerIndex >= 0) { // finish the game
+          if (this.practice && this.game.winnerIndex === 0) {
+            addQualified(this.Class, this.players[0].person);
+          }
           if (this.players[0].person !== this.players[1].person && !this.practice) // if someone plays themselves, no elo update
             findFirstUser(this.Class, this.players[0].person, this.players[1].person, this.game.winnerIndex);
           delete this.handlers[this.id];
