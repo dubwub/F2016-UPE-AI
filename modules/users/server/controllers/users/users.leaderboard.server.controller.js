@@ -7,7 +7,7 @@ var path = require('path'),
  * List of Users
  */
 exports.leaderboard = function (req, res) {
-  User.find({}, '-salt -password -_id -email').limit(15).sort({ elo: -1 }).populate('user', 'username').exec(function (err, users) {
+  User.find({}, '-salt -password -_id -email').sort({ elo: -1 }).populate('user', 'username').exec(function (err, users) {
     if (err) {
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
