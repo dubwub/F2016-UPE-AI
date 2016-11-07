@@ -23,6 +23,7 @@ var Class = {
 };
 
 // when starting up the server, set all in progress games to aborted just to clean things up
+Game.remove({ state: 'aborted' }, function (err, data) { if (err) console.log(err); });
 Game.update({ state: 'in progress' }, { $set: { state: 'aborted' } }, { multi: true },
   function(err, data) { if (err) console.log(err); console.log('Regular game cleanup performed: '); console.log(data); });
 

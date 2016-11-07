@@ -79,6 +79,7 @@ var Game = new Schema({
   },
   hardBlockBoard: [Number],
   softBlockBoard: [Number],
+  winnerIndex: Number,
   // bombList: [Object],
   trailMap: Object,
   bombMap: Object,

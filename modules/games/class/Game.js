@@ -535,6 +535,7 @@ Game.prototype = {
 		this.model.people = this.people;
 		this.model.moveOrder = this.moveOrder;
 		this.model.moveIterator = this.moveIterator;
+		this.model.winnerIndex = this.winnerIndex;
 		var playerIDs = []; // player IDs are what are saved in mongo, not the player objects themselves (those are separate)
 		for (var i = 0; i < this.players.length; i++) {
 			playerIDs.push(this.players[i].getID());
