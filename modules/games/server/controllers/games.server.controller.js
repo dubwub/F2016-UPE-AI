@@ -131,7 +131,7 @@ exports.submit = function (req, res) {
  * List of Games
  */
 exports.list = function (req, res) {
-  Game.find().sort('-date').populate('people').exec(function (err, games) {
+  Game.find().sort('-date').limit(50).populate('people').exec(function (err, games) {
     if (err) {
       // console.log(err);
       return res.status(400).send({
