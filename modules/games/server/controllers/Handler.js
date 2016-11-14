@@ -56,7 +56,7 @@ var Handler = function Handler(handlers, people, Class, reses, callback, practic
   this.requests[firstPlayerIndex].json(this.game.sanitizedForm(firstPlayerIndex));
   this.requests[firstPlayerIndex] = null;
   var that = this; // javascript freaking sucks
-  setTimeout(function() { that.checkTimeout(); }, 5000);
+  setTimeout(function() { that.checkTimeout(); }, 15000);
   return this;
 };
 
@@ -131,7 +131,7 @@ Handler.prototype =
   moveNumber: 0,
   checkTimeout: function() { // after 5seconds, if the player hasn't moved yet, abort the game if short enough game or otherwise award victory
     if (this.game.state !== 'in progress') return;
-    if (Date.now() - this.lastMoveTime >= 4999) { // timed out!
+    if (Date.now() - this.lastMoveTime >= 14999) { // timed out!
       delete this.handlers[this.id];
       if (this.moveNumber < 3) { // if it's early enough, abort the game
         this.game.state = 'aborted';
@@ -188,7 +188,7 @@ Handler.prototype =
             this.requests[nextPlayer] = null;
           }
           this.lastMoveTime = Date.now();
-          setTimeout(timeoutFunc, 5000);
+          setTimeout(timeoutFunc, 15000);
           // callback(returnJSON.err, returnJSON);
           // TODO: do we need a callback?
         }
