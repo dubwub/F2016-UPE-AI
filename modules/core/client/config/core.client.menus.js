@@ -15,6 +15,12 @@
       roles: ['*']
     });
 
+    menuService.addMenuItem('topbar', {
+      title: 'Changelog',
+      state: 'changelog',
+      roles: ['*']
+    });
+
     menuService.addMenu('account', {
       roles: ['user']
     });

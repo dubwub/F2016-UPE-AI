@@ -13,6 +13,7 @@ function Game() {
 	this.trailMap = {};
 	this.portalMap = {};
 	this.replay = [];
+	this.practice = false;
 	this.model = null;
 	this.state = 'in progress';
 	this.winnerIndex = -2;
@@ -91,13 +92,21 @@ function isEmpty(map) {
 }
 
 // helper function to calculate value of a block at a specific position
+// function getBlockValue(x, y) {
+// 	x = parseInt(x, 10);
+// 	y = parseInt(y, 10);
+// 	var rawScore = Math.abs((this.boardSize - 1 - x) * x * (this.boardSize - 1 - y) * y);
+// 	var scaledScore = Math.floor(10 * rawScore / ((this.boardSize - 1) * (this.boardSize - 1) * (this.boardSize - 1) * (this.boardSize - 1) / 16));
+// 	if (scaledScore === 0) return 1;
+// 	else return parseInt(scaledScore, 10); // guaranteed to be a number from 1 to 10 distributed more heavily towards center blocks
+// }
 function getBlockValue(x, y) {
 	x = parseInt(x, 10);
 	y = parseInt(y, 10);
-	var rawScore = Math.abs((this.boardSize - 1 - x) * x * (this.boardSize - 1 - y) * y);
-	var scaledScore = Math.floor(10 * rawScore / ((this.boardSize - 1) * (this.boardSize - 1) * (this.boardSize - 1) * (this.boardSize - 1) / 16));
+	var rawScore = Math.abs((11 - 1 - x) * x * (11 - 1 - y) * y);
+	var scaledScore = Math.floor(10 * rawScore / ((11 - 1) * (11 - 1) * (11 - 1) * (11 - 1) / 16));
 	if (scaledScore === 0) return 1;
-	else return scaledScore, 10; // guaranteed to be a number from 1 to 10 distributed more heavily towards center blocks
+	else return parseInt(scaledScore, 10); // guaranteed to be a number from 1 to 10 distributed more heavily towards center blocks
 }
 
 Game.prototype = {
@@ -396,28 +405,28 @@ Game.prototype = {
 				this.bombMap[[player.x, player.y]] = { owner: playerIndex, tick: 5 };
 				break;
 			case 'buy_count': // buys an extra bomb
-				if (player.coins < 1) {
+				if (player.coins < 5) {
 					outputNote = 'Insufficient funds to buy bomb';
 					break;
 				}
 				player.bombCount++;
-				player.coins -= 1;
+				player.coins -= 5;
 				break;
 			case 'buy_pierce': // buys pierce
-				if (player.coins < 1) {
+				if (player.coins < 5) {
 					outputNote = 'Insufficient funds to buy pierce';
 					break;
 				}
 				player.bombPierce++;
-				player.coins -= 1;
+				player.coins -= 5;
 				break;
 			case 'buy_range': // buys pierce
-				if (player.coins < 1) {
+				if (player.coins < 5) {
 					outputNote = 'Insufficient funds to buy bomb range';
 					break;
 				}
 				player.bombRange++;
-				player.coins -= 1;
+				player.coins -= 5;
 				break;
 			// TODO: balance buying block? right now it costs just as much to create something then destroy it
 			case 'buy_block': // buys new block
@@ -549,6 +558,7 @@ Game.prototype = {
 		this.model.markModified('trailMap');
 		this.model.portalMap = this.portalMap;
 		this.model.markModified('portalMap');
+		this.model.practice = this.practice;
 		if (this.replay.length === 0) this.createSnapshot(); // initial save
 		this.model.replay = this.replay;
 		this.model.markModified('replay');

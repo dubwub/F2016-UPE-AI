@@ -356,19 +356,19 @@
           vm.game.bombMap[[player.x, player.y]] = { owner: playerIndex, tick: 5 }; // TODO: change this to 4
           break;
         case 'buy_count': // buys an extra bomb
-          if (player.coins < 1) break;
+          if (player.coins < 5) break;
           player.bombCount++;
-          player.coins -= 1;
+          player.coins -= 5;
           break;
         case 'buy_pierce': // buys pierce
-          if (player.coins < 1) break;
+          if (player.coins < 5) break;
           player.bombPierce++;
-          player.coins -= 1;
+          player.coins -= 5;
           break;
         case 'buy_range': // buys pierce
-          if (player.coins < 1) break;
+          if (player.coins < 5) break;
           player.bombRange++;
-          player.coins -= 1;
+          player.coins -= 5;
           break;
         // TODO: balance buying block? right now it costs just as much to create something then destroy it
         case 'buy_block': // buys new block

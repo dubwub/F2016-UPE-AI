@@ -77,6 +77,10 @@ var Game = new Schema({
     type: String, // "in progress", "complete", or "aborted"
     default: "in progress"
   },
+  practice: {
+    type: Boolean,
+    default: false
+  },
   hardBlockBoard: [Number],
   softBlockBoard: [Number],
   winnerIndex: Number,
