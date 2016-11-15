@@ -34,7 +34,7 @@
 * Run mongo (small terminal that allows you to look at the mongodb directly), and type use ai-comp
 * Run the command: results = []
 * Then: db.users.find().forEach(function(u) { results.push(u.email); } )
-* Then: print results
+* Then: results
 
 ##Full Rules/Documentation
 See aicomp.io/docs for the full documentation!
