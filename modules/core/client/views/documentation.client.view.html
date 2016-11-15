@@ -136,11 +136,11 @@
 
     <dl class="dl-horizontal">
     <dt>Range Up <kbd>buy_range</kbd></dt>
-    <dd>Increases your player’s bomb range by 1. This increases how far your explosion trails will go when unimpeded. [default 3, costs 1 coin]</dd>
+    <dd>Increases your player’s bomb range by 1. This increases how far your explosion trails will go when unimpeded. [default 3, costs 5 coin]</dd>
     <dt>Bomb Up <kbd>buy_count</kbd></dt>
-    <dd>Increases your player’s bomb count by 1. This increases how many bombs you can have out at once. [default 1, costs 1 coin]</dd>
+    <dd>Increases your player’s bomb count by 1. This increases how many bombs you can have out at once. [default 1, costs 5 coin]</dd>
     <dt>Pierce Up <kbd>buy_pierce</kbd></dt>
-    <dd>Increases your player’s bomb pierce by 1. This increases how far your explosion trails will go after collisions with solid objects. [default 0, costs 1 coin]</dd>
+    <dd>Increases your player’s bomb pierce by 1. This increases how far your explosion trails will go after collisions with solid objects. [default 0, costs 5 coin]</dd>
     <dt>Set Block <kbd>buy_block</kbd></dt>
     <dd>Creates a destructible block in the space your player is facing. Cost is variable to the value of the block being placed. You cannot create a block on top of an existing solid object (you will not be charged for an invalid block placement this way). The value formula is given below (min value is 1, even if the formula gives 0):
     <pre>floor((board size - 1 - x) * x * (board size - 1 - y) * y * 10 / ((board size - 1)^4 / 16))</pre></dd>
@@ -176,7 +176,7 @@
     <dt>Coding your AI</dt>
     <dd><p>All of the game logic is handled internally on the server! All you need to worry about is how you want to interpret the board state into a move. Read the Sample Output breakdown below for more details on how to do that. <b>We've also provided some sample AIs to get you get started!</b> See below.
     <p>For some inspiration on how best to play the game, hit up Games > Training Mode from the top nav bar!
-    <p><b>Note that if a bot takes more than 5 seconds <b>(Note: currently 15s to deal with strange timeout issues)</b> to input a move, the game will be ended as a win for the other player. If the game was not sufficiently long enough (less than 3 moves), the game will be aborted instead, which will not award any elo points to either player.</b></dd>
+    <p><b>Note that if a bot takes more than <strike>5 seconds</strike> <b>(Note: currently 15 seconds to deal with strange timeout issues)</b> to input a move, the game will be ended as a win for the other player. If the game was not sufficiently long enough (less than 3 moves), the game will be aborted instead, which will not award any elo points to either player.</b></dd>
     <dt>Testing your bot<br>(AND QUALIFYING)</dt>
     <dd><p>Before trying the game out on the actual matchmaking server, you should definitely try it against our practice bot! All it does is make random moves, and it never drops bombs. <b>Your matches against the practice bot will not affect your matchmaking rating at all.</b> To do this, have your AI send a post request to:
     <pre>http://aicomp.io/api/games/practice</pre>
@@ -256,9 +256,9 @@ while output['state'] != 'complete':
     <li><kbd>op</kbd> - shoot orange portal</li>
     <li><kbd>bp</kbd> - shoot blue portal</li>
     <li><kbd>(empty string)</kbd> - do nothing</li>
-    <li><kbd>buy_count</kbd> - costs 1, increases number of bombs you can have out by 1 (bomb count)</li>
-    <li><kbd>buy_pierce</kbd> - costs 1, increases range of your bombs after collision with solid objects</li>
-    <li><kbd>buy_range</kbd> - costs 1, increases raw range of bombs</li>
+    <li><kbd>buy_count</kbd> - costs 5, increases number of bombs you can have out by 1 (bomb count)</li>
+    <li><kbd>buy_pierce</kbd> - costs 5, increases range of your bombs after collision with solid objects</li>
+    <li><kbd>buy_range</kbd> - costs 5, increases raw range of bombs</li>
     <li><kbd>buy_block</kbd> - costs &lt;value of block&gt;, creates a block in the square you’re facing assuming there’s not a solid object already there</li>
     <li>Value formula (min 1, even if the formula returns 0): <pre>floor((board size - 1 - x) * x * (board size - 1 - y) * y * 10 / ((board size - 1)^4 / 16))</pre></li>
     </ul>
