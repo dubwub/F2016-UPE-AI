@@ -157,6 +157,11 @@
       <button type="button" class="btn btn-primary" ng-click="stepForward()">></button>
       <button type="button" class="btn btn-primary" ng-click="stepTo(vm.replay.length - 1)">>></button>
       </div>
+      <div class="row center-block" align="center">
+      <div class="checkbox">
+        <label><input type='checkbox' ng-model="autoplay">Autoplay</label>
+      </div>
+      </div>
       <br>
       <span ng-repeat="snapshot in vm.replay track by $index">
         <small>{{$index}}:</small> <button type="button" class="btn btn-default" ng-click="stepTo($index)">{{snapshot.lastMove}}</button>

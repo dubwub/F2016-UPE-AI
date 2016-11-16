@@ -443,7 +443,19 @@
     vm.replay = game.replay;
     vm.game = vm.replay[vm.replay.length - 1]; // current snapshot to show on the screen
     vm.replayIterator = vm.replay.length - 1;
-    console.log(vm.replayIterator);
+    $scope.autoplay = false;
+
+    $scope.$watch('[autoplay]', function() {
+      setTimeout(autoplayRecursive, 500);
+    }, true);
+
+    var autoplayRecursive = function() {
+      if ($scope.autoplay) {
+        $scope.stepForward();
+        $scope.$apply();
+        setTimeout(autoplayRecursive, 500);
+      }
+    };
 
     $scope.stepTo = function(i) {
       if (i < vm.replay.length) {
