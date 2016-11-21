@@ -169,9 +169,9 @@ Handler.prototype =
         var nextPlayer = this.game.moveOrder[this.game.moveIterator];
         // check winnerIndex, if === -2, game is ongoing otherwise finish
         if (this.game.winnerIndex === -1 || this.game.winnerIndex >= 0) { // finish the game
-          if (this.practice && this.game.winnerIndex === 0) {
-            addQualified(this.Class, this.players[0].person);
-          }
+          // if (this.practice && this.game.winnerIndex === 0) { // enable this if statement to run quals
+          //   addQualified(this.Class, this.players[0].person);
+          // }
           if (this.players[0].person !== this.players[1].person && !this.practice) // if someone plays themselves, no elo update
             findFirstUser(this.Class, this.players[0].person, this.players[1].person, this.game.winnerIndex);
           delete this.handlers[this.id];
