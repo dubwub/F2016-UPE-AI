@@ -32,8 +32,6 @@
     vm.game = {
       boardSize: 11 // can be customized, LEAVE TO ODD NUMBERS FOR OPTIMAL BLOCK PLACEMENT
     };
-    // vm.game = new Game();
-    // console.log(vm.game);
 
     function createPlayer(x, y) { // player factory
       return {
@@ -444,6 +442,19 @@
     vm.game = vm.replay[vm.replay.length - 1]; // current snapshot to show on the screen
     vm.replayIterator = vm.replay.length - 1;
     $scope.autoplay = false;
+
+    $scope.data = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(game.replay));
+    // console.log($scope.data);
+
+    $scope.saveJSON = function () {
+      $scope.toJSON = '';
+      $scope.toJSON = angular.toJson($scope.data);
+      var blob = new Blob([$scope.toJSON], { type: "application/json;charset=utf-8;" });
+      var downloadLink = angular.element('<a></a>');
+      downloadLink.attr('href', window.URL.createObjectURL(blob));
+      downloadLink.attr('download', 'game.json');
+      downloadLink[0].click();
+    };
 
     $scope.$watch('[autoplay]', function() {
       setTimeout(autoplayRecursive, 500);

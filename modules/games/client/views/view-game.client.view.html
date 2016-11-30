@@ -1,6 +1,11 @@
 <section>
   <div class="page-header">
     <h4>Game TV</h4>
+
+    <div class="row">
+    <a class="btn" ng-click="saveJSON()" ng-href="{{ url }}">Download game data</a>
+    </div>
+
     <span ng-bind="vm.fullGame.date | date:'mediumDate'" align="center"></span><br>
       <span ng-bind="vm.fullGame.state" align="center"></span><br><br>
 
