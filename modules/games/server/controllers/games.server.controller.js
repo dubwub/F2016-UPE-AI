@@ -61,7 +61,7 @@ function verifyAccount (req, res, id, username, next) {
       return returnValue;
     }
     req.user = user;
-    returnValue = true;
+    // returnValue = true;
     next(req, res);
   });
   return returnValue;
@@ -82,7 +82,7 @@ function performSearch(req, res) {
         });
       }, false);
       handlers[new_handler.id] = new_handler; // add to assoc. array (hashmap)
-      console.log(handlers);
+      // console.log(handlers);
       saved_res = -1; // reset search request (PROBABLY STILL NEEDS MUTEX)
       saved_person_id = -1;
     }
@@ -101,7 +101,7 @@ exports.practice = function (req, res) {
       });
     }, true);
     handlers[new_handler.id] = new_handler; // add to assoc. array (hashmap)
-    console.log(handlers);
+    // console.log(handlers);
   });
 };
 
