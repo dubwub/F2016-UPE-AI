@@ -13,7 +13,6 @@
   How these work:
   These connect the server game logic (Games and Players), and serve as the functionality beyond the game for any particular game.
   For instance, this handles the first level of POST request, and calculates elos for post-match.
-
 */
 
 var mongoose = require('mongoose'),

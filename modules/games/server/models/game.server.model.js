@@ -47,7 +47,7 @@ var Snapshot = new Schema({
   },
   lastMove: {
     type: String,
-    default: 'Start' // the first snapshot created is of the origin
+    default: '' // the first snapshot created is of the origin
   },
   moveOrder: [Number],
   moveIterator: Number,
@@ -75,12 +75,16 @@ var Game = new Schema({
   players: [{ type: Schema.ObjectId, ref: 'Player' }],
   state: {
     type: String, // "in progress", "complete", or "aborted"
-    default: "in progress"
+    default: 'in progress'
   },
   practice: {
     type: Boolean,
     default: false
   },
+  // gameType: {
+  //   type: String,
+  //   default: 'regular'
+  // },
   hardBlockBoard: [Number],
   softBlockBoard: [Number],
   winnerIndex: Number,

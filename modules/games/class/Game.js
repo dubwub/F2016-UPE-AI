@@ -12,7 +12,7 @@ function Game() {
 	this.bombMap = {};
 	this.trailMap = {};
 	this.portalMap = {};
-	this.replay = [];
+	this.moveNumber = 0;
 	this.practice = false;
 	this.model = null;
 	this.state = 'in progress';
@@ -120,7 +120,8 @@ Game.prototype = {
 	bombMap: {},
 	trailMap: {},
 	portalMap: {},
-	replay: [],
+	moveNumber: 0,
+	Class: null,
 	model: null,
 	state: 'in progress',
 	winnerIndex: -2, // when state is 'done', this will be set to the index of the winner (or -1 for tie, -2 for in progress)
@@ -194,7 +195,7 @@ Game.prototype = {
 		newSnap.softBlockBoard = this.softBlockBoard;
 		newSnap.moveOrder = this.moveOrder;
 		newSnap.moveIterator = this.moveIterator;
-		if (lastMove) newSnap.lastMove = lastMove;
+		newSnap.lastMove = lastMove;
 		// newSnap.markModified('lastMove');
 		newSnap.players = [];
 		for (var index = 0; index < this.players.length; index++) {
@@ -203,8 +204,14 @@ Game.prototype = {
 		newSnap.trailMap = this.trailMap;
 		newSnap.bombMap = this.bombMap;
 		newSnap.portalMap = this.portalMap;
-		this.replay.push(newSnap._id);
 		newSnap.save();
+		mongooseGame.update({ _id: this.model._id }, {
+			$push: {
+				replay: newSnap._id
+			}
+		}, {
+			multi: false
+		}, function(err, data) { if(err) console.log(err); else console.log(data); });
 	},
 	// returns x, y and direction of a solid object move in a specific direction
 	simulateMovement: function(x, y, direction) {
@@ -367,7 +374,7 @@ Game.prototype = {
 		}
 		var player = this.players[playerIndex];
 		var output; // used in the switch case
-		// this.replay.push(move);
+		this.moveNumber++;
 		switch (move) {
 			case 'ml': // move left
 				output = this.simulateMovement(player.x, player.y, 0);
@@ -559,12 +566,12 @@ Game.prototype = {
 		this.model.portalMap = this.portalMap;
 		this.model.markModified('portalMap');
 		this.model.practice = this.practice;
-		if (this.replay.length === 0) this.createSnapshot(); // initial save
-		this.model.replay = this.replay;
-		this.model.markModified('replay');
-		// console.log(this.replay);
-		// console.log(this.model);
 		this.model.save(callback);
+
+		if (this.moveNumber === 0) {
+			// console.log('creating initial snapshot');
+			this.createSnapshot('Start'); // initial save
+		}
 	}
 };
 

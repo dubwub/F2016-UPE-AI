@@ -149,10 +149,7 @@ exports.list = function (req, res) {
 
 // training mode, doesn't really need anything here tbh
 exports.training = function (req, res) {
-  // console.log(Class);
-  // console.log(res);
   res.json(Class);
-  // return Class;
 };
 
 /**
