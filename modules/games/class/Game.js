@@ -52,6 +52,18 @@ function Game() {
 	this.softBlockBoard[1*this.boardSize + 3] = 1;
 	this.softBlockBoard[(this.boardSize - 2) * this.boardSize + this.boardSize - 4] = 1;
 	this.softBlockBoard[(this.boardSize - 4) * this.boardSize + this.boardSize - 2] = 1;
+
+	this.apocalypseBoard = createArray(this.boardSize, this.boardSize);
+	this.apocalypseIterator1 = {
+		x: 0,
+		y: this.boardSize - 1,
+		orientation: 1
+	};
+	this.apocalypseIterator2 = {
+		x: this.boardSize - 1,
+		y: 0,
+		orientation: 3		
+	};
 	return this;
 }
 
@@ -121,10 +133,12 @@ Game.prototype = {
 	trailMap: {},
 	portalMap: {},
 	moveNumber: 0,
-	Class: null,
 	model: null,
 	state: 'in progress',
 	winnerIndex: -2, // when state is 'done', this will be set to the index of the winner (or -1 for tie, -2 for in progress)
+	apocalypseBoard: null,
+	apocalypseIterator1: null,
+	apocalypseIterator2: null,
 	// game obj constructor
 	init: function() {
 		// hard blocks appear in a gridlike pattern with no other hard blocks in any of the adjacent squres.
@@ -211,7 +225,9 @@ Game.prototype = {
 			}
 		}, {
 			multi: false
-		}, function(err, data) { if(err) console.log(err); else console.log(data); });
+		}, function(err, data) {
+			// console.log('snapshot callback');
+			if(err) console.log(err); else console.log(data); });
 	},
 	// returns x, y and direction of a solid object move in a specific direction
 	simulateMovement: function(x, y, direction) {
@@ -251,8 +267,7 @@ Game.prototype = {
 			this.deletePortal(x, y, -1); // -1 means delete all portals
 			// console.log(this.portalMap);
 			for (var trail in this.trailMap[[x, y]]) {
-				if (this.trailMap[[x, y]].hasOwnProperty(trail)) {
-					// THERE WAS A WEIRD BUG (unreproducible): crashed because this.players[trail] was not defined
+				if (this.trailMap[[x, y]].hasOwnProperty(trail) && trail !== '-1') {
 					this.players[trail].coins += getBlockValue(x, y);
 				}
 			}
@@ -266,9 +281,14 @@ Game.prototype = {
 	},
 	placeTrail: function(pIndex, x, y, type) {
 		if (typeof this.trailMap[[x, y]] === 'undefined') {
-			this.trailMap[[x, y]] = {};
-			this.trailMap[[x, y]][pIndex] = { tick: 2, type: type };
-		} else this.trailMap[[x, y]][pIndex] = { tick: 2, type: type };
+			this.trailMap[[x, y]] = {};	
+		}
+		if (type !== 'apocalypse') {
+			this.trailMap[[x, y]][pIndex] = { tick: 2, type: type };	
+		} 
+		else {
+			this.trailMap[[x, y]][pIndex] = { tick: 0, type: type };
+		}
 	},
 	recursiveDetonate: function(x, y, direction, range, pierce, pierceMode, owner) {
 		if (range === 0 || (pierceMode === true && pierce < 0)) return;
@@ -368,6 +388,7 @@ Game.prototype = {
 	},
 	submit: function(playerIndex, move, callback) {
 		var outputNote; // note to be sent back with the output
+		console.log(move);
 		// console.log(playerIndex + ', ' + this.moveOrder[this.moveIterator]);
 		if (playerIndex !== this.moveOrder[this.moveIterator]) {
 			return { err: 'Not your turn.' };
@@ -466,6 +487,27 @@ Game.prototype = {
 		// 3. trails are ticked, killing players/blocks etc
 		// 4. check if the game's ended
 		if (this.moveIterator >= this.players.length) {
+			// if the moveNumber is past the tiebreak point, the ring of fire will occur.
+			console.log('moveNumber = ' + this.moveNumber);
+			if (this.moveNumber > 400) {
+				console.log('placing trails');
+				this.placeTrail(-1, this.apocalypseIterator1.x, this.apocalypseIterator1.y, 'apocalypse');
+				this.placeTrail(-1, this.apocalypseIterator2.x, this.apocalypseIterator2.y, 'apocalypse');
+				var nextSquare1 = getNextSquare(this.apocalypseIterator1.x, this.apocalypseIterator1.y, this.apocalypseIterator1.orientation);
+				if (nextSquare1[0] < 0 || nextSquare1[0] >= this.boardSize || nextSquare1[1] < 0 || nextSquare1[1] >= this.boardSize ||
+					(typeof this.trailMap[[nextSquare1[0], nextSquare1[1]]] !== 'undefined' &&
+						typeof this.trailMap[[nextSquare1[0], nextSquare1[1]]][-1] !== 'undefined')) {
+					this.apocalypseIterator1.orientation = (this.apocalypseIterator1.orientation + 1) % 4;
+					this.apocalypseIterator2.orientation = (this.apocalypseIterator2.orientation + 1) % 4;
+					nextSquare1 = getNextSquare(this.apocalypseIterator1.x, this.apocalypseIterator1.y, this.apocalypseIterator1.orientation);
+				}
+				var nextSquare2 = getNextSquare(this.apocalypseIterator2.x, this.apocalypseIterator2.y, this.apocalypseIterator2.orientation);
+				this.apocalypseIterator1.x = nextSquare1[0];
+				this.apocalypseIterator1.y = nextSquare1[1];
+				this.apocalypseIterator2.x = nextSquare2[0];
+				this.apocalypseIterator2.y = nextSquare2[1];
+			}
+
 			this.moveIterator = 0;
 			// first, move player who moved first time to end of the list
 			this.moveOrder.push(this.moveOrder[0]); // add first player to end
@@ -490,8 +532,9 @@ Game.prototype = {
 							var trailArray = trailSquare.split(',');
 							var trailX = Number.parseInt(trailArray[0], 10);
 							var trailY = Number.parseInt(trailArray[1], 10);
-							this.trailMap[trailSquare][trail].tick -= 1;
 							this.trailResolveSquare(trailX, trailY);
+							if (this.trailMap[trailSquare][trail].type === 'apocalypse') continue;
+							this.trailMap[trailSquare][trail].tick -= 1;
 							if (this.trailMap[trailSquare][trail].tick === 0) {
 								delete this.trailMap[trailSquare][trail];
 								if (isEmpty(this.trailMap[trailSquare]))
@@ -542,6 +585,7 @@ Game.prototype = {
 		output.trailMap = this.trailMap;
 		output.bombMap = this.bombMap;
 		output.portalMap = this.portalMap;
+		output.moveNumber = this.moveNumber;
 		return output;
 	},
 	save: function(callback) { // saves the game into the database (should be called after attachPlayers always)

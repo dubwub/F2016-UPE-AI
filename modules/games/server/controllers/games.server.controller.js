@@ -124,7 +124,7 @@ exports.read = function (req, res) {
  */
 exports.submit = function (req, res) {
   var game = req.game;
-  console.log(req.body.move);
+  // console.log(req.body.move);
   if (typeof handlers[game._id] === 'undefined') {
     res.json('Game ID is undefined, maybe the game ended or does not exist!');
   } else handlers[game._id].submitMove(req.body.move, req.body.playerID, req.body.devkey, res);

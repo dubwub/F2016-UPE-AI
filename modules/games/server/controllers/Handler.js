@@ -191,6 +191,7 @@ Handler.prototype =
           // callback(returnJSON.err, returnJSON);
           // TODO: do we need a callback?
         }
+        break;
       }
     }
   }
