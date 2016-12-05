@@ -18,6 +18,7 @@
         <li><a href="#portaloverview">Portal Overview</a></li>
         <li><a href="#shopoverview">Shop Overview</a></li>
         <li><a href="#init">Initialization</a></li>
+        <li><a href="#apocalypse">Apocalypse</a></li>
         <li><a href="#enginedetails">Engine Details</a></li>
         </ul>
     <li><a href="#developingyourai">Developing your AI</a></li>
@@ -161,6 +162,9 @@
     <br><br><p>Soft blocks are initialized throughout the entirety of the board purely randomly (each non-occupied space has a 70% chance of having a soft block) with the exception being around the players' starting points. Each player is guaranteed exactly one vertical and horizontal free space to ensure that no player is completely doomed to begin with.
     <p>Additionally, the move order (see below for details) is initialized to [0, 1]. This is described more below in Engine Details.
     <p><a href="#toc">Back to top</a>
+    <h4 id="apocalypse">Apocalypse</h4>
+    <img src="img/docs/ringoffire.png" align="right" style="width: 25%; margin: 20px;"></img>
+    <p>At the beginning of the game, the "move count" is at 0. With every successful submit, the move count increases by one. This move count is given in the sample output as moveCount. At the end of each full turn (a full turn being after each player has moved once), if the total movecount is greater than 400, the ring of fire will iterate. The ring of fire consists of two trails, one starting at the bottom left corner (0, 10), and one starting in the top right corner (10, 0). The bottom left trail travels upwards initially, and the top right one travels downwards initially. Each iteration, they move forward, turning 90 degrees to the right if they will collide with either an apocalypse trail or the edge of the board. A complete description of how the ring of fire moves is shown to the right. <strike>Note that the ring of fire seems to be broken for practice mode.</strike> (Should be fixed!)</p>
     <h4 id="enginedetails">Engine details</h4>
     <p>The engine handles each game by going through rounds until the game is completed.
     <p>A round in Bomberman follows the following steps:

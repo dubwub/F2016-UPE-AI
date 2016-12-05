@@ -180,14 +180,15 @@ Handler.prototype =
           if (!this.practice) this.requests[1] = null;
         } else {
           if (this.practice === true && this.game.moveOrder[this.game.moveIterator] === 1) { // AI always goes second
-            this.submitMove(this.Class.AI.getMove(this.game), this.players[1]._id, null, null);
+            var AImove = function() { that.submitMove(that.Class.AI.getMove(that.game), that.players[1]._id, null, null); };
+            setTimeout(AImove, 1000);
           } else {
             if (this.requests[nextPlayer] === null) console.log('null res when trying to respond? ' + this.game.moveIterator);
             this.requests[nextPlayer].json(this.game.sanitizedForm(nextPlayer));
             this.requests[nextPlayer] = null;
+            this.lastMoveTime = Date.now();
+            setTimeout(timeoutFunc, 15000);
           }
-          this.lastMoveTime = Date.now();
-          setTimeout(timeoutFunc, 15000);
           // callback(returnJSON.err, returnJSON);
           // TODO: do we need a callback?
         }

@@ -227,7 +227,7 @@ Game.prototype = {
 			multi: false
 		}, function(err, data) {
 			// console.log('snapshot callback');
-			if(err) console.log(err); else console.log(data); });
+			if(err) console.log(err); /* else console.log(data); */ });
 	},
 	// returns x, y and direction of a solid object move in a specific direction
 	simulateMovement: function(x, y, direction) {
@@ -488,9 +488,9 @@ Game.prototype = {
 		// 4. check if the game's ended
 		if (this.moveIterator >= this.players.length) {
 			// if the moveNumber is past the tiebreak point, the ring of fire will occur.
-			console.log('moveNumber = ' + this.moveNumber);
+			// console.log('moveNumber = ' + this.moveNumber);
 			if (this.moveNumber > 400) {
-				console.log('placing trails');
+				// console.log('placing trails, ' + move);
 				this.placeTrail(-1, this.apocalypseIterator1.x, this.apocalypseIterator1.y, 'apocalypse');
 				this.placeTrail(-1, this.apocalypseIterator2.x, this.apocalypseIterator2.y, 'apocalypse');
 				var nextSquare1 = getNextSquare(this.apocalypseIterator1.x, this.apocalypseIterator1.y, this.apocalypseIterator1.orientation);
@@ -560,6 +560,7 @@ Game.prototype = {
 			this.players[i].save(function (err, data) { if (err) console.log(err); /* else console.log(data); */ });
 		var returnJSON = this.sanitizedForm(playerIndex);
 		returnJSON.note = outputNote;
+		// console.log('done with submit');
 		return returnJSON; // will return -2 until the game is complete
 	},
 	getID: function() { // returns the Mongo ID of the game
