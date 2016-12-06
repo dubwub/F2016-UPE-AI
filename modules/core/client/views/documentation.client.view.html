@@ -165,6 +165,7 @@
     <h4 id="apocalypse">Apocalypse</h4>
     <img src="img/docs/ringoffire.png" align="right" style="width: 25%; margin: 20px;"></img>
     <p>At the beginning of the game, the "move count" is at 0. With every successful submit, the move count increases by one. This move count is given in the sample output as moveCount. At the end of each full turn (a full turn being after each player has moved once), if the total movecount is greater than 400, the ring of fire will iterate. The ring of fire consists of two trails, one starting at the bottom left corner (0, 10), and one starting in the top right corner (10, 0). The bottom left trail travels upwards initially, and the top right one travels downwards initially. Each iteration, they move forward, turning 90 degrees to the right if they will collide with either an apocalypse trail or the edge of the board. A complete description of how the ring of fire moves is shown to the right. <strike>Note that the ring of fire seems to be broken for practice mode.</strike> (Should be fixed!)</p>
+    <p>The apocalypse fire trails will appear in the trailMap and resolve at the end of each turn just like a regular trail. Note that these trails are permanent and do not tick down. They will still go through the entirety of the hard blocks surrounding the map before starting to go into the actionable squares.</p>
     <h4 id="enginedetails">Engine details</h4>
     <p>The engine handles each game by going through rounds until the game is completed.
     <p>A round in Bomberman follows the following steps:
