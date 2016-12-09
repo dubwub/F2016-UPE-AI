@@ -433,14 +433,15 @@
     };
   }
 
-  GamesController.$inject = ['$scope', '$state', 'gameResolve', '$window', 'Socket'];
+  GamesController.$inject = ['$scope', '$state', 'gameResolve', '$window', 'Socket', 'GamesService'];
 
-  function GamesController($scope, $state, game, $window, Socket) {
+  function GamesController($scope, $state, game, $window, Socket, GamesService) {
     var vm = this;
     vm.fullGame = game; // holds current game state, also game details
     vm.replay = game.replay;
     vm.game = vm.replay[vm.replay.length - 1]; // current snapshot to show on the screen
     vm.replayIterator = vm.replay.length - 1;
+    vm.value = game;
     $scope.autoplay = false;
 
     $scope.data = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(game.replay));
@@ -464,6 +465,14 @@
       if ($scope.autoplay) {
         $scope.stepForward();
         $scope.$apply();
+        if (vm.fullGame.state === 'in progress') {
+          vm.value = (GamesService.get({
+            gameId: vm.fullGame._id
+          }, function(data) {
+            vm.fullGame = data;
+            vm.replay = data.replay;
+          }).$promise);
+        }
         setTimeout(autoplayRecursive, 500);
       }
     };
