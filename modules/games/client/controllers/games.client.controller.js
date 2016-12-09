@@ -433,9 +433,9 @@
     };
   }
 
-  GamesController.$inject = ['$scope', '$state', 'gameResolve', '$window', 'Socket'];
+  GamesController.$inject = ['$scope', '$state', 'gameResolve', '$window', 'Socket', 'GamesService'];
 
-  function GamesController($scope, $state, game, $window, Socket) {
+  function GamesController($scope, $state, game, $window, Socket, GamesService) {
     var vm = this;
     vm.fullGame = game; // holds current game state, also game details
     vm.replay = game.replay;
@@ -464,6 +464,14 @@
       if ($scope.autoplay) {
         $scope.stepForward();
         $scope.$apply();
+        if (vm.fullGame.state === 'in progress') {
+          vm.value = (GamesService.get({
+            gameId: vm.fullGame._id
+          }, function(data) {
+            vm.fullGame = data;
+            vm.replay = data.replay;
+          }).$promise);
+        }
         setTimeout(autoplayRecursive, 500);
       }
     };
